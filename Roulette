@@ -1,0 +1,219 @@
+import random
+
+# -----------------------------
+# INITIAL SETUP
+# -----------------------------
+STARTING_BALANCE = 1000
+balance = STARTING_BALANCE
+
+wheel = list(range(37))
+
+red_numbers = {1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36}
+
+# Stats
+spin_history = []
+total_spins = 0
+wins = 0
+losses = 0
+total_wagered = 0
+
+
+# -----------------------------
+# CORE FUNCTIONS
+# -----------------------------
+def spin_wheel():
+    global total_spins
+    result = random.choice(wheel)
+    spin_history.append(result)
+    total_spins += 1
+    return result
+
+
+def get_color(number):
+    if number == 0:
+        return "green"
+    return "red" if number in red_numbers else "black"
+
+
+# -----------------------------
+# INPUT HELPER
+# -----------------------------
+def get_int(prompt):
+    while True:
+        val = input(prompt)
+        if val.lower() == "exit":
+            return "exit"
+        if val.isdigit():
+            return int(val)
+        print("Enter a valid number or type 'exit'")
+
+
+# -----------------------------
+# BETTING SYSTEM
+# -----------------------------
+def place_bet():
+    while True:
+        print("\n=== BET MENU ===")
+        print("1 - Number Bet")
+        print("2 - Color Bet")
+        print("3 - Number + Color Bet")
+        print("4 - Quit Game")
+
+        choice = input("Choose option: ").lower()
+
+        if choice in ["4", "exit"]:
+            return "exit"
+
+        # NUMBER BET
+        if choice == "1":
+            amount = get_int("Enter bet amount: ")
+            if amount == "exit":
+                return "exit"
+
+            number = get_int("Choose number (0-36): ")
+            if number == "exit":
+                return "exit"
+
+            if 0 <= number <= 36:
+                return ("number", amount, number)
+
+        # COLOR BET
+        elif choice == "2":
+            amount = get_int("Enter bet amount: ")
+            if amount == "exit":
+                return "exit"
+
+            color = input("Choose color (red/black): ").lower()
+            if color == "exit":
+                return "exit"
+
+            if color in ["red", "black"]:
+                return ("color", amount, color)
+
+        # COMBO BET
+        elif choice == "3":
+            amount = get_int("Enter total bet amount: ")
+            if amount == "exit":
+                return "exit"
+
+            number = get_int("Choose number (0-36): ")
+            if number == "exit":
+                return "exit"
+
+            color = input("Choose color (red/black): ").lower()
+            if color == "exit":
+                return "exit"
+
+            if 0 <= number <= 36 and color in ["red", "black"]:
+                return ("combo", amount, number, color)
+
+        else:
+            print("Invalid choice.")
+
+
+# -----------------------------
+# WIN CALCULATION
+# -----------------------------
+def calculate_winnings(bet, result):
+    global wins, losses
+
+    color = get_color(result)
+
+    # NUMBER BET
+    if bet[0] == "number":
+        _, amount, number = bet
+        if number == result:
+            wins += 1
+            return amount * 35
+
+    # COLOR BET
+    elif bet[0] == "color":
+        _, amount, chosen_color = bet
+        if chosen_color == color:
+            wins += 1
+            return amount * 2
+
+    # COMBO BET
+    elif bet[0] == "combo":
+        _, amount, number, chosen_color = bet
+
+        num_win = amount * 25 if number == result else 0
+        color_win = amount * 1.5 if chosen_color == color else 0
+
+        if num_win > 0 or color_win > 0:
+            wins += 1
+            return int(num_win + color_win)
+
+    losses += 1
+    return 0
+
+
+# -----------------------------
+# SUMMARY
+# -----------------------------
+def show_summary():
+    print("\n FINAL SUMMARY")
+    print("----------------------")
+    print("Starting Balance:", STARTING_BALANCE)
+    print("Final Balance:", balance)
+    print("Total Spins:", total_spins)
+    print("Wins:", wins)
+    print("Losses:", losses)
+    print("Total Wagered:", total_wagered)
+
+    if total_spins > 0:
+        print("Win Rate:", round((wins / total_spins) * 100, 2), "%")
+
+
+# -----------------------------
+# MAIN GAME LOOP
+# -----------------------------
+def play_game():
+    global balance, total_wagered
+
+    print(" Welcome to Space Casino Roulette")
+    print(" Type 'exit' anytime to quit")
+
+    while balance > 0:
+        print("\n Balance:", balance)
+        print(" Recent Spins:", spin_history[-5:])
+
+        bet = place_bet()
+
+        if bet == "exit":
+            print("\n You chose to quit.")
+            break
+
+        amount = bet[1]
+
+        if amount > balance:
+            print("You dont have  enough balance!")
+            continue
+
+        balance -= amount
+        total_wagered += amount
+
+        print("\n Spinning...")
+        result = spin_wheel()
+        color = get_color(result)
+
+        print(f"Result: {result} ({color})")
+
+        winnings = calculate_winnings(bet, result)
+
+        if winnings > 0:
+            print(f" Congrats you have won ${winnings}")
+            balance += winnings
+        else:
+            print(" You lost try again!")
+
+    if balance <= 0:
+        print("\n You lost all your money game over!")
+
+    show_summary()
+
+
+# -----------------------------
+# RUN GAME
+# -----------------------------
+play_game()
