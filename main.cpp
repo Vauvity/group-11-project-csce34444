@@ -1,9 +1,17 @@
+/*
+    Author:     Ramon Lopez | rjl0157 | ramonlopez2@my.unt.edu
+    Team:       Group 11 - Team Galactic - Space Casino
+    Course:     CSCE 3444.400 Software Engineering
+    Instructor: Bahareh M. Dorri
+*/
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <limits>
 #include <cctype>
 #include <fstream>
+#include <iomanip>
 #include "BlackjackGame.h"
 
 using std::cin;
@@ -14,15 +22,20 @@ using std::string;
 using std::vector;
 using std::numeric_limits;
 using std::streamsize;
+using std::fixed;
+using std::setprecision;
 
 double promptStartingBankroll();
 double promptBetAmount(const BlackjackGame& game);
 string promptPlayerAction(const BlackjackGame& game);
 void showTableState(const BlackjackGame& game);
-void showRoundLog(const BlackjackGame& game);
 string getDealerVisibleHand(const BlackjackGame& game);
+void showSessionInfo(const BlackjackGame& game);
+void showFinalSessionSummary(const BlackjackGame& game, double startingBankroll);
 bool promptPlayAgain();
+void writeRoundLogToFile(const BlackjackGame& game);
 
+// Appends round log output to file.
 void writeRoundLogToFile(const BlackjackGame& game)
 {
     std::ofstream logFile("blackjack_log.txt", std::ios::app);
@@ -35,10 +48,10 @@ void writeRoundLogToFile(const BlackjackGame& game)
     }
 
     logFile << "\n";
-
     logFile.close();
 }
 
+// Main game loop.
 int main()
 {
     cout << "========================================" << endl;
@@ -69,8 +82,8 @@ int main()
         cout << "Round " << game.getRoundNumber() << endl;
         cout << "----------------------------------------" << endl;
 
-        cout << "Current Bet: $" << game.getCurrentBet() << endl;
-        cout << "Bankroll after bet deduction: $" << game.getBankroll() << endl;
+        cout << "Initial Bet: $" << game.getInitialBet() << endl;
+        cout << "Bankroll after initial bet deduction: $" << game.getBankroll() << endl;
 
         if (game.wasShoeReshuffledBeforeCurrentRound())
         {
@@ -82,32 +95,57 @@ int main()
             cout << "This is the last hand before the shoe is shuffled." << endl;
         }
 
+        bool redrawTable = true;
+
         while (!game.isRoundOver())
         {
-            showTableState(game);
+            if (redrawTable)
+            {
+                showTableState(game);
+            }
 
             string action = promptPlayerAction(game);
 
             if (action == "H")
             {
                 game.playerHit();
+                redrawTable = true;
             }
             else if (action == "S")
             {
                 game.playerStand();
+                redrawTable = true;
             }
             else if (action == "D")
             {
                 game.playerDoubleDown();
+                redrawTable = true;
+            }
+            else if (action == "P")
+            {
+                game.playerSplit();
+                redrawTable = true;
+            }
+            else if (action == "T")
+            {
+                game.requestHint();
+
+                cout << endl;
+                cout << game.getHintText() << endl;
+
+                redrawTable = false;
+            }
+            else if (action == "I")
+            {
+                showSessionInfo(game);
+                cout << endl;
+                redrawTable = false;
             }
         }
 
         cout << endl;
-        cout << "========== ROUND RESULT ==========" << endl;
-        showTableState(game);
+        cout << "========== ROUND RESULT ==========" << endl << endl;
         cout << game.getRoundResultText() << endl;
-        cout << "Payout returned: $" << game.getPayoutAmount() << endl;
-        cout << "Updated bankroll: $" << game.getBankroll() << endl;
 
         writeRoundLogToFile(game);
 
@@ -126,6 +164,8 @@ int main()
 
         keepPlaying = promptPlayAgain();
     }
+
+    showFinalSessionSummary(game, startingBankroll);
 
     cout << endl;
     cout << "Thanks for playing Blackjack." << endl;
@@ -189,6 +229,7 @@ double promptBetAmount(const BlackjackGame& game)
     }
 }
 
+// Prompts only currently legal actions.
 string promptPlayerAction(const BlackjackGame& game)
 {
     string input;
@@ -196,7 +237,7 @@ string promptPlayerAction(const BlackjackGame& game)
     while (true)
     {
         cout << endl;
-        cout << "Choose action: ";
+        cout << "Choose action for hand " << (game.getActiveHandIndex() + 1) << ": ";
 
         if (game.canHit())
         {
@@ -212,6 +253,18 @@ string promptPlayerAction(const BlackjackGame& game)
         {
             cout << "[D]ouble Down ";
         }
+
+        if (game.canSplit())
+        {
+            cout << "S[P]lit ";
+        }
+
+        if (game.canRequestHint())
+        {
+            cout << "Hin[T] ";
+        }
+
+        cout << "[I]nfo ";
 
         cout << ": ";
         getline(cin, input);
@@ -236,12 +289,38 @@ string promptPlayerAction(const BlackjackGame& game)
                 {
                     return "D";
                 }
-                else
+
+                cout << "Double down is not available right now." << endl;
+                cout << "You must have enough bankroll to match that hand's bet, and the hand must still be on its opening decision window." << endl;
+                continue;
+            }
+
+            if (choice == 'P')
+            {
+                if (game.canSplit())
                 {
-                    cout << "Double down is not available right now." << endl;
-                    cout << "You need exactly 2 cards, it must be your first action, and you must have enough bankroll to match the current bet." << endl;
-                    continue;
+                    return "P";
                 }
+
+                cout << "Split is not available right now." << endl;
+                cout << "You need a splittable 2-card hand and enough bankroll to fund the additional hand." << endl;
+                continue;
+            }
+
+            if (choice == 'T')
+            {
+                if (game.canRequestHint())
+                {
+                    return "T";
+                }
+
+                cout << "Hint is not available right now." << endl;
+                continue;
+            }
+
+            if (choice == 'I')
+            {
+                return "I";
             }
         }
 
@@ -249,6 +328,7 @@ string promptPlayerAction(const BlackjackGame& game)
     }
 }
 
+// Displays dealer and player hands for the current round.
 void showTableState(const BlackjackGame& game)
 {
     cout << endl;
@@ -264,10 +344,29 @@ void showTableState(const BlackjackGame& game)
         cout << getDealerVisibleHand(game) << endl;
     }
 
-    cout << "Player Hand: " << game.getPlayerHand().toString()
-         << " (Value: " << game.getPlayerValue() << ")" << endl;
+    for (int i = 0; i < game.getHandCount(); i++)
+    {
+        cout << "Player Hand " << (i + 1);
+
+        if (!game.isRoundOver() && i == game.getActiveHandIndex())
+        {
+            cout << " [ACTIVE]";
+        }
+
+        cout << ": " << game.getPlayerHand(i).toString()
+             << " (Value: " << game.getPlayerHand(i).getValue() << ")"
+             << " | Bet: $" << game.getPlayerHandBet(i);
+
+        if (game.didPlayerDoubleDown(i))
+        {
+            cout << " | Doubled";
+        }
+
+        cout << endl;
+    }
 }
 
+// Hides dealer hole card until reveal.
 string getDealerVisibleHand(const BlackjackGame& game)
 {
     vector<Card> dealerCards = game.getDealerHand().getCards();
@@ -285,16 +384,65 @@ string getDealerVisibleHand(const BlackjackGame& game)
     return dealerCards[0].toString() + " ??";
 }
 
-void showRoundLog(const BlackjackGame& game)
+// Shows current session stats.
+void showSessionInfo(const BlackjackGame& game)
 {
-    vector<string> roundLog = game.getRoundLog();
+    BlackjackAccuracyStats accuracyStats = game.getSessionAccuracyStats();
+    BlackjackLuckStats luckStats = game.getSessionLuckStats();
 
-    cout << "========== ROUND LOG ==========" << endl;
+    cout << endl;
+    cout << "========== SESSION INFO ==========" << endl;
+    cout << "Current Bankroll: $" << fixed << setprecision(2) << game.getBankroll() << endl;
+    cout << "Strategy Accuracy: " << fixed << setprecision(2)
+         << accuracyStats.getAccuracyPercent() << "%" << endl;
+    cout << "Optimal Actions: " << accuracyStats.optimalActions << endl;
+    cout << "Suboptimal Actions: " << accuracyStats.suboptimalActions << endl;
+    cout << "Hints Used: " << accuracyStats.hintsUsed << endl;
+    cout << "Luck Factor: " << fixed << setprecision(2)
+         << luckStats.getLuckFactorPercent() << "%" << endl;
+    cout << "Lucky Hands: " << luckStats.luckyHands << endl;
+    cout << "Semi-Lucky Pushes: " << luckStats.semiLuckyPushes << endl;
+    cout << "Unlucky Hands: " << luckStats.unluckyHands << endl;
+    cout << "==================================" << endl;
+}
 
-    for (const string& entry : roundLog)
+// Shows final session totals.
+void showFinalSessionSummary(const BlackjackGame& game, double startingBankroll)
+{
+    BlackjackAccuracyStats accuracyStats = game.getSessionAccuracyStats();
+    BlackjackLuckStats luckStats = game.getSessionLuckStats();
+
+    double finalBankroll = game.getBankroll();
+    double netChange = finalBankroll - startingBankroll;
+
+    cout << endl;
+    cout << "========== SESSION SUMMARY ==========" << endl;
+    cout << "Starting Bankroll: $" << fixed << setprecision(2) << startingBankroll << endl;
+    cout << "Final Bankroll:    $" << fixed << setprecision(2) << finalBankroll << endl;
+
+    if (netChange >= 0.0)
     {
-        cout << entry << endl;
+        cout << "Net Change:        +$" << fixed << setprecision(2) << netChange << endl;
     }
+    else
+    {
+        cout << "Net Change:        -$" << fixed << setprecision(2) << (-netChange) << endl;
+    }
+
+    cout << endl;
+    cout << "Strategy Accuracy: " << fixed << setprecision(2)
+         << accuracyStats.getAccuracyPercent() << "%" << endl;
+    cout << "Optimal Actions:   " << accuracyStats.optimalActions << endl;
+    cout << "Suboptimal Actions:" << accuracyStats.suboptimalActions << endl;
+    cout << "Hints Used:        " << accuracyStats.hintsUsed << endl;
+
+    cout << endl;
+    cout << "Luck Factor:       " << fixed << setprecision(2)
+         << luckStats.getLuckFactorPercent() << "%" << endl;
+    cout << "Lucky Hands:       " << luckStats.luckyHands << endl;
+    cout << "Semi-Lucky Pushes: " << luckStats.semiLuckyPushes << endl;
+    cout << "Unlucky Hands:     " << luckStats.unluckyHands << endl;
+    cout << "=====================================" << endl;
 }
 
 bool promptPlayAgain()

@@ -1,3 +1,10 @@
+/*
+    Author:     Ramon Lopez | rjl0157 | ramonlopez2@my.unt.edu
+    Team:       Group 11 - Team Galactic - Space Casino
+    Course:     CSCE 3444.400 Software Engineering
+    Instructor: Bahareh M. Dorri
+*/
+
 #include "Card.h"
 
 Card::Card(Rank newRank, Suit newSuit)
@@ -15,6 +22,7 @@ Suit Card::getSuit() const
     return suit;
 }
 
+// Formatting cards into strings.
 string Card::toString() const
 {
     string rankText;
