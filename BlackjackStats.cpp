@@ -1,3 +1,11 @@
+/*
+    Name:       Prayush Panta
+    UID:        PP1008
+    Team:       Group 11 - Team Galactic - Space Casino
+    Course:     CSCE 3444 Software Engineering
+    Instructor: Bahareh M. Dorri
+*/
+
 #include "BlackjackStats.h"
 #include <iostream>
 #include <iomanip>
@@ -14,6 +22,7 @@ using std::fixed;
 using std::setprecision;
 using std::ostringstream;
 using std::string;
+
 
 //  Constructor
 
@@ -41,6 +50,7 @@ BlackjackStats::BlackjackStats(double startBankroll)
 {
 }
 
+
 //  recordRound — call after every game.getRoundSummary()
 
 void BlackjackStats::recordRound(const BlackjackRoundSummary& summary)
@@ -66,30 +76,42 @@ void BlackjackStats::recordRound(const BlackjackRoundSummary& summary)
         currentStreak = 0;
     }
 
-    if (summary.wasNaturalBlackjack)  totalBlackjacks++;
-    if (summary.playerBusted)         totalPlayerBusts++;
-    if (summary.dealerBusted)         totalDealerBusts++;
+    if (summary.wasNaturalBlackjack) totalBlackjacks++;
+    if (summary.dealerBusted)        totalDealerBusts++;
 
-    if (summary.wasDoubleDown)
+    //  Player bust: derive from roundOutcome 
+    //    BlackjackRoundSummary has no playerBusted field;
+    //    PlayerBust outcome means the player busted.
+    if (summary.roundOutcome == RoundOutcome::PlayerBust)
+        totalPlayerBusts++;
+
+    //  Double down: derive from hand-level data 
+    //    BlackjackRoundSummary has no wasDoubleDown field;
+    //    check each player hand's doubledDown flag instead.
+    for (const SplitHandState& hand : summary.playerHands)
     {
-        totalDoubleDowns++;
-        if (summary.playerWon) totalDoubleDownWins++;
+        if (hand.doubledDown)
+        {
+            totalDoubleDowns++;
+            if (hand.won) totalDoubleDownWins++;
+        }
     }
 
     //  Financial tracking 
-    totalAmountBet      += summary.betAmount;
+    //    Use initialBetAmount (not betAmount — that field doesn't exist).
+    totalAmountBet      += summary.initialBetAmount;
     totalPayoutReceived += summary.payoutAmount;
     currentBankroll      = summary.endingBankroll;
 
-    if (summary.netChange > 0)
+    if (summary.netChange > 0.0)
         biggestWin  = std::max(biggestWin,  summary.netChange);
-    else if (summary.netChange < 0)
+    else if (summary.netChange < 0.0)
         biggestLoss = std::max(biggestLoss, std::abs(summary.netChange));
 
     peakBankroll   = std::max(peakBankroll,   currentBankroll);
     lowestBankroll = std::min(lowestBankroll, currentBankroll);
 
-    //  History of past 10 rounds
+    //  History (last 10 rounds) 
     RoundResult result;
     result.roundNumber   = summary.roundNumber;
     result.netChange     = summary.netChange;
@@ -97,14 +119,14 @@ void BlackjackStats::recordRound(const BlackjackRoundSummary& summary)
 
     switch (summary.roundOutcome)
     {
-        case RoundOutcome::PlayerBlackjack: result.outcome = "BLACKJACK"; break;
-        case RoundOutcome::PlayerWin:       result.outcome = "WIN";       break;
+        case RoundOutcome::PlayerBlackjack: result.outcome = "BLACKJACK";    break;
+        case RoundOutcome::PlayerWin:       result.outcome = "WIN";          break;
         case RoundOutcome::DealerBust:      result.outcome = "WIN (D.Bust)"; break;
-        case RoundOutcome::Push:            result.outcome = "PUSH";      break;
-        case RoundOutcome::PlayerBust:      result.outcome = "LOSS (Bust)"; break;
-        case RoundOutcome::DealerWin:       result.outcome = "LOSS";      break;
-        case RoundOutcome::DealerBlackjack: result.outcome = "LOSS (D.BJ)"; break;
-        default:                            result.outcome = "";       break;
+        case RoundOutcome::Push:            result.outcome = "PUSH";         break;
+        case RoundOutcome::PlayerBust:      result.outcome = "LOSS (Bust)";  break;
+        case RoundOutcome::DealerWin:       result.outcome = "LOSS";         break;
+        case RoundOutcome::DealerBlackjack: result.outcome = "LOSS (D.BJ)";  break;
+        default:                            result.outcome = "---";          break;
     }
 
     history.push_back(result);
@@ -112,7 +134,8 @@ void BlackjackStats::recordRound(const BlackjackRoundSummary& summary)
         history.erase(history.begin());
 }
 
-//  displayStats 
+
+//  displayStats
 
 void BlackjackStats::displayStats() const
 {
@@ -120,53 +143,54 @@ void BlackjackStats::displayStats() const
 
     cout << endl;
     printDivider('=', W);
-    cout << setw((W + 22) / 2) << right << "* GALACTIC CASINO  --  BLACKJACK STATS *" << endl;
+    cout << setw((W + 22) / 2) << right
+         << "* GALACTIC CASINO  --  BLACKJACK STATS *" << endl;
     printDivider('=', W);
 
-    //  SESSION OVERVIEW 
+    //  Session overview 
     cout << " SESSION OVERVIEW" << endl;
     printDivider('-', W);
-    printRow("Rounds Played",    std::to_string(totalRounds), W);
-    printRow("Starting Bankroll", formatMoney(startingBankroll), W);
-    printRow("Current Bankroll",  formatMoney(currentBankroll), W);
+    printRow("Rounds Played",     std::to_string(totalRounds),              W);
+    printRow("Starting Bankroll", formatMoney(startingBankroll),            W);
+    printRow("Current Bankroll",  formatMoney(currentBankroll),             W);
     printRow("Net Profit / Loss", formatMoney(currentBankroll - startingBankroll), W);
-    printRow("Peak Bankroll",     formatMoney(peakBankroll), W);
-    printRow("Lowest Bankroll",   formatMoney(lowestBankroll), W);
-    printRow("Total Wagered",     formatMoney(totalAmountBet), W);
-    printRow("ROI",               formatPercent(currentBankroll - startingBankroll, totalAmountBet), W);
+    printRow("Peak Bankroll",     formatMoney(peakBankroll),                W);
+    printRow("Lowest Bankroll",   formatMoney(lowestBankroll),              W);
+    printRow("Total Wagered",     formatMoney(totalAmountBet),              W);
+    printRow("ROI",               formatPercent(currentBankroll - startingBankroll,
+                                                totalAmountBet),            W);
 
-    //  WIN / LOSS BREAKDOWN 
+    //  Win / loss breakdown 
     cout << endl;
     cout << " WIN / LOSS BREAKDOWN" << endl;
     printDivider('-', W);
     printRow("Wins",     std::to_string(totalWins)   + "  " + formatPercent(totalWins,   totalRounds), W);
     printRow("Losses",   std::to_string(totalLosses) + "  " + formatPercent(totalLosses, totalRounds), W);
     printRow("Pushes",   std::to_string(totalPushes) + "  " + formatPercent(totalPushes, totalRounds), W);
-    printRow("Win Rate", formatPercent(totalWins, totalWins + totalLosses), W);
+    printRow("Win Rate", formatPercent(totalWins, totalWins + totalLosses),                            W);
 
-    // Win rate visual bar
     if (totalWins + totalLosses > 0)
     {
         double ratio = (double)totalWins / (totalWins + totalLosses);
         cout << "  [" << buildBar(ratio, W - 6) << "]" << endl;
     }
 
-    //  SPECIAL EVENTS 
+    //  Special events 
     cout << endl;
     cout << " SPECIAL EVENTS" << endl;
     printDivider('-', W);
-    printRow("Natural Blackjacks", std::to_string(totalBlackjacks)
-             + "  " + formatPercent(totalBlackjacks, totalRounds), W);
-    printRow("Player Busts",       std::to_string(totalPlayerBusts)
-             + "  " + formatPercent(totalPlayerBusts, totalRounds), W);
-    printRow("Dealer Busts",       std::to_string(totalDealerBusts)
-             + "  " + formatPercent(totalDealerBusts, totalRounds), W);
-    printRow("Double Downs",       std::to_string(totalDoubleDowns), W);
+    printRow("Natural Blackjacks",
+             std::to_string(totalBlackjacks) + "  " + formatPercent(totalBlackjacks, totalRounds), W);
+    printRow("Player Busts",
+             std::to_string(totalPlayerBusts) + "  " + formatPercent(totalPlayerBusts, totalRounds), W);
+    printRow("Dealer Busts",
+             std::to_string(totalDealerBusts) + "  " + formatPercent(totalDealerBusts, totalRounds), W);
+    printRow("Double Downs", std::to_string(totalDoubleDowns), W);
 
     if (totalDoubleDowns > 0)
         printRow("  DD Win Rate", formatPercent(totalDoubleDownWins, totalDoubleDowns), W);
 
-    //  STREAKS & RECORDS 
+    //  Streaks & records 
     cout << endl;
     cout << " STREAKS & RECORDS" << endl;
     printDivider('-', W);
@@ -174,15 +198,15 @@ void BlackjackStats::displayStats() const
     string streakStr;
     if      (currentStreak > 0) streakStr = "+" + std::to_string(currentStreak) + " (winning)";
     else if (currentStreak < 0) streakStr =       std::to_string(currentStreak) + " (losing)";
-    else                         streakStr = "0 (neutral)";
+    else                        streakStr = "0 (neutral)";
 
-    printRow("Current Streak",      streakStr, W);
-    printRow("Longest Win Streak",  std::to_string(longestWinStreak),  W);
-    printRow("Longest Loss Streak", std::to_string(longestLossStreak), W);
-    printRow("Biggest Single Win",  formatMoney(biggestWin),  W);
-    printRow("Biggest Single Loss", formatMoney(biggestLoss), W);
+    printRow("Current Streak",      streakStr,                          W);
+    printRow("Longest Win Streak",  std::to_string(longestWinStreak),   W);
+    printRow("Longest Loss Streak", std::to_string(longestLossStreak),  W);
+    printRow("Biggest Single Win",  formatMoney(biggestWin),            W);
+    printRow("Biggest Single Loss", formatMoney(biggestLoss),           W);
 
-    //  RECENT ROUNDS SUMMARY
+    //  Recent rounds 
     cout << endl;
     cout << " LAST " << history.size() << " ROUNDS" << endl;
     printDivider('-', W);
@@ -208,6 +232,7 @@ void BlackjackStats::displayStats() const
     cout << endl;
 }
 
+
 //  Helpers
 
 string BlackjackStats::formatMoney(double amount) const
@@ -224,7 +249,8 @@ string BlackjackStats::formatPercent(double numerator, double denominator) const
 {
     if (denominator <= 0) return "(0.0%)";
     ostringstream out;
-    out << "(" << fixed << setprecision(1) << (numerator / denominator * 100.0) << "%)";
+    out << "(" << fixed << setprecision(1)
+        << (numerator / denominator * 100.0) << "%)";
     return out.str();
 }
 
@@ -246,6 +272,7 @@ void BlackjackStats::printRow(const string& label, const string& value, int widt
     if (gap < 1) gap = 1;
     cout << "  " << label << string(gap, '.') << value << endl;
 }
+
 
 //  Getters
 
