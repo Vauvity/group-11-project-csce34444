@@ -1,11 +1,18 @@
+/*
+    Author:     Ramon Lopez | rjl0157 | ramonlopez2@my.unt.edu
+    Team:       Group 11 - Team Galactic - Space Casino
+    Course:     CSCE 3444.400 Software Engineering
+    Instructor: Bahareh M. Dorri
+*/
+
 #include "Shoe.h"
 #include <algorithm>
 #include <chrono>
 #include <stdexcept>
 
-using std::random_device;
 using std::runtime_error;
 
+// Initializes shoe and seeds RNG.
 Shoe::Shoe(int numberOfDecks)
     : deckCount(numberOfDecks), nextCardIndex(0)
 {
@@ -17,6 +24,7 @@ Shoe::Shoe(int numberOfDecks)
     reset();
 }
 
+// Builds full shoe of cards.
 void Shoe::buildShoe()
 {
     cards.clear();
@@ -40,18 +48,21 @@ void Shoe::buildShoe()
     }
 }
 
+// Shuffles cards using RNG.
 void Shoe::shuffle()
 {
     std::shuffle(cards.begin(), cards.end(), rng);
     nextCardIndex = 0;
 }
 
+// Resets and reshuffles shoe.
 void Shoe::reset()
 {
     buildShoe();
     shuffle();
 }
 
+// Deals next card from shoe.
 Card Shoe::dealCard()
 {
     if (isEmpty())

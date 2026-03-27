@@ -1,3 +1,10 @@
+/*
+    Author:     Ramon Lopez | rjl0157 | ramonlopez2@my.unt.edu
+    Team:       Group 11 - Team Galactic - Space Casino
+    Course:     CSCE 3444.400 Software Engineering
+    Instructor: Bahareh M. Dorri
+*/
+
 #ifndef SHOE_H
 #define SHOE_H
 
@@ -8,6 +15,8 @@
 using std::vector;
 using std::mt19937;
 
+
+// Shoe with multiple decks.
 class Shoe
 {
 private:
@@ -16,7 +25,7 @@ private:
     int nextCardIndex;
     mt19937 rng;
 
-    void buildShoe();
+    void buildShoe();   // Builds the shoe.
 
 public:
     Shoe(int numberOfDecks = 6);

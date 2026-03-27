@@ -1,3 +1,10 @@
+/*
+    Author:     Ramon Lopez | rjl0157 | ramonlopez2@my.unt.edu
+    Team:       Group 11 - Team Galactic - Space Casino
+    Course:     CSCE 3444.400 Software Engineering
+    Instructor: Bahareh M. Dorri
+*/
+
 #ifndef CARD_H
 #define CARD_H
 
@@ -5,6 +12,7 @@
 
 using std::string;
 
+// Rank of a playing card.
 enum class Rank
 {
     Two,
@@ -22,6 +30,7 @@ enum class Rank
     Ace
 };
 
+// Suit of a playing card.
 enum class Suit
 {
     Clubs,
@@ -30,6 +39,7 @@ enum class Suit
     Spades
 };
 
+// Card class.
 class Card
 {
 private:
@@ -40,6 +50,7 @@ public:
     Card(Rank newRank, Suit newSuit);
 
     Rank getRank() const;
+
     Suit getSuit() const;
 
     string toString() const;
