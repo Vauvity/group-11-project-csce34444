@@ -16,7 +16,7 @@ using std::setprecision;
 
 BlackjackGame::BlackjackGame(double startingBankroll, int numberOfDecks)
     : shoe(numberOfDecks),
-      bankroll(startingBankroll),
+      tableBalance(startingBankroll),
       initialBet(0.0),
       totalBetCommitted(0.0),
       payoutAmount(0.0),
@@ -43,7 +43,7 @@ bool BlackjackGame::startNewRound(double betAmount)
         return false;
     }
 
-    if (betAmount <= 0.0 || betAmount > bankroll)
+    if (betAmount <= 0.0 || betAmount > tableBalance)
     {
         return false;
     }
@@ -61,7 +61,7 @@ bool BlackjackGame::startNewRound(double betAmount)
     dealerHand.clear();
     roundLog.clear();
 
-    startingBankrollForRound = bankroll;
+    startingBankrollForRound = tableBalance;
     initialBet = betAmount;
     totalBetCommitted = betAmount;
     payoutAmount = 0.0;
@@ -77,7 +77,7 @@ bool BlackjackGame::startNewRound(double betAmount)
 
     lastHandBeforeShuffle = shoe.getCardsRemaining() <= reshuffleCutoff;
 
-    bankroll -= betAmount;
+    tableBalance -= betAmount;
     roundState = RoundState::PlayerTurn;
 
     addLogEntry("========================================");
@@ -87,9 +87,9 @@ bool BlackjackGame::startNewRound(double betAmount)
         addLogEntry("Shoe reshuffled before this round.");
     }
 
-    addLogEntry("Starting bankroll before bet: " + formatMoney(startingBankrollForRound));
+    addLogEntry("Starting table balance before bet: " + formatMoney(startingBankrollForRound));
     addLogEntry("Initial bet placed: " + formatMoney(initialBet));
-    addLogEntry("Bankroll after initial bet deduction: " + formatMoney(bankroll));
+    addLogEntry("Table balance after initial bet deduction: " + formatMoney(tableBalance));
 
     if (lastHandBeforeShuffle)
     {
@@ -329,7 +329,7 @@ bool BlackjackGame::canDoubleDownOnHand(int handIndex) const
     if (handState.finished ||
         handState.doubledDown ||
         handState.isSplitAceHand ||
-        bankroll < handState.bet)
+        tableBalance < handState.bet)
     {
         return false;
     }
@@ -359,7 +359,7 @@ bool BlackjackGame::canSplitHand(int handIndex) const
     return !handState.finished &&
            !handState.doubledDown &&
            handState.hand.canSplit() &&
-           bankroll >= handState.bet;
+           tableBalance >= handState.bet;
 }
 
 bool BlackjackGame::canSplit() const
@@ -482,13 +482,13 @@ void BlackjackGame::playerDoubleDown()
     addLogEntry("Player hand " + std::to_string(activeHandIndex + 1) + " action: Double Down");
     handState.actionSequence.push_back("DoubleDown");
 
-    bankroll -= handState.bet;
+    tableBalance -= handState.bet;
     totalBetCommitted += handState.bet;
     handState.bet *= 2.0;
     handState.doubledDown = true;
 
     addLogEntry("Player hand " + std::to_string(activeHandIndex + 1) + " bet doubled to: " + formatMoney(handState.bet));
-    addLogEntry("Bankroll after double down deduction: " + formatMoney(bankroll));
+    addLogEntry("Table balance after double down deduction: " + formatMoney(tableBalance));
 
     dealCardToHand(handState, "Player hand " + std::to_string(activeHandIndex + 1) + " draws: ");
     addLogEntry("Player hand " + std::to_string(activeHandIndex + 1) + ": " + handState.hand.toString() +
@@ -526,7 +526,7 @@ void BlackjackGame::playerSplit()
 
     recordPlayerDecision(StrategyAction::Split);
 
-    bankroll -= newHandBet;
+    tableBalance -= newHandBet;
     totalBetCommitted += newHandBet;
     roundIncludedSplit = true;
 
@@ -553,7 +553,7 @@ void BlackjackGame::playerSplit()
 
     addLogEntry("Player hand " + std::to_string(activeHandIndex + 1) + " action: Split");
     addLogEntry("Additional split bet placed: " + formatMoney(newHandBet));
-    addLogEntry("Bankroll after split deduction: " + formatMoney(bankroll));
+    addLogEntry("Table balance after split deduction: " + formatMoney(tableBalance));
 
     dealCardToHand(playerHands[activeHandIndex],
                    "Player hand " + std::to_string(activeHandIndex + 1) + " receives split card: ");
@@ -649,7 +649,7 @@ void BlackjackGame::resolveHandOutcome(PlayerHandState& handState, int dealerVal
         handState.payout = handState.bet;
     }
 
-    bankroll += handState.payout;
+    tableBalance += handState.payout;
 }
 
 bool BlackjackGame::areAllPlayerHandsFinished() const
@@ -727,7 +727,7 @@ void BlackjackGame::resolveRound()
     {
         playerHands[0].outcome = RoundOutcome::Push;
         playerHands[0].payout = playerHands[0].bet;
-        bankroll += playerHands[0].payout;
+        tableBalance += playerHands[0].payout;
         payoutAmount += playerHands[0].payout;
         playerHands[0].finished = true;
         roundOutcome = RoundOutcome::Push;
@@ -737,7 +737,7 @@ void BlackjackGame::resolveRound()
     {
         playerHands[0].outcome = RoundOutcome::PlayerBlackjack;
         playerHands[0].payout = playerHands[0].bet * 2.5;
-        bankroll += playerHands[0].payout;
+        tableBalance += playerHands[0].payout;
         payoutAmount += playerHands[0].payout;
         playerHands[0].finished = true;
         roundOutcome = RoundOutcome::PlayerBlackjack;
@@ -826,8 +826,8 @@ void BlackjackGame::resolveRound()
     addLogEntry("Final dealer hand: " + dealerHand.toString() +
                 " | value = " + std::to_string(dealerHand.getValue()));
     addLogEntry("Round outcome: " + outcomeToString(roundOutcome));
-    addLogEntry("Total payout returned to bankroll: " + formatMoney(payoutAmount));
-    addLogEntry("Ending bankroll: " + formatMoney(bankroll));
+    addLogEntry("Total payout returned to table balance: " + formatMoney(payoutAmount));
+    addLogEntry("Ending table balance: " + formatMoney(tableBalance));
 
     if (lastHandBeforeShuffle)
     {
@@ -987,7 +987,7 @@ string BlackjackGame::buildRoundResultText() const
     result += "\nTotal Wager:\t" + formatMoney(totalBetCommitted);
     result += "\nPayout:\t\t" + formatMoney(payoutAmount);
     result += "\nNet Change:\t" + formatMoney(payoutAmount - totalBetCommitted);
-    result += "\nBankroll:\t" + formatMoney(bankroll);
+    result += "\nTable Balance:\t" + formatMoney(tableBalance);
     result += "\n----------------------------------------";
 
     return result;
@@ -1040,9 +1040,22 @@ bool BlackjackGame::isValidHandIndex(int handIndex) const
     return handIndex >= 0 && handIndex < static_cast<int>(playerHands.size());
 }
 
-double BlackjackGame::getBankroll() const
+void BlackjackGame::setTableBalance(double amount)
 {
-    return bankroll;
+    if (amount >= 0.0)
+    {
+        tableBalance = amount;
+    }
+}
+
+double BlackjackGame::getTableBalance() const
+{
+    return tableBalance;
+}
+
+double BlackjackGame::cashOut() const
+{
+    return tableBalance;
 }
 
 double BlackjackGame::getCurrentBet() const
@@ -1189,8 +1202,8 @@ BlackjackRoundSummary BlackjackGame::getRoundSummary() const
     summary.totalBetCommitted = totalBetCommitted;
     summary.bankrollAfterBetDeduction = startingBankrollForRound - totalBetCommitted;
     summary.payoutAmount = payoutAmount;
-    summary.endingBankroll = bankroll;
-    summary.netChange = bankroll - startingBankrollForRound;
+    summary.endingBankroll = tableBalance;
+    summary.netChange = tableBalance - startingBankrollForRound;
     summary.roundOutcome = roundOutcome;
     summary.dealerFinalValue = dealerHand.getValue();
     summary.activeHandIndexAtRoundEnd = activeHandIndex;

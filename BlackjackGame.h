@@ -55,7 +55,8 @@ private:
     vector<PlayerHandState> playerHands;   // Supports split hands.
     Hand dealerHand;
 
-    double bankroll;
+    // Local funds currently available at the blackjack table.
+    double tableBalance;
     double initialBet;
     double totalBetCommitted;
     double payoutAmount;
@@ -127,7 +128,10 @@ public:
     void playerSplit();
     void requestHint();
 
-    double getBankroll() const;
+    void setTableBalance(double amount);
+    double getTableBalance() const;
+    double cashOut() const;
+
     double getCurrentBet() const;
     double getInitialBet() const;
     double getTotalBetCommitted() const;

@@ -1,38 +1,88 @@
 #ifndef SESSIONMANAGER_H
 #define SESSIONMANAGER_H
 
-#include "SessionStats.h"
+#include <memory>
+
+#include "Bankroll.h"
+#include "BlackjackStats.h"
+
+class BlackjackGame;
 
 class SessionManager
 {
-private:
-    SessionStats sessionStats;
-
 public:
-    explicit SessionManager(double startingBalance);
+    enum class ActiveModule
+    {
+        None,
+        Blackjack,
+        Roulette,
+        Slots
+    };
 
-    // Session lifecycle
-    void startSession();
+    explicit SessionManager(double startingBankroll = 1000.0);
+    ~SessionManager();
+
+    void startSession(double startingBankroll);
     void endSession();
 
-    // Game routing
-    void playBlackjack();
-    void playSlots();
-    void playRoulette();
+    bool isSessionActive() const;
+    double getCurrentBankroll() const;
+    ActiveModule getActiveModule() const;
 
-    // Display
-    void displaySessionSummary() const;
+    void setActiveModule(ActiveModule module);
+    void returnToMainMenu();
 
-    // Getters
-    double getCurrentBalance() const;
-    double getNetGainLoss() const;
-    double getPeakBalance() const;
-    double getLowestBalance() const;
-    int    getTotalRounds() const;
-    int    getGamesPlayed() const;
-    double getSessionDuration() const;
+    bool enterBlackjack();
+    bool startBlackjackRound(double betAmount);
 
-    const SessionStats& getSessionStats() const;
+    bool canBlackjackHit() const;
+    bool canBlackjackStand() const;
+    bool canBlackjackDoubleDown() const;
+    bool canBlackjackSplit() const;
+    bool canBlackjackRequestHint() const;
+
+    bool blackjackHit();
+    bool blackjackStand();
+    bool blackjackDoubleDown();
+    bool blackjackSplit();
+    bool blackjackRequestHint();
+
+    bool isBlackjackLoaded() const;
+    bool isBlackjackRoundOver() const;
+
+    BlackjackGame* getBlackjackGame();
+    const BlackjackGame* getBlackjackGame() const;
+
+    BlackjackStats& getBlackjackStats();
+    const BlackjackStats& getBlackjackStats() const;
+
+    void finalizeBlackjackRound();
+
+    bool enterRoulette();
+    bool isRouletteAvailable() const;
+
+    bool enterSlots();
+    bool isSlotsAvailable() const;
+
+    void runTerminalSession();
+
+private:
+    Bankroll bankroll;
+    BlackjackStats blackjackStats;
+    std::unique_ptr<BlackjackGame> blackjackGame;
+
+    bool sessionActive;
+    ActiveModule activeModule;
+
+    double promptStartingBankroll() const;
+    int promptMainMenuChoice() const;
+    void showTerminalMainMenu() const;
+
+    void runTerminalBlackjack();
+    void runTerminalRoulettePlaceholder();
+    void runTerminalSlotsPlaceholder();
+
+    void syncBankrollFromBlackjack();
 };
 
 #endif

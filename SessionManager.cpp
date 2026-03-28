@@ -1,76 +1,520 @@
 #include "SessionManager.h"
+#include "BlackjackGame.h"
 
-SessionManager::SessionManager(double startingBalance)
-    : sessionStats(startingBalance)
+#include <iostream>
+#include <limits>
+
+using std::cin;
+using std::cout;
+using std::numeric_limits;
+using std::streamsize;
+
+SessionManager::SessionManager(double startingBankroll)
+    : bankroll(startingBankroll),
+      blackjackStats(startingBankroll),
+      blackjackGame(nullptr),
+      sessionActive(false),
+      activeModule(ActiveModule::None)
 {
 }
 
-void SessionManager::startSession()
+SessionManager::~SessionManager() = default;
+
+void SessionManager::startSession(double startingBankroll)
 {
-    sessionStats.startSession();
+    bankroll = Bankroll(startingBankroll);
+    blackjackStats = BlackjackStats(startingBankroll);
+    blackjackGame.reset();
+
+    sessionActive = true;
+    activeModule = ActiveModule::None;
 }
 
 void SessionManager::endSession()
 {
-    sessionStats.endSession();
+    blackjackGame.reset();
+    sessionActive = false;
+    activeModule = ActiveModule::None;
 }
 
-void SessionManager::playBlackjack()
+bool SessionManager::isSessionActive() const
 {
-    sessionStats.playBlackjack();
+    return sessionActive;
 }
 
-void SessionManager::playSlots()
+double SessionManager::getCurrentBankroll() const
 {
-    sessionStats.playSlots();
+    return bankroll.getBalance();
 }
 
-void SessionManager::playRoulette()
+SessionManager::ActiveModule SessionManager::getActiveModule() const
 {
-    sessionStats.playRoulette();
+    return activeModule;
 }
 
-void SessionManager::displaySessionSummary() const
+void SessionManager::setActiveModule(ActiveModule module)
 {
-    sessionStats.displaySessionSummary();
+    activeModule = module;
 }
 
-double SessionManager::getCurrentBalance() const
+void SessionManager::returnToMainMenu()
 {
-    return sessionStats.getCurrentBalance();
+    activeModule = ActiveModule::None;
 }
 
-double SessionManager::getNetGainLoss() const
+bool SessionManager::enterBlackjack()
 {
-    return sessionStats.getNetGainLoss();
+    if (!sessionActive)
+    {
+        return false;
+    }
+
+    if (!blackjackGame)
+    {
+        blackjackGame = std::make_unique<BlackjackGame>(bankroll.getBalance());
+    }
+
+    activeModule = ActiveModule::Blackjack;
+    return true;
 }
 
-double SessionManager::getPeakBalance() const
+bool SessionManager::startBlackjackRound(double betAmount)
 {
-    return sessionStats.getPeakBalance();
+    if (!enterBlackjack())
+    {
+        return false;
+    }
+
+    return blackjackGame->startNewRound(betAmount);
 }
 
-double SessionManager::getLowestBalance() const
+bool SessionManager::canBlackjackHit() const
 {
-    return sessionStats.getLowestBalance();
+    return blackjackGame && blackjackGame->canHit();
 }
 
-int SessionManager::getTotalRounds() const
+bool SessionManager::canBlackjackStand() const
 {
-    return sessionStats.getTotalRounds();
+    return blackjackGame && blackjackGame->canStand();
 }
 
-int SessionManager::getGamesPlayed() const
+bool SessionManager::canBlackjackDoubleDown() const
 {
-    return sessionStats.getGamesPlayed();
+    return blackjackGame && blackjackGame->canDoubleDown();
 }
 
-double SessionManager::getSessionDuration() const
+bool SessionManager::canBlackjackSplit() const
 {
-    return sessionStats.getSessionDuration();
+    return blackjackGame && blackjackGame->canSplit();
 }
 
-const SessionStats& SessionManager::getSessionStats() const
+bool SessionManager::canBlackjackRequestHint() const
 {
-    return sessionStats;
+    return blackjackGame && blackjackGame->canRequestHint();
+}
+
+bool SessionManager::blackjackHit()
+{
+    if (!canBlackjackHit())
+    {
+        return false;
+    }
+
+    blackjackGame->playerHit();
+
+    if (blackjackGame->isRoundOver())
+    {
+        finalizeBlackjackRound();
+    }
+
+    return true;
+}
+
+bool SessionManager::blackjackStand()
+{
+    if (!canBlackjackStand())
+    {
+        return false;
+    }
+
+    blackjackGame->playerStand();
+
+    if (blackjackGame->isRoundOver())
+    {
+        finalizeBlackjackRound();
+    }
+
+    return true;
+}
+
+bool SessionManager::blackjackDoubleDown()
+{
+    if (!canBlackjackDoubleDown())
+    {
+        return false;
+    }
+
+    blackjackGame->playerDoubleDown();
+
+    if (blackjackGame->isRoundOver())
+    {
+        finalizeBlackjackRound();
+    }
+
+    return true;
+}
+
+bool SessionManager::blackjackSplit()
+{
+    if (!canBlackjackSplit())
+    {
+        return false;
+    }
+
+    blackjackGame->playerSplit();
+
+    if (blackjackGame->isRoundOver())
+    {
+        finalizeBlackjackRound();
+    }
+
+    return true;
+}
+
+bool SessionManager::blackjackRequestHint()
+{
+    if (!canBlackjackRequestHint())
+    {
+        return false;
+    }
+
+    blackjackGame->requestHint();
+    return true;
+}
+
+bool SessionManager::isBlackjackLoaded() const
+{
+    return blackjackGame != nullptr;
+}
+
+bool SessionManager::isBlackjackRoundOver() const
+{
+    return blackjackGame && blackjackGame->isRoundOver();
+}
+
+BlackjackGame* SessionManager::getBlackjackGame()
+{
+    return blackjackGame.get();
+}
+
+const BlackjackGame* SessionManager::getBlackjackGame() const
+{
+    return blackjackGame.get();
+}
+
+BlackjackStats& SessionManager::getBlackjackStats()
+{
+    return blackjackStats;
+}
+
+const BlackjackStats& SessionManager::getBlackjackStats() const
+{
+    return blackjackStats;
+}
+
+void SessionManager::finalizeBlackjackRound()
+{
+    if (!blackjackGame || !blackjackGame->isRoundOver())
+    {
+        return;
+    }
+
+    syncBankrollFromBlackjack();
+    blackjackStats.recordRound(blackjackGame->getRoundSummary());
+}
+
+bool SessionManager::enterRoulette()
+{
+    if (!sessionActive)
+    {
+        return false;
+    }
+
+    activeModule = ActiveModule::Roulette;
+    return true;
+}
+
+bool SessionManager::isRouletteAvailable() const
+{
+    return false;
+}
+
+bool SessionManager::enterSlots()
+{
+    if (!sessionActive)
+    {
+        return false;
+    }
+
+    activeModule = ActiveModule::Slots;
+    return true;
+}
+
+bool SessionManager::isSlotsAvailable() const
+{
+    return false;
+}
+
+void SessionManager::runTerminalSession()
+{
+    double startingBankroll = promptStartingBankroll();
+    startSession(startingBankroll);
+
+    while (sessionActive)
+    {
+        if (bankroll.isBroke())
+        {
+            cout << "\nYou're out of money! Session over.\n";
+            break;
+        }
+
+        showTerminalMainMenu();
+        int choice = promptMainMenuChoice();
+
+        switch (choice)
+        {
+            case 1:
+                runTerminalBlackjack();
+                break;
+            case 2:
+                runTerminalSlotsPlaceholder();
+                break;
+            case 3:
+                runTerminalRoulettePlaceholder();
+                break;
+            case 4:
+                cout << "\nCurrent bankroll: $" << bankroll.getBalance() << "\n";
+                break;
+            case 5:
+                endSession();
+                break;
+            default:
+                cout << "Invalid choice.\n";
+                break;
+        }
+    }
+}
+
+double SessionManager::promptStartingBankroll() const
+{
+    double amount = 0.0;
+
+    while (true)
+    {
+        cout << "Enter your starting bankroll: $";
+        cin >> amount;
+
+        if (cin.fail() || amount <= 0.0)
+        {
+            cout << "Invalid amount. Try again.\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        return amount;
+    }
+}
+
+int SessionManager::promptMainMenuChoice() const
+{
+    int choice = 0;
+
+    while (true)
+    {
+        cout << "Choice: ";
+
+        if (cin >> choice)
+        {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return choice;
+        }
+
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Enter a number.\n";
+    }
+}
+
+void SessionManager::showTerminalMainMenu() const
+{
+    cout << "\n============================\n";
+    cout << "Balance: $" << bankroll.getBalance() << "\n";
+    cout << "1. Blackjack\n";
+    cout << "2. Slots\n";
+    cout << "3. Roulette\n";
+    cout << "4. Current Bankroll\n";
+    cout << "5. Exit\n";
+    cout << "============================\n";
+}
+
+void SessionManager::runTerminalBlackjack()
+{
+    if (!enterBlackjack())
+    {
+        cout << "\nUnable to enter Blackjack.\n";
+        return;
+    }
+
+    cout << "\n=== Blackjack ===\n";
+
+    bool keepPlaying = true;
+
+    while (keepPlaying && !bankroll.isBroke())
+    {
+        cout << "\nCurrent Balance: $" << bankroll.getBalance() << "\n";
+
+        double bet = 0.0;
+        cout << "Enter bet amount: $";
+        cin >> bet;
+
+        if (cin.fail())
+        {
+            cout << "Invalid bet.\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if (!startBlackjackRound(bet))
+        {
+            cout << "Unable to start round.\n";
+            continue;
+        }
+
+        while (!isBlackjackRoundOver())
+        {
+            const BlackjackGame* game = getBlackjackGame();
+
+            cout << "\nYour Hand: " << game->getPlayerHand().toString()
+                 << " (" << game->getPlayerValue() << ")\n";
+
+            cout << "Dealer Hand: " << game->getDealerHand().toString() << "\n";
+
+            cout << "\nChoose action:\n";
+            cout << "1. Hit\n";
+            cout << "2. Stand\n";
+
+            if (canBlackjackDoubleDown()) cout << "3. Double Down\n";
+            if (canBlackjackSplit()) cout << "4. Split\n";
+            if (canBlackjackRequestHint()) cout << "5. Hint\n";
+
+            int choice = 0;
+            cout << "Choice: ";
+            cin >> choice;
+
+            if (cin.fail())
+            {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid option.\n";
+                continue;
+            }
+
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            switch (choice)
+            {
+                case 1:
+                    if (!blackjackHit()) cout << "Hit is not available.\n";
+                    break;
+                case 2:
+                    if (!blackjackStand()) cout << "Stand is not available.\n";
+                    break;
+                case 3:
+                    if (!blackjackDoubleDown()) cout << "Double down is not available.\n";
+                    break;
+                case 4:
+                    if (!blackjackSplit()) cout << "Split is not available.\n";
+                    break;
+                case 5:
+                    if (blackjackRequestHint())
+                    {
+                        cout << getBlackjackGame()->getHintText() << "\n";
+                    }
+                    else
+                    {
+                        cout << "Hint is not available.\n";
+                    }
+                    break;
+                default:
+                    cout << "Invalid option.\n";
+                    break;
+            }
+        }
+
+        cout << "\n" << getBlackjackGame()->getRoundResultText() << "\n";
+        cout << "Updated Balance: $" << bankroll.getBalance() << "\n";
+
+        if (bankroll.isBroke())
+        {
+            cout << "\nYou're out of money! Returning to main menu...\n";
+            break;
+        }
+
+        char again = 'n';
+        cout << "\nPlay another round? (y/n): ";
+        cin >> again;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if (again != 'y' && again != 'Y')
+        {
+            keepPlaying = false;
+        }
+    }
+
+    returnToMainMenu();
+}
+
+void SessionManager::runTerminalRoulettePlaceholder()
+{
+    if (enterRoulette())
+    {
+        cout << "\n[Roulette placeholder]\n";
+    }
+
+    returnToMainMenu();
+}
+
+void SessionManager::runTerminalSlotsPlaceholder()
+{
+    if (enterSlots())
+    {
+        cout << "\n[Slots placeholder]\n";
+    }
+
+    returnToMainMenu();
+}
+
+void SessionManager::syncBankrollFromBlackjack()
+{
+    if (!blackjackGame)
+    {
+        return;
+    }
+
+    const double sessionBalance = bankroll.getBalance();
+    const double blackjackBalance = blackjackGame->getBankroll();
+
+    if (blackjackBalance > sessionBalance)
+    {
+        bankroll.deposit(blackjackBalance - sessionBalance);
+    }
+    else if (blackjackBalance < sessionBalance)
+    {
+        bankroll.withdraw(sessionBalance - blackjackBalance);
+    }
 }
