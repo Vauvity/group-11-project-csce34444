@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <limits>
+#include <vector>
 
 using std::cin;
 using std::cout;
@@ -32,7 +33,9 @@ void SessionManager::startSession(double startingBankroll)
 
 void SessionManager::endSession()
 {
+    cashOutBlackjackToSession();
     blackjackGame.reset();
+
     sessionActive = false;
     activeModule = ActiveModule::None;
 }
@@ -59,6 +62,11 @@ void SessionManager::setActiveModule(ActiveModule module)
 
 void SessionManager::returnToMainMenu()
 {
+    if (activeModule == ActiveModule::Blackjack)
+    {
+        cashOutBlackjackToSession();
+    }
+
     activeModule = ActiveModule::None;
 }
 
@@ -74,6 +82,7 @@ bool SessionManager::enterBlackjack()
         blackjackGame = std::make_unique<BlackjackGame>(bankroll.getBalance());
     }
 
+    blackjackGame->setTableBalance(bankroll.getBalance());
     activeModule = ActiveModule::Blackjack;
     return true;
 }
@@ -229,7 +238,6 @@ void SessionManager::finalizeBlackjackRound()
         return;
     }
 
-    syncBankrollFromBlackjack();
     blackjackStats.recordRound(blackjackGame->getRoundSummary());
 }
 
@@ -238,6 +246,11 @@ bool SessionManager::enterRoulette()
     if (!sessionActive)
     {
         return false;
+    }
+
+    if (activeModule == ActiveModule::Blackjack)
+    {
+        cashOutBlackjackToSession();
     }
 
     activeModule = ActiveModule::Roulette;
@@ -254,6 +267,11 @@ bool SessionManager::enterSlots()
     if (!sessionActive)
     {
         return false;
+    }
+
+    if (activeModule == ActiveModule::Blackjack)
+    {
+        cashOutBlackjackToSession();
     }
 
     activeModule = ActiveModule::Slots;
@@ -371,9 +389,17 @@ void SessionManager::runTerminalBlackjack()
 
     bool keepPlaying = true;
 
-    while (keepPlaying && !bankroll.isBroke())
+    while (keepPlaying)
     {
-        cout << "\nCurrent Balance: $" << bankroll.getBalance() << "\n";
+        const BlackjackGame* game = getBlackjackGame();
+
+        cout << "\nCurrent Table Balance: $" << game->getTableBalance() << "\n";
+
+        if (game->getTableBalance() <= 0.0)
+        {
+            cout << "\nYou're out of money at the Blackjack table. Returning to main menu...\n";
+            break;
+        }
 
         double bet = 0.0;
         cout << "Enter bet amount: $";
@@ -397,12 +423,30 @@ void SessionManager::runTerminalBlackjack()
 
         while (!isBlackjackRoundOver())
         {
-            const BlackjackGame* game = getBlackjackGame();
+            game = getBlackjackGame();
 
             cout << "\nYour Hand: " << game->getPlayerHand().toString()
                  << " (" << game->getPlayerValue() << ")\n";
 
-            cout << "Dealer Hand: " << game->getDealerHand().toString() << "\n";
+            cout << "Dealer Hand: ";
+            if (game->isDealerHoleCardRevealed())
+            {
+                cout << game->getDealerHand().toString()
+                    << " (" << game->getDealerValue() << ")\n";
+            }
+            else
+            {
+                vector<Card> dealerCards = game->getDealerHand().getCards();
+
+                if (!dealerCards.empty())
+                {
+                    cout << dealerCards[0].toString() << " ??\n";
+                }
+                else
+                {
+                    cout << "\n";
+                }
+            }
 
             cout << "\nChoose action:\n";
             cout << "1. Hit\n";
@@ -456,10 +500,12 @@ void SessionManager::runTerminalBlackjack()
             }
         }
 
-        cout << "\n" << getBlackjackGame()->getRoundResultText() << "\n";
-        cout << "Updated Balance: $" << bankroll.getBalance() << "\n";
+        game = getBlackjackGame();
 
-        if (bankroll.isBroke())
+        cout << "\n" << game->getRoundResultText() << "\n";
+        cout << "Updated Table Balance: $" << game->getTableBalance() << "\n";
+
+        if (game->getTableBalance() <= 0.0)
         {
             cout << "\nYou're out of money! Returning to main menu...\n";
             break;
@@ -499,22 +545,14 @@ void SessionManager::runTerminalSlotsPlaceholder()
     returnToMainMenu();
 }
 
-void SessionManager::syncBankrollFromBlackjack()
+void SessionManager::cashOutBlackjackToSession()
 {
     if (!blackjackGame)
     {
         return;
     }
 
-    const double sessionBalance = bankroll.getBalance();
-    const double blackjackBalance = blackjackGame->getBankroll();
-
-    if (blackjackBalance > sessionBalance)
-    {
-        bankroll.deposit(blackjackBalance - sessionBalance);
-    }
-    else if (blackjackBalance < sessionBalance)
-    {
-        bankroll.withdraw(sessionBalance - blackjackBalance);
-    }
+    double newBalance = blackjackGame->cashOut();
+    double delta = newBalance - bankroll.getBalance();
+    bankroll.applyNetChange(delta);
 }

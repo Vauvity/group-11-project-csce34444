@@ -82,7 +82,7 @@ private:
     void runTerminalRoulettePlaceholder();
     void runTerminalSlotsPlaceholder();
 
-    void syncBankrollFromBlackjack();
+    void cashOutBlackjackToSession();
 };
 
 #endif

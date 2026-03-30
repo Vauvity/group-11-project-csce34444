@@ -63,10 +63,10 @@ int main()
 
     bool keepPlaying = true;
 
-    while (keepPlaying && game.getBankroll() > 0.0)
+    while (keepPlaying && game.getTableBalance() > 0.0)
     {
         cout << endl;
-        cout << "Current bankroll: $" << game.getBankroll() << endl;
+        cout << "Current table balance: $" << game.getTableBalance() << endl;
         cout << "Cards remaining in shoe: " << game.getCardsRemaining() << endl;
 
         double betAmount = promptBetAmount(game);
@@ -83,7 +83,7 @@ int main()
         cout << "----------------------------------------" << endl;
 
         cout << "Initial Bet: $" << game.getInitialBet() << endl;
-        cout << "Bankroll after initial bet deduction: $" << game.getBankroll() << endl;
+        cout << "Table balance after initial bet deduction: $" << game.getTableBalance() << endl;
 
         if (game.wasShoeReshuffledBeforeCurrentRound())
         {
@@ -155,10 +155,10 @@ int main()
             cout << "The shoe will be reshuffled before the next round." << endl;
         }
 
-        if (game.getBankroll() <= 0.0)
+        if (game.getTableBalance() <= 0.0)
         {
             cout << endl;
-            cout << "You are out of money. Session over." << endl;
+            cout << "You are out of table funds. Session over." << endl;
             break;
         }
 
@@ -218,9 +218,9 @@ double promptBetAmount(const BlackjackGame& game)
         {
             cout << "Bet must be greater than 0." << endl;
         }
-        else if (betAmount > game.getBankroll())
+        else if (betAmount > game.getTableBalance())
         {
-            cout << "You cannot bet more than your current bankroll." << endl;
+            cout << "You cannot bet more than your current table balance." << endl;
         }
         else
         {
@@ -291,7 +291,7 @@ string promptPlayerAction(const BlackjackGame& game)
                 }
 
                 cout << "Double down is not available right now." << endl;
-                cout << "You must have enough bankroll to match that hand's bet, and the hand must still be on its opening decision window." << endl;
+                cout << "You must have enough table balance to match that hand's bet, and the hand must still be on its opening decision window." << endl;
                 continue;
             }
 
@@ -303,7 +303,7 @@ string promptPlayerAction(const BlackjackGame& game)
                 }
 
                 cout << "Split is not available right now." << endl;
-                cout << "You need a splittable 2-card hand and enough bankroll to fund the additional hand." << endl;
+                cout << "You need a splittable 2-card hand and enough table balance to fund the additional hand." << endl;
                 continue;
             }
 
@@ -392,7 +392,7 @@ void showSessionInfo(const BlackjackGame& game)
 
     cout << endl;
     cout << "========== SESSION INFO ==========" << endl;
-    cout << "Current Bankroll: $" << fixed << setprecision(2) << game.getBankroll() << endl;
+    cout << "Current Table Balance: $" << fixed << setprecision(2) << game.getTableBalance() << endl;
     cout << "Strategy Accuracy: " << fixed << setprecision(2)
          << accuracyStats.getAccuracyPercent() << "%" << endl;
     cout << "Optimal Actions: " << accuracyStats.optimalActions << endl;
@@ -412,21 +412,21 @@ void showFinalSessionSummary(const BlackjackGame& game, double startingBankroll)
     BlackjackAccuracyStats accuracyStats = game.getSessionAccuracyStats();
     BlackjackLuckStats luckStats = game.getSessionLuckStats();
 
-    double finalBankroll = game.getBankroll();
-    double netChange = finalBankroll - startingBankroll;
+    double finalTableBalance = game.getTableBalance();
+    double netChange = finalTableBalance - startingBankroll;
 
     cout << endl;
     cout << "========== SESSION SUMMARY ==========" << endl;
-    cout << "Starting Bankroll: $" << fixed << setprecision(2) << startingBankroll << endl;
-    cout << "Final Bankroll:    $" << fixed << setprecision(2) << finalBankroll << endl;
+    cout << "Starting Table Balance: $" << fixed << setprecision(2) << startingBankroll << endl;
+    cout << "Final Table Balance:    $" << fixed << setprecision(2) << finalTableBalance << endl;
 
     if (netChange >= 0.0)
     {
-        cout << "Net Change:        +$" << fixed << setprecision(2) << netChange << endl;
+        cout << "Net Change:             +$" << fixed << setprecision(2) << netChange << endl;
     }
     else
     {
-        cout << "Net Change:        -$" << fixed << setprecision(2) << (-netChange) << endl;
+        cout << "Net Change:             -$" << fixed << setprecision(2) << (-netChange) << endl;
     }
 
     cout << endl;
