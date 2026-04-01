@@ -133,7 +133,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BlackjackGame.cpp" />
+    <ClCompile Include="BlackjackStrategy.cpp" />
+    <ClCompile Include="BlackjackUI.cpp" />
+    <ClCompile Include="Card.cpp" />
+    <ClCompile Include="GameSelect.cpp" />
+    <ClCompile Include="Hand.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="Shoe.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BlackjackGame.h" />
+    <ClInclude Include="BlackjackStrategy.h" />
+    <ClInclude Include="BlackjackTypes.h" />
+    <ClInclude Include="BlackjackUI.h" />
+    <ClInclude Include="Card.h" />
+    <ClInclude Include="GameSelect.h" />
+    <ClInclude Include="Hand.h" />
+    <ClInclude Include="MainMenu.h" />
+    <ClInclude Include="Shoe.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

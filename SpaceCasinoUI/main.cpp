@@ -1,53 +1,41 @@
+/*
+    Author:     Ramon Lopez | rjl0157 | ramonlopez2@my.unt.edu
+    Team:       Group 11 - Team Galactic - Space Casino
+    Course:     CSCE 3444.400 Software Engineering
+    Instructor: Bahareh M. Dorri
+*/
+
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <iostream>
+#include "MainMenu.h"
+#include "GameSelect.h"
+#include "BlackjackUI.h"
+
+enum class AppState
+{
+    MainMenu,
+    GameSelect,
+    Blackjack
+};
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({ 1000, 700 }), "Space Casino");
+    sf::RenderWindow window(sf::VideoMode({ 1000, 760 }), "Space Casino");
     window.setFramerateLimit(60);
 
     sf::Font font;
-    if (!font.openFromFile("font.otf"))
+    if (!font.openFromFile("ARIAL.TTF"))
     {
-        std::cout << "Font failed to load.\n";
+        std::cout << "Failed to load ARIAL.TTF\n";
         return 1;
     }
 
-    sf::Text title(font, "SPACE CASINO", 54);
-    title.setFillColor(sf::Color::White);
-    title.setPosition({ 300.f, 100.f });
+    MainMenu mainMenu(font);
+    GameSelect gameSelect(font);
+    BlackjackUI blackjackUI(font);
 
-    sf::RectangleShape startButton({ 300.f, 80.f });
-    startButton.setPosition({ 350.f, 280.f });
-    startButton.setFillColor(sf::Color(50, 50, 150));
-
-    sf::Text startText(font, "START GAME", 28);
-    startText.setFillColor(sf::Color::White);
-    startText.setPosition({ 410.f, 305.f });
-
-    sf::RectangleShape settingsButton({ 300.f, 80.f });
-    settingsButton.setPosition({ 350.f, 390.f });
-    settingsButton.setFillColor(sf::Color(50, 50, 150));
-
-    sf::Text settingsText(font, "SETTINGS", 28);
-    settingsText.setFillColor(sf::Color::White);
-    settingsText.setPosition({ 435.f, 415.f });
-
-    sf::RectangleShape exitButton({ 300.f, 80.f });
-    exitButton.setPosition({ 350.f, 500.f });
-    exitButton.setFillColor(sf::Color(50, 50, 150));
-
-    sf::Text exitText(font, "EXIT", 28);
-    exitText.setFillColor(sf::Color::White);
-    exitText.setPosition({ 470.f, 525.f });
-
-    bool showStartMessage = false;
-    bool showSettingsMessage = false;
-
-    sf::Text messageText(font, "Placeholder only for Sprint 1 demo", 24);
-    messageText.setFillColor(sf::Color::Yellow);
-    messageText.setPosition({ 285.f, 620.f });
+    AppState currentState = AppState::MainMenu;
 
     while (window.isOpen())
     {
@@ -57,77 +45,71 @@ int main()
             {
                 window.close();
             }
-
-            if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
+            else if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
             {
                 if (mousePressed->button == sf::Mouse::Button::Left)
                 {
-                    sf::Vector2f mousePos(
-                        static_cast<float>(mousePressed->position.x),
-                        static_cast<float>(mousePressed->position.y)
+                    sf::Vector2f mousePos = window.mapPixelToCoords(
+                        { mousePressed->position.x, mousePressed->position.y }
                     );
 
-                    if (startButton.getGlobalBounds().contains(mousePos))
+                    if (currentState == AppState::MainMenu)
                     {
-                        showStartMessage = true;
-                        showSettingsMessage = false;
+                        bool startGame = false;
+                        bool exitGame = false;
+                        mainMenu.handleMouseClick(mousePos, startGame, exitGame);
+
+                        if (startGame)
+                        {
+                            currentState = AppState::GameSelect;
+                        }
+                        else if (exitGame)
+                        {
+                            window.close();
+                        }
                     }
-                    else if (settingsButton.getGlobalBounds().contains(mousePos))
+                    else if (currentState == AppState::GameSelect)
                     {
-                        showSettingsMessage = true;
-                        showStartMessage = false;
+                        bool openBlackjack = false;
+                        bool backToMain = false;
+                        gameSelect.handleMouseClick(mousePos, openBlackjack, backToMain);
+
+                        if (openBlackjack)
+                        {
+                            currentState = AppState::Blackjack;
+                        }
+                        else if (backToMain)
+                        {
+                            currentState = AppState::MainMenu;
+                        }
                     }
-                    else if (exitButton.getGlobalBounds().contains(mousePos))
+                    else if (currentState == AppState::Blackjack)
                     {
-                        window.close();
+                        bool backToMenu = false;
+                        blackjackUI.handleScreenClick(mousePos, backToMenu);
+
+                        if (backToMenu)
+                        {
+                            currentState = AppState::GameSelect;
+                        }
                     }
                 }
             }
         }
 
-        sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
-        sf::Vector2f mousePos(
-            static_cast<float>(mousePixelPos.x),
-            static_cast<float>(mousePixelPos.y)
-        );
+        window.clear();
 
-        if (startButton.getGlobalBounds().contains(mousePos))
-            startButton.setFillColor(sf::Color(80, 80, 200));
-        else
-            startButton.setFillColor(sf::Color(50, 50, 150));
-
-        if (settingsButton.getGlobalBounds().contains(mousePos))
-            settingsButton.setFillColor(sf::Color(80, 80, 200));
-        else
-            settingsButton.setFillColor(sf::Color(50, 50, 150));
-
-        if (exitButton.getGlobalBounds().contains(mousePos))
-            exitButton.setFillColor(sf::Color(80, 80, 200));
-        else
-            exitButton.setFillColor(sf::Color(50, 50, 150));
-
-        window.clear(sf::Color(10, 10, 30));
-
-        window.draw(title);
-
-        window.draw(startButton);
-        window.draw(startText);
-
-        window.draw(settingsButton);
-        window.draw(settingsText);
-
-        window.draw(exitButton);
-        window.draw(exitText);
-
-        if (showStartMessage)
+        if (currentState == AppState::MainMenu)
         {
-            messageText.setString("Start Game clicked  placeholder for Sprint 1");
-            window.draw(messageText);
+            mainMenu.draw(window);
         }
-        else if (showSettingsMessage)
+        else if (currentState == AppState::GameSelect)
         {
-            messageText.setString("Settings clicked  placeholder for Sprint 1");
-            window.draw(messageText);
+            gameSelect.draw(window);
+        }
+        else if (currentState == AppState::Blackjack)
+        {
+            blackjackUI.draw(window);
         }
 
         window.display();
