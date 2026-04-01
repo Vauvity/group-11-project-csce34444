@@ -26,14 +26,23 @@ private:
     sf::Text bankrollHintText;
     sf::Text errorText;
 
-    sf::RectangleShape bankrollBox;
+    sf::Text startText;
+    sf::Text exitText;
+    sf::Text confirmText;
+    sf::Text cancelText;
+
     sf::RectangleShape startButton;
     sf::RectangleShape exitButton;
 
-    sf::Text startText;
-    sf::Text exitText;
+    sf::RectangleShape overlay;
+    sf::RectangleShape popupPanel;
+    sf::RectangleShape bankrollBox;
+    sf::RectangleShape confirmButton;
+    sf::RectangleShape cancelButton;
 
     std::string bankrollInput;
+    bool showingBankrollInput = false;
+    bool bankrollSetForSession = false;
 
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
     void refreshBankrollText();

@@ -57,6 +57,17 @@ int main()
                         mainMenu.handleTextEntered(textEntered->unicode);
                     }
                 }
+                else if (currentState == AppState::GameSelect)
+                {
+                    if (textEntered->unicode == 8)
+                    {
+                        gameSelect.handleBackspace();
+                    }
+                    else
+                    {
+                        gameSelect.handleTextEntered(textEntered->unicode);
+                    }
+                }
             }
             else if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
             {
@@ -80,6 +91,7 @@ int main()
                                 bankrollInitialized = true;
                             }
 
+                            gameSelect.setBankroll(sharedBankroll);
                             blackjackUI.setStartingBankroll(sharedBankroll);
                             slotsUI.setStartingBankroll(sharedBankroll);
                             currentState = AppState::GameSelect;
@@ -95,6 +107,8 @@ int main()
                         bool openSlots = false;
                         bool backToMain = false;
                         gameSelect.handleMouseClick(mousePos, openBlackjack, openSlots, backToMain);
+
+                        sharedBankroll = gameSelect.getBankroll();
 
                         if (openBlackjack)
                         {
@@ -119,6 +133,7 @@ int main()
                         if (backToMenu)
                         {
                             sharedBankroll = blackjackUI.getCurrentBankroll();
+                            gameSelect.setBankroll(sharedBankroll);
                             slotsUI.setStartingBankroll(sharedBankroll);
                             currentState = AppState::GameSelect;
                         }
@@ -131,6 +146,7 @@ int main()
                         if (backToMenu)
                         {
                             sharedBankroll = slotsUI.getCurrentBankroll();
+                            gameSelect.setBankroll(sharedBankroll);
                             blackjackUI.setStartingBankroll(sharedBankroll);
                             currentState = AppState::GameSelect;
                         }
