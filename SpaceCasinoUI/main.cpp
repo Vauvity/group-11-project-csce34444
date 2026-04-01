@@ -4,12 +4,14 @@
 #include "MainMenu.h"
 #include "GameSelect.h"
 #include "BlackjackUI.h"
+#include "SlotsUI.h"
 
 enum class AppState
 {
     MainMenu,
     GameSelect,
-    Blackjack
+    Blackjack,
+    Slots
 };
 
 int main()
@@ -27,6 +29,10 @@ int main()
     MainMenu mainMenu(font);
     GameSelect gameSelect(font);
     BlackjackUI blackjackUI(font);
+    SlotsUI slotsUI(font);
+
+    double sharedBankroll = 1000.0;
+    bool bankrollInitialized = false;
 
     AppState currentState = AppState::MainMenu;
 
@@ -68,7 +74,14 @@ int main()
 
                         if (startGame)
                         {
-                            blackjackUI.setStartingBankroll(mainMenu.getEnteredBankroll());
+                            if (!bankrollInitialized)
+                            {
+                                sharedBankroll = mainMenu.getEnteredBankroll();
+                                bankrollInitialized = true;
+                            }
+
+                            blackjackUI.setStartingBankroll(sharedBankroll);
+                            slotsUI.setStartingBankroll(sharedBankroll);
                             currentState = AppState::GameSelect;
                         }
                         else if (exitGame)
@@ -79,12 +92,19 @@ int main()
                     else if (currentState == AppState::GameSelect)
                     {
                         bool openBlackjack = false;
+                        bool openSlots = false;
                         bool backToMain = false;
-                        gameSelect.handleMouseClick(mousePos, openBlackjack, backToMain);
+                        gameSelect.handleMouseClick(mousePos, openBlackjack, openSlots, backToMain);
 
                         if (openBlackjack)
                         {
+                            blackjackUI.setStartingBankroll(sharedBankroll);
                             currentState = AppState::Blackjack;
+                        }
+                        else if (openSlots)
+                        {
+                            slotsUI.setStartingBankroll(sharedBankroll);
+                            currentState = AppState::Slots;
                         }
                         else if (backToMain)
                         {
@@ -98,6 +118,20 @@ int main()
 
                         if (backToMenu)
                         {
+                            sharedBankroll = blackjackUI.getCurrentBankroll();
+                            slotsUI.setStartingBankroll(sharedBankroll);
+                            currentState = AppState::GameSelect;
+                        }
+                    }
+                    else if (currentState == AppState::Slots)
+                    {
+                        bool backToMenu = false;
+                        slotsUI.handleScreenClick(mousePos, backToMenu);
+
+                        if (backToMenu)
+                        {
+                            sharedBankroll = slotsUI.getCurrentBankroll();
+                            blackjackUI.setStartingBankroll(sharedBankroll);
                             currentState = AppState::GameSelect;
                         }
                     }
@@ -118,6 +152,10 @@ int main()
         else if (currentState == AppState::Blackjack)
         {
             blackjackUI.draw(window);
+        }
+        else if (currentState == AppState::Slots)
+        {
+            slotsUI.draw(window);
         }
 
         window.display();

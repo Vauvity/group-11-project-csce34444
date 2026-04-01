@@ -12,6 +12,8 @@ public:
     explicit BlackjackUI(sf::Font& sharedFont);
 
     void setStartingBankroll(double bankroll);
+    double getCurrentBankroll() const;
+
     void handleScreenClick(sf::Vector2f mousePos, bool& backToMenu);
     void draw(sf::RenderWindow& window);
 
@@ -42,7 +44,6 @@ private:
     float currentBet;
     bool roundStarted;
 
-private:
     void setupButtons();
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
 

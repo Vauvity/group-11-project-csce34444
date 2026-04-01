@@ -52,7 +52,10 @@ void BlackjackUI::setStartingBankroll(double bankroll)
     roundStarted = false;
     updateText();
 }
-
+double BlackjackUI::getCurrentBankroll() const
+{
+    return game.getBankroll();
+}
 void BlackjackUI::setupButtons()
 {
     hitButton.setSize({ 150.f, 50.f });

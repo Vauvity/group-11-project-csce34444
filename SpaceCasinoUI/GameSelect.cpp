@@ -58,8 +58,12 @@ void GameSelect::centerTextInButton(sf::Text& text, const sf::RectangleShape& bu
         });
 }
 
-void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& backToMain)
+void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& openSlots, bool& backToMain)
 {
+    openBlackjack = false;
+    openSlots = false;
+    backToMain = false;
+
     if (blackjackButton.getGlobalBounds().contains(mousePos))
     {
         openBlackjack = true;
@@ -71,7 +75,8 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
     }
     else if (slotsButton.getGlobalBounds().contains(mousePos))
     {
-        messageText.setString("Slots does not work right now.");
+        openSlots = true;
+        messageText.setString("");
     }
     else if (backButton.getGlobalBounds().contains(mousePos))
     {

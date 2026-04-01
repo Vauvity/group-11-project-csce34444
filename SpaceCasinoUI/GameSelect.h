@@ -7,7 +7,7 @@ class GameSelect
 public:
     explicit GameSelect(sf::Font& sharedFont);
 
-    void handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& backToMain);
+    void handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& openSlots, bool& backToMain);
     void draw(sf::RenderWindow& window);
 
 private:
