@@ -2,7 +2,7 @@
 
 MainMenu::MainMenu(sf::Font& sharedFont)
     : font(sharedFont),
-    titleText(font, "SPACE CASINO", 54),
+    titleText(font, "WELCOME TO SPACE CASINO", 54),
     bankrollLabelText(font, "ENTER STARTING BANKROLL", 24),
     bankrollInputText(font, "", 28),
     bankrollHintText(font, "", 18),
@@ -14,7 +14,11 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     bankrollInput("")
 {
     titleText.setFillColor(sf::Color::White);
-    titleText.setPosition({ 298.f, 120.f });
+    sf::FloatRect bounds = titleText.getLocalBounds();
+    titleText.setPosition({
+        (1000.f - bounds.size.x) / 2.f - bounds.position.x,
+        120.f
+        });
 
     startButton.setSize({ 300.f, 80.f });
     startButton.setPosition({ 350.f, 320.f });
@@ -179,6 +183,16 @@ double MainMenu::getEnteredBankroll() const
     }
 
     return std::stod(bankrollInput);
+}
+
+void MainMenu::resetSession()
+{
+    bankrollSetForSession = false;
+    showingBankrollInput = false;
+    bankrollInput.clear();
+    bankrollHintText.setString("");
+    errorText.setString("");
+    refreshBankrollText();
 }
 
 void MainMenu::handleMouseClick(sf::Vector2f mousePos, bool& startGame, bool& exitGame)

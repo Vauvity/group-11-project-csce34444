@@ -14,6 +14,7 @@ public:
 
     bool hasValidBankroll() const;
     double getEnteredBankroll() const;
+    void resetSession();
 
     void draw(sf::RenderWindow& window);
 

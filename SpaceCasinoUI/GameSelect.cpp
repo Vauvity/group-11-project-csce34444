@@ -17,9 +17,13 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     addErrorText(font, "", 18),
     addConfirmText(font, "CONFIRM", 20),
     addCancelText(font, "CANCEL", 20),
+    gameOverTitle(font, "GAME OVER!", 34),
+    gameOverMessage(font, "You're Broke!", 24),
+    gameOverButtonText(font, "MAIN MENU", 20),
     currentBankroll(1000.0),
     addMoneyInput(""),
-    showingAddMoneyPopup(false)
+    showingAddMoneyPopup(false),
+    showingGameOverPopup(false)
 {
     titleText.setFillColor(sf::Color::White);
     titleText.setPosition({ 285.f, 85.f });
@@ -100,6 +104,25 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     centerTextInButton(addConfirmText, addConfirmButton);
     centerTextInButton(addCancelText, addCancelButton);
 
+    gameOverPanel.setSize({ 430.f, 230.f });
+    gameOverPanel.setPosition({ 285.f, 250.f });
+    gameOverPanel.setFillColor(sf::Color(30, 10, 10));
+    gameOverPanel.setOutlineThickness(3.f);
+    gameOverPanel.setOutlineColor(sf::Color(220, 70, 70));
+
+    gameOverTitle.setFillColor(sf::Color(255, 90, 90));
+    gameOverTitle.setPosition({ 380.f, 285.f });
+
+    gameOverMessage.setFillColor(sf::Color::White);
+    gameOverMessage.setPosition({ 410.f, 340.f });
+
+    gameOverButton.setSize({ 180.f, 55.f });
+    gameOverButton.setPosition({ 410.f, 395.f });
+    gameOverButton.setFillColor(sf::Color(110, 110, 110));
+
+    gameOverButtonText.setFillColor(sf::Color::White);
+    centerTextInButton(gameOverButtonText, gameOverButton);
+
     refreshBankrollDisplay();
     refreshAddMoneyDisplay();
 }
@@ -107,7 +130,19 @@ GameSelect::GameSelect(sf::Font& sharedFont)
 void GameSelect::setBankroll(double bankroll)
 {
     currentBankroll = bankroll;
+
+    if (currentBankroll <= 0)
+    {
+        currentBankroll = 0;
+        showingGameOverPopup = true;
+        showingAddMoneyPopup = false;
+        addMoneyInput.clear();
+        addHintText.setString("");
+        addErrorText.setString("");
+    }
+
     refreshBankrollDisplay();
+    refreshAddMoneyDisplay();
 }
 
 double GameSelect::getBankroll() const
@@ -169,7 +204,7 @@ bool GameSelect::hasValidAddAmount() const
 
 void GameSelect::handleTextEntered(unsigned int unicode)
 {
-    if (!showingAddMoneyPopup)
+    if (!showingAddMoneyPopup || showingGameOverPopup)
     {
         return;
     }
@@ -193,7 +228,7 @@ void GameSelect::handleTextEntered(unsigned int unicode)
 
 void GameSelect::handleBackspace()
 {
-    if (!showingAddMoneyPopup)
+    if (!showingAddMoneyPopup || showingGameOverPopup)
     {
         return;
     }
@@ -224,6 +259,16 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
     openBlackjack = false;
     openSlots = false;
     backToMain = false;
+
+    if (showingGameOverPopup)
+    {
+        if (gameOverButton.getGlobalBounds().contains(mousePos))
+        {
+            showingGameOverPopup = false;
+            backToMain = true;
+        }
+        return;
+    }
 
     if (showingAddMoneyPopup)
     {
@@ -339,5 +384,15 @@ void GameSelect::draw(sf::RenderWindow& window)
         window.draw(addCancelButton);
         window.draw(addConfirmText);
         window.draw(addCancelText);
+    }
+
+    if (showingGameOverPopup)
+    {
+        window.draw(overlay);
+        window.draw(gameOverPanel);
+        window.draw(gameOverTitle);
+        window.draw(gameOverMessage);
+        window.draw(gameOverButton);
+        window.draw(gameOverButtonText);
     }
 }

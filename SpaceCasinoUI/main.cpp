@@ -122,6 +122,12 @@ int main()
                         }
                         else if (backToMain)
                         {
+                            if (sharedBankroll <= 0.0)
+                            {
+                                bankrollInitialized = false;
+                                mainMenu.resetSession();
+                            }
+
                             currentState = AppState::MainMenu;
                         }
                     }

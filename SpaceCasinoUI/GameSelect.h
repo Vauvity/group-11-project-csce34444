@@ -48,6 +48,13 @@ private:
     sf::Text addConfirmText;
     sf::Text addCancelText;
 
+    bool showingGameOverPopup;
+    sf::RectangleShape gameOverPanel;
+    sf::Text gameOverTitle;
+    sf::Text gameOverMessage;
+    sf::RectangleShape gameOverButton;
+    sf::Text gameOverButtonText;
+
     double currentBankroll;
     std::string addMoneyInput;
     bool showingAddMoneyPopup;
