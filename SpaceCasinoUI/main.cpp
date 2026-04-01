@@ -1,10 +1,3 @@
-/*
-    Author:     Ramon Lopez | rjl0157 | ramonlopez2@my.unt.edu
-    Team:       Group 11 - Team Galactic - Space Casino
-    Course:     CSCE 3444.400 Software Engineering
-    Instructor: Bahareh M. Dorri
-*/
-
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <iostream>
@@ -45,6 +38,20 @@ int main()
             {
                 window.close();
             }
+            else if (const auto* textEntered = event->getIf<sf::Event::TextEntered>())
+            {
+                if (currentState == AppState::MainMenu)
+                {
+                    if (textEntered->unicode == 8)
+                    {
+                        mainMenu.handleBackspace();
+                    }
+                    else
+                    {
+                        mainMenu.handleTextEntered(textEntered->unicode);
+                    }
+                }
+            }
             else if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
             {
                 if (mousePressed->button == sf::Mouse::Button::Left)
@@ -61,6 +68,7 @@ int main()
 
                         if (startGame)
                         {
+                            blackjackUI.setStartingBankroll(mainMenu.getEnteredBankroll());
                             currentState = AppState::GameSelect;
                         }
                         else if (exitGame)

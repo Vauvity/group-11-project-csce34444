@@ -11,6 +11,7 @@ class BlackjackUI
 public:
     explicit BlackjackUI(sf::Font& sharedFont);
 
+    void setStartingBankroll(double bankroll);
     void handleScreenClick(sf::Vector2f mousePos, bool& backToMenu);
     void draw(sf::RenderWindow& window);
 
@@ -44,12 +45,13 @@ private:
 private:
     void setupButtons();
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
-    void updateText();
-    void handleGameClick(sf::Vector2f mousePos);
 
     std::string getDealerDisplay() const;
     std::string getPlayerDisplay() const;
     std::string getStatusMessage() const;
-    std::string getPostRoundStats() const;
     std::string shortenResultText(const std::string& text) const;
+    std::string getPostRoundStats() const;
+
+    void updateText();
+    void handleGameClick(sf::Vector2f mousePos);
 };

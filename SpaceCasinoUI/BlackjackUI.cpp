@@ -45,6 +45,14 @@ BlackjackUI::BlackjackUI(sf::Font& sharedFont)
     updateText();
 }
 
+void BlackjackUI::setStartingBankroll(double bankroll)
+{
+    game = BlackjackGame(bankroll);
+    currentBet = 50.0f;
+    roundStarted = false;
+    updateText();
+}
+
 void BlackjackUI::setupButtons()
 {
     hitButton.setSize({ 150.f, 50.f });
@@ -196,8 +204,15 @@ std::string BlackjackUI::getPostRoundStats() const
         return "";
     }
 
-    return "Bankroll: $" + std::to_string(static_cast<int>(game.getBankroll())) +
-        "\nBet: $" + std::to_string(static_cast<int>(currentBet));
+    BlackjackRoundSummary summary = game.getRoundSummary();
+
+    std::string text;
+    text += "Starting Bankroll: $" + std::to_string(static_cast<int>(summary.startingBankroll)) + "\n";
+    text += "Ending Bankroll: $" + std::to_string(static_cast<int>(summary.endingBankroll)) + "\n";
+    text += "Net Change: $" + std::to_string(static_cast<int>(summary.netChange)) + "\n";
+    text += "Result: " + shortenResultText(game.getRoundResultText());
+
+    return text;
 }
 
 std::string BlackjackUI::getStatusMessage() const
@@ -328,6 +343,8 @@ void BlackjackUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
 
     if (backButton.getGlobalBounds().contains(mousePos))
     {
+        roundStarted = false;
+        updateText();
         backToMenu = true;
         return;
     }
