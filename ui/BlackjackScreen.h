@@ -40,7 +40,7 @@ private:
 
     double pendingBet;
     std::string roundText;
-
+ 
     Button* add5Button;
     Button* add25Button;
     Button* add100Button;
@@ -51,8 +51,11 @@ private:
     Button* standButton;
     Button* doubleButton;
     Button* splitButton;
-    Button* nextHandButton;
 
+    Button* hintButton;
+    std::string hintText;
+
+    Button* nextHandButton;
     Button* backToHubButton;
 };
 

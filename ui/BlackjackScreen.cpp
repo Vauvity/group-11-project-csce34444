@@ -19,6 +19,7 @@ BlackjackScreen::BlackjackScreen(sf::Font& appFont, SessionManager& sessionManag
       standButton(nullptr),
       doubleButton(nullptr),
       splitButton(nullptr),
+      hintButton(nullptr),
       nextHandButton(nullptr),
       backToHubButton(nullptr)
 {
@@ -36,6 +37,7 @@ BlackjackScreen::~BlackjackScreen()
     delete standButton;
     delete doubleButton;
     delete splitButton;
+    delete hintButton;
     delete nextHandButton;
     delete backToHubButton;
 }
@@ -53,6 +55,7 @@ void BlackjackScreen::setupButtons()
     standButton = new Button({130.f, 52.f}, {760.f, 420.f}, "Stand", font);
     doubleButton = new Button({130.f, 52.f}, {760.f, 490.f}, "Double", font);
     splitButton = new Button({130.f, 52.f}, {760.f, 560.f}, "Split", font);
+    hintButton = new Button({130.f, 52.f}, {760.f, 630.f}, "Hint", font);
 
     nextHandButton = new Button({180.f, 50.f}, {730.f, 560.f}, "Next Hand", font);
     backToHubButton = new Button({170.f, 50.f}, {20.f, 620.f}, "Back to Hub", font);
@@ -62,6 +65,7 @@ void BlackjackScreen::resetForTableEntry()
 {
     pendingBet = 0.0;
     roundText.clear();
+    hintText.clear();
 }
 
 void BlackjackScreen::update(const sf::RenderWindow& window)
@@ -79,6 +83,7 @@ void BlackjackScreen::update(const sf::RenderWindow& window)
         standButton->update(window);
         doubleButton->update(window);
         splitButton->update(window);
+        hintButton->update(window);
     }
     else if (game && game->isRoundOver())
     {
@@ -132,6 +137,18 @@ BlackjackScreen::Action BlackjackScreen::handleEvent(const sf::RenderWindow& win
             session.blackjackSplit();
             updateRoundTextFromGame();
         }
+        
+        if (hintButton->isClicked(window, event))
+        {
+            if (session.blackjackRequestHint())
+            {
+                hintText = session.getBlackjackGame()->getHintText();
+            }
+            else
+            {
+                hintText = "Hint unavailable.";
+            }
+        }
     }
     // Handle post-round actions
     else if (game && game->isRoundOver())
@@ -141,6 +158,7 @@ BlackjackScreen::Action BlackjackScreen::handleEvent(const sf::RenderWindow& win
             if (session.prepareNextBlackjackRound())
             {
                 resetForTableEntry();
+                hintText.clear();
             }
         }
     }
@@ -210,6 +228,8 @@ void BlackjackScreen::render(sf::RenderWindow& window)
         {
             splitButton->render(window);
         }
+        
+        hintButton->render(window);
     }
     else if (game && game->isRoundOver())
     {
@@ -240,6 +260,12 @@ void BlackjackScreen::render(sf::RenderWindow& window)
         y += 35.f;
 
         renderLeftText(window, roundText, 40.f, y, 18);
+    }
+
+    if (!hintText.empty() && roundActive)
+    {
+        renderLeftText(window, "Hint", 40.f, 500.f, 20);
+        renderLeftText(window, hintText, 40.f, 530.f, 18);
     }
 }
 
