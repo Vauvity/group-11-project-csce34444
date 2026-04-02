@@ -155,35 +155,37 @@ ChartAction BlackjackStrategy::getChartAction(const Hand& playerHand,
 {
     int dealerColumn = getDealerColumn(dealerUpCard);
 
+    // global clamp
+    if (dealerColumn < 2) dealerColumn = 2;
+    if (dealerColumn > 11) dealerColumn = 11;
+
+    // pair logic
     if (canSplit && isPairHand(playerHand))
     {
         int pairValue = getPairValue(playerHand);
 
-        // Safety clamp (prevents crash)
         if (pairValue < 2) pairValue = 2;
         if (pairValue > 11) pairValue = 11;
-
-        if (dealerColumn < 2) dealerColumn = 2;
-        if (dealerColumn > 11) dealerColumn = 11;
 
         return pairTable[pairValue][dealerColumn];
     }
 
+    // soft hand
     if (isSoftHand(playerHand))
     {
         int softTotal = getSoftTotal(playerHand);
+
+        if (softTotal < 13) softTotal = 13;
+        if (softTotal > 21) softTotal = 21;
+
         return softTable[softTotal][dealerColumn];
     }
 
+    // hard hand
     int hardTotal = playerHand.getValue();
-    if (hardTotal < 5)
-    {
-        hardTotal = 5;
-    }
-    else if (hardTotal > 21)
-    {
-        hardTotal = 21;
-    }
+
+    if (hardTotal < 5) hardTotal = 5;
+    if (hardTotal > 21) hardTotal = 21;
 
     return hardTable[hardTotal][dealerColumn];
 }
