@@ -1,10 +1,10 @@
-#include <SFML/Graphics.hpp>
 #include <optional>
 #include <iostream>
-#include "MainMenu.h"
-#include "GameSelect.h"
-#include "BlackjackUI.h"
-#include "SlotsUI.h"
+#include <SFML/Graphics.hpp>
+#include "ui/screens/welcome/MainMenu.h"
+#include "ui/screens/hub/GameSelect.h"
+#include "ui/screens/blackjack/BlackjackUI.h"
+#include "ui/screens/slots/SlotsUI.h"
 
 enum class AppState
 {

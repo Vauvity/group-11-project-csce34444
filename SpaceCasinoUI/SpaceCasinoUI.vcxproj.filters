@@ -1,93 +1,114 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="core">
+      <UniqueIdentifier>{e58ff3cb-edce-4b13-bf29-5a040234b04e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="ui">
+      <UniqueIdentifier>{c2d6ba06-da58-4040-9598-0c21ddbf8ac4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\session\Bankroll.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\session\SessionManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\session\SessionStats.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\blackjack\BlackjackGame.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\blackjack\BlackjackStats.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\blackjack\BlackjackStrategy.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\blackjack\Card.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\blackjack\Hand.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\blackjack\Shoe.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\slots\SlotsGame.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\screens\welcome\MainMenu.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\screens\hub\GameSelect.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\screens\blackjack\BlackjackUI.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\screens\slots\SlotsUI.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BlackjackGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BlackjackStrategy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Card.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Hand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Shoe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BlackjackUI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainMenu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameSelect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SlotsGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SlotsUI.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BlackjackGame.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\session\Bankroll.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="BlackjackStrategy.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\session\SessionManager.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="BlackjackTypes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\session\SessionStats.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="Card.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\blackjack\BlackjackGame.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="Hand.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\blackjack\BlackjackStats.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="Shoe.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\blackjack\BlackjackStrategy.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="BlackjackUI.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\blackjack\BlackjackTypes.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="MainMenu.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\blackjack\Card.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="GameSelect.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\blackjack\Hand.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="SlotsGame.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\blackjack\Shoe.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="SlotTypes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\slots\SlotsGame.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="SlotWindow.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\slots\SlotTypes.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="SlotsUI.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="core\slots\SlotWindow.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\app\AppState.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\screens\welcome\MainMenu.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\screens\hub\GameSelect.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\screens\blackjack\BlackjackUI.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\screens\slots\SlotsUI.h">
+      <Filter>ui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
