@@ -24,15 +24,24 @@ using std::string;
 
 class Bankroll
 {
+public:
+    enum class ErrorCode
+    {
+        None,
+        InvalidAmount,
+        InsufficientFunds,
+        NegativeBalance
+    };
+
 private:
     double balance;
     double startingBalance;
     double peakBalance;
     double lowestBalance;
+    ErrorCode lastError;
 
     void updateTracking();
 
-public:
     explicit Bankroll(double startingAmount);
 
     //  Core transactions 
@@ -47,6 +56,10 @@ public:
     // Call after each round to confirm balance integrity.
     // Returns true if balance >= 0 and is internally consistent.
     bool validateBalance() const;
+
+    // Last operation status for UI layer to display.
+    ErrorCode getLastError() const;
+    string getLastErrorMessage() const;
 
     //  Getters 
     double getBalance()         const;

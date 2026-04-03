@@ -51,7 +51,7 @@ int main()
     {
         if (session.getCurrentBalance() <= 0.0)
         {
-            cout << "\nYou're out of money! Session over.\n";
+            cout << "\nYou're out of money! Game over.\n";
             break;
         }
 

@@ -23,7 +23,8 @@ Bankroll::Bankroll(double startingAmount)
     : balance(startingAmount),
       startingBalance(startingAmount),
       peakBalance(startingAmount),
-      lowestBalance(startingAmount)
+      lowestBalance(startingAmount),
+      lastError(ErrorCode::None)
 {
     if (startingAmount <= 0.0)
     {
@@ -47,18 +48,19 @@ bool Bankroll::withdraw(double amount)
 {
     if (amount <= 0.0)
     {
-        cout << "[Bankroll] Withdrawal rejected: amount must be greater than 0.\n";
+        lastError = ErrorCode::InvalidAmount;
         return false;
     }
 
     if (amount > balance)
     {
-        cout << "[Bankroll] Withdrawal rejected: insufficient funds.\n";
+        lastError = ErrorCode::InsufficientFunds;
         return false;
     }
 
     balance -= amount;
     updateTracking();
+    lastError = ErrorCode::None;
     return true;
 }
 
@@ -69,11 +71,13 @@ void Bankroll::deposit(double amount)
 {
     if (amount <= 0.0)
     {
+        lastError = ErrorCode::InvalidAmount;
         return;   // no-op for zero payouts (losses); games handle messaging
     }
 
     balance += amount;
     updateTracking();
+    lastError = ErrorCode::None;
 }
 
 
@@ -83,15 +87,33 @@ bool Bankroll::validateBalance() const
 {
     if (balance < 0.0)
     {
-        cout << "[Bankroll] WARNING: balance is negative ($"
-             << fixed << setprecision(2) << balance << "). "
-             << "Possible accounting error in game logic.\n";
         return false;
     }
 
     return true;
 }
 
+Bankroll::ErrorCode Bankroll::getLastError() const
+{
+    return lastError;
+}
+
+string Bankroll::getLastErrorMessage() const
+{
+    switch (lastError)
+    {
+        case ErrorCode::None:
+            return "";
+        case ErrorCode::InvalidAmount:
+            return "Amount must be greater than 0.";
+        case ErrorCode::InsufficientFunds:
+            return "Insufficient funds.";
+        case ErrorCode::NegativeBalance:
+            return "Balance is negative. Possible accounting error.";
+        default:
+            return "Unknown bankroll error.";
+    }
+}
 
 //  Getters
 
