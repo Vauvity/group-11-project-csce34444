@@ -2,55 +2,38 @@
 #define CASINOAPP_H
 
 #include <SFML/Graphics.hpp>
-#include <string>
+#include <memory>
 #include "AppState.h"
+#include "../screens/welcome/MainMenu.h"
+#include "../screens/hub/GameSelect.h"
 #include "../screens/blackjack/BlackjackUI.h"
-#include "../../core/session/SessionManager.h"
-
-class Button;
+#include "../screens/slots/SlotsUI.h"
 
 class CasinoApp
 {
 public:
     CasinoApp();
-    ~CasinoApp();
-
     void run();
 
 private:
     void processEvents();
-    void update();
     void render();
-    void changeState(AppState newState);
-
-    void setupButtons();
-    void renderCenteredText(const std::string& text, float y, unsigned int size = 30);
-
-    void renderWelcome();
-    void renderBankrollSetup();
-    void renderMainHub();
+    void syncGameSelectBankroll();
+    void syncBlackjackBankroll();
+    void syncSlotsBankroll();
+    void resetSessionIfNeeded();
 
     sf::RenderWindow window;
     sf::Font font;
-    SessionManager session;
+
+    std::unique_ptr<MainMenu> mainMenu;
+    std::unique_ptr<GameSelect> gameSelect;
+    std::unique_ptr<BlackjackUI> blackjackUI;
+    std::unique_ptr<SlotsUI> slotsUI;
+
     AppState currentState;
-
-    double pendingBankroll;
-
-    Button* startButton;
-    Button* exitButton;
-
-    Button* add5;
-    Button* add25;
-    Button* add100;
-    Button* add500;
-    Button* clearButton;
-    Button* confirmButton;
-
-    Button* blackjackButton;
-    Button* backButton;
-
-    BlackjackUI* blackjackUI;
+    double sharedBankroll;
+    bool bankrollInitialized;
 };
 
 #endif

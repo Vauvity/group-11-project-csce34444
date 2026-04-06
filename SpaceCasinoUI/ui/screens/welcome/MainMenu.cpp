@@ -2,7 +2,7 @@
 
 MainMenu::MainMenu(sf::Font& sharedFont)
     : font(sharedFont),
-    titleText(font, "WELCOME TO SPACE CASINO", 54),
+    titleText(font, "WELCOME TO SPACE CASINO", 46),
     bankrollLabelText(font, "ENTER STARTING BANKROLL", 24),
     bankrollInputText(font, "", 28),
     bankrollHintText(font, "", 18),
@@ -16,7 +16,7 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     titleText.setFillColor(sf::Color::White);
     sf::FloatRect bounds = titleText.getLocalBounds();
     titleText.setPosition({
-        (1000.f - bounds.size.x) / 2.f - bounds.position.x,
+        500.f - bounds.size.x / 2.f - bounds.position.x,
         120.f
         });
 
@@ -44,7 +44,11 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     popupPanel.setOutlineColor(sf::Color(90, 210, 255));
 
     bankrollLabelText.setFillColor(sf::Color(235, 220, 90));
-    bankrollLabelText.setPosition({ 340.f, 225.f });
+    sf::FloatRect labelBounds = bankrollLabelText.getLocalBounds();
+    bankrollLabelText.setPosition({
+        500.f - labelBounds.size.x / 2.f - labelBounds.position.x,
+        225.f
+        });
 
     bankrollBox.setSize({ 320.f, 58.f });
     bankrollBox.setPosition({ 340.f, 275.f });
@@ -84,7 +88,7 @@ void MainMenu::centerTextInButton(sf::Text& text, const sf::RectangleShape& butt
 
     text.setPosition({
         buttonPos.x + (buttonSize.x - textBounds.size.x) / 2.f - textBounds.position.x,
-        buttonPos.y + (buttonSize.y - textBounds.size.y) / 2.f - textBounds.position.y - 2.f
+        buttonPos.y + (buttonSize.y - textBounds.size.y) / 2.f - textBounds.position.y - 3.f
         });
 }
 

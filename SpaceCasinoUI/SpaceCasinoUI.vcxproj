@@ -30,6 +30,7 @@
     <ClCompile Include="core\session\SessionStats.cpp" />
     <ClCompile Include="core\slots\SlotsGame.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ui\app\CasinoApp.cpp" />
     <ClCompile Include="ui\screens\blackjack\BlackjackUI.cpp" />
     <ClCompile Include="ui\screens\hub\GameSelect.cpp" />
     <ClCompile Include="ui\screens\slots\SlotsUI.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="core\slots\SlotTypes.h" />
     <ClInclude Include="core\slots\SlotWindow.h" />
     <ClInclude Include="ui\app\AppState.h" />
+    <ClInclude Include="ui\app\CasinoApp.h" />
     <ClInclude Include="ui\screens\blackjack\BlackjackUI.h" />
     <ClInclude Include="ui\screens\hub\GameSelect.h" />
     <ClInclude Include="ui\screens\slots\SlotsUI.h" />

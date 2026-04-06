@@ -54,6 +54,9 @@
     <ClCompile Include="main.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="ui\app\CasinoApp.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\session\Bankroll.h">
@@ -108,6 +111,9 @@
       <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="ui\screens\slots\SlotsUI.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\app\CasinoApp.h">
       <Filter>ui</Filter>
     </ClInclude>
   </ItemGroup>

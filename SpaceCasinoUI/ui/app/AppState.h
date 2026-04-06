@@ -3,15 +3,10 @@
 
 enum class AppState
 {
-    Welcome,
-    BankrollSetup,
-    MainHub,
+    MainMenu,
+    GameSelect,
     Blackjack,
-    Roulette,
-    Slots,
-    Stats,
-    GameInfo,
-    Exit
+    Slots
 };
 
 #endif
