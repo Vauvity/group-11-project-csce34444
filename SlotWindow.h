@@ -6,10 +6,11 @@
 //
 //	Team Galactic's Space Casino casino simulator project
 //	Slots Module
-//	SlotWindow.h version 3
+//	SlotWindow.h version 4
 //		This class supports the display of the slot reels "in the slot machine window"
 //		to ensure the proper symbols and reel positions are shown.
-//	last updated: 3/30/26
+//	last updated: 4/6/26
+//		UPDATE FIX: Displays rows and columns in the correct layout
 //*/
 
 #ifndef SLOTWINDOW_H
@@ -23,7 +24,7 @@ public:
 		display[i][j] = a;
 	};
 	char getDisplay(int i, int j) {				// Returns the characters in the window.
-		return display[i][j];					//	needs to be iterated through
+		return display[j][i];					//	needs to be iterated through
 	};
 };
 

@@ -6,9 +6,11 @@
 //
 //	Team Galactic's Space Casino casino simulator project
 //	Slots Module
-//	SlotsGame.h version 3
+//	SlotsGame.h version 4
 //		Creates the SlotsGame class Slots
-//	last updated: 3/30/26
+//	last updated: 4/6/26
+//		UPDATE ADD: adds public function "SlotsSummary statSummary"
+//		(struct defined in SlotTypes.h) to pass stats from latest spin.
 //*/
 
 #ifndef SLOTSGAME_H
@@ -45,7 +47,7 @@ private:
 	double currentbet;		//Stores user bet amount
 	double payout;			//Stores payout
 	bool won;				//true if win, false if no win
-	int spinNum;			//Number of spin we're on in this session
+	int spinNum = 0;			//Number of spin we're on in this session
 
 	///*int r1pos;			//possibly redundant
 	//int r2pos;
@@ -62,7 +64,10 @@ public:
 	Slots(double startingBankroll);		// Initializes slot starting bankroll for stats
 	SlotWindow reelsSpin(double b);		// Spins and "starts game." Takes bet, returns Slotwindow
 	double paytable();					// Calculates paytable and returns payout
+	SlotsSummary statSummary();			// Returns a struct with stats for each spin
 
+	//TESTING ONLY
+	char dispStack();
 };
 
 #endif

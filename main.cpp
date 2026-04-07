@@ -6,9 +6,10 @@
 
 	Team Galactic's Space Casino casino simulator project
 	Slots Module
-	main.cpp version 3
+	main.cpp version 4
 		Runs the slots module in terminal for testing purposes
-	last updated: 3/30/26
+	last updated: 4/6/26
+		Works with version 4 of all slots files.
 */
 
 #include <iostream>
@@ -16,19 +17,7 @@
 #include "SlotsGame.h"
 #include "SlotWindow.h"
 
-
-using namespace std;
-
-//
-//		CURRENT TO-DO: (3/26/26)
-//		-> create game state (check how Ramon did it and emulate that) 
-//				and use that to pull stuff
-//		-> clear, communicative comments for Kaden and Prayush
-//		-> stats session class that can be created, have stats set, and sent to
-//				backend overall game session
-//		-> continued error catching/testing/handling
-//		
-
+using namespace std;	
 
 int main() {
 	double bank;

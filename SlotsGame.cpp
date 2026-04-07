@@ -6,9 +6,12 @@
 //
 //	Team Galactic's Space Casino casino simulator project
 //	Slots Module
-//	SlotsGame.cpp version 3
+//	SlotsGame.cpp version 4
 //		The SlotsGame class Slots
-//	last updated: 3/30/26
+//	last updated: 4/6/26
+//		UPDATE ADD: add the function SlotsSummary statSummary() to pass struct with
+//		slot spin stats through.
+//		UPDATE FIX: fixes issue with reading the reels in the correct order
 //*/
 
 #include "SlotsGame.h"
@@ -16,6 +19,14 @@
 #include <ctime>
 #include "SlotWindow.h"
 #include <stack>
+
+
+//	CURRENT TO-DOS: (4/6/26)
+//	-> Keep troubleshooting to identify paytable calculation flaws
+// 
+//	-> Look into progressive jackpot/payout? (do some research)
+//	-> Continue with error handling
+//
 
 
 //===========SLOTS FUNCTION==============
@@ -43,6 +54,7 @@ void Slots::placeBet(double bet) {
 // slot machine window.
 SlotWindow Slots::reelsSpin(double b) {
 	placeBet(b);
+	spinNum++;
 
 	//RNG for all 3 reel posit holders seeded with the time
 	srand(time(NULL));
@@ -80,16 +92,18 @@ double Slots::paytable() {
 	payout = 0;
 	won = 0;
 
-	//CURRENT BUG:
-	// Unable to recognize multipliers showing up
+	//CURRENT BUGS:
+	// Not properly calculating payout because of stack handling (current conspiracy)
+	// Unable to recognize multipliers showing up (?may be caused by above issue)
+
 	//check for multipliers
 	for (int c = 0; c < 3; c++) {
 		for (int r = 0; r < 3; r++) {
-			if (reels[c][r] == 'W') {
+			if (reels[r][c] == 'W') {
 				payCalc.push('w');
 				won = 1;
 			}
-			else if (reels[c][r] == 'F') {
+			else if (reels[r][c] == 'F') {
 				payCalc.push('f');
 				won = 1;
 			}
@@ -97,12 +111,12 @@ double Slots::paytable() {
 	}
 	//check three in a row on rows
 	for (int i = 0; i < 3; i++) {
-		if (reels[0][i] == reels[1][i] && reels[0][i] == reels[2][i]) {
-			if (reels[0][i] == 'J' || reels[0][i] == 'Q' || reels[0][i] == 'T' ||
-					reels[0][i] == 'K') {
+		if (reels[i][0] == reels[i][1] && reels[0][i] == reels[i][2]) {
+			if (reels[i][0] == 'J' || reels[i][0] == 'Q' || reels[i][0] == 'T' ||
+					reels[i][0] == 'K') {
 				payCalc.push('l');
 			}
-			else if (reels[0][i] == 'V' || reels[0][i] == 'B') {
+			else if (reels[i][0] == 'V' || reels[i][0] == 'B') {
 				payCalc.push('b');
 			}
 			else {
@@ -131,7 +145,33 @@ double Slots::paytable() {
 			payCalc.pop();
 		}
 	}
-	
-	bankroll += payout;
+	bankroll += payout;	
 	return payout;
 } // End paytable()
+
+
+//===========STATSUMMARY FUNCTION==============
+// Creates and returns a struct SlotsSummary 
+// that includes all of the stats from the
+// current spin.
+// **NOTE: the calculation of the paytable is still WIP bc of known errors**
+SlotsSummary Slots::statSummary() {
+	SlotsSummary roundStats;
+	roundStats.spinNumber = spinNum;
+	roundStats.startingBankroll = initbank;
+	roundStats.betMade = currentbet;
+	roundStats.payoutAmount = payout;
+	roundStats.endingBankroll = bankroll;
+	roundStats.netChange = bankroll - initbank;
+	roundStats.slotDisplay = slotw;
+	//roundStats.paytablCalc = ;		//pay table calculation still WIP
+
+	return roundStats;
+} // End statSummary()
+
+
+
+//TESTING FUNCT ONLY!!!
+char Slots::dispStack() {
+	return payCalc.top();
+}
