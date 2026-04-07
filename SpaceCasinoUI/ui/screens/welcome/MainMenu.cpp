@@ -2,7 +2,7 @@
 
 MainMenu::MainMenu(sf::Font& sharedFont)
     : font(sharedFont),
-    titleText(font, "WELCOME TO SPACE CASINO", 46),
+    titleText(font, "WELCOME TO SPACE CASINO", 50),
     bankrollLabelText(font, "ENTER STARTING BANKROLL", 24),
     bankrollInputText(font, "", 28),
     bankrollHintText(font, "", 18),
@@ -13,20 +13,24 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     cancelText(font, "CANCEL", 20),
     bankrollInput("")
 {
-    titleText.setFillColor(sf::Color::White);
+    titleText.setFillColor(sf::Color(255, 210, 90));
     sf::FloatRect bounds = titleText.getLocalBounds();
     titleText.setPosition({
         500.f - bounds.size.x / 2.f - bounds.position.x,
-        120.f
+        95.f
         });
 
-    startButton.setSize({ 300.f, 80.f });
-    startButton.setPosition({ 350.f, 320.f });
-    startButton.setFillColor(sf::Color(60, 60, 180));
+    startButton.setSize({ 260.f, 90.f });
+    startButton.setPosition({ 370.f, 250.f });
+    startButton.setFillColor(sf::Color(50, 115, 230));
+    startButton.setOutlineThickness(2.f);
+    startButton.setOutlineColor(sf::Color(255, 210, 90));
 
-    exitButton.setSize({ 300.f, 80.f });
-    exitButton.setPosition({ 350.f, 440.f });
-    exitButton.setFillColor(sf::Color(170, 50, 50));
+    exitButton.setSize({ 260.f, 90.f });
+    exitButton.setPosition({ 370.f, 390.f });
+    exitButton.setFillColor(sf::Color(180, 65, 85));
+    exitButton.setOutlineThickness(2.f);
+    exitButton.setOutlineColor(sf::Color(255, 210, 90));
 
     startText.setFillColor(sf::Color::White);
     exitText.setFillColor(sf::Color::White);
@@ -35,7 +39,7 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     centerTextInButton(exitText, exitButton);
 
     overlay.setSize({ 1000.f, 760.f });
-    overlay.setFillColor(sf::Color(0, 0, 0, 165));
+    overlay.setFillColor(sf::Color(0, 0, 0, 160));
 
     popupPanel.setSize({ 470.f, 290.f });
     popupPanel.setPosition({ 265.f, 190.f });
@@ -43,7 +47,7 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     popupPanel.setOutlineThickness(3.f);
     popupPanel.setOutlineColor(sf::Color(90, 210, 255));
 
-    bankrollLabelText.setFillColor(sf::Color(235, 220, 90));
+    bankrollLabelText.setFillColor(sf::Color(255, 210, 90));
     sf::FloatRect labelBounds = bankrollLabelText.getLocalBounds();
     bankrollLabelText.setPosition({
         500.f - labelBounds.size.x / 2.f - labelBounds.position.x,
@@ -59,25 +63,31 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     bankrollInputText.setFillColor(sf::Color::White);
     bankrollInputText.setPosition({ 360.f, 285.f });
 
-    bankrollHintText.setFillColor(sf::Color(180, 180, 180));
+    bankrollHintText.setFillColor(sf::Color(200, 200, 200));
     bankrollHintText.setPosition({ 340.f, 345.f });
 
-    errorText.setFillColor(sf::Color(255, 120, 120));
+    errorText.setFillColor(sf::Color(255, 140, 140));
     errorText.setPosition({ 340.f, 372.f });
 
     confirmButton.setSize({ 160.f, 52.f });
     confirmButton.setPosition({ 340.f, 410.f });
     confirmButton.setFillColor(sf::Color(70, 70, 100));
+    confirmButton.setOutlineThickness(2.f);
+    confirmButton.setOutlineColor(sf::Color(255, 210, 90));
 
     cancelButton.setSize({ 160.f, 52.f });
     cancelButton.setPosition({ 520.f, 410.f });
     cancelButton.setFillColor(sf::Color(120, 120, 120));
+    cancelButton.setOutlineThickness(2.f);
+    cancelButton.setOutlineColor(sf::Color(255, 210, 90));
 
     confirmText.setFillColor(sf::Color::White);
     cancelText.setFillColor(sf::Color::White);
 
     centerTextInButton(confirmText, confirmButton);
     centerTextInButton(cancelText, cancelButton);
+
+    refreshBankrollText();
 }
 
 void MainMenu::centerTextInButton(sf::Text& text, const sf::RectangleShape& button)
@@ -114,7 +124,7 @@ void MainMenu::refreshBankrollText()
 
     if (!bankrollInput.empty() && bankrollInput != "0")
     {
-        confirmButton.setFillColor(sf::Color(60, 60, 180));
+        confirmButton.setFillColor(sf::Color(50, 115, 230));
     }
     else
     {
@@ -265,8 +275,18 @@ void MainMenu::handleMouseClick(sf::Vector2f mousePos, bool& startGame, bool& ex
 void MainMenu::draw(sf::RenderWindow& window)
 {
     sf::RectangleShape background({ 1000.f, 760.f });
-    background.setFillColor(sf::Color(0, 85, 20));
+    background.setFillColor(sf::Color(20, 55, 30));
     window.draw(background);
+
+    sf::RectangleShape topLine({ 880.f, 3.f });
+    topLine.setPosition({ 58.f, 170.f });
+    topLine.setFillColor(sf::Color(255, 210, 90));
+    window.draw(topLine);
+
+    sf::RectangleShape bottomLine({ 880.f, 3.f });
+    bottomLine.setPosition({ 58.f, 610.f });
+    bottomLine.setFillColor(sf::Color(255, 210, 90));
+    window.draw(bottomLine);
 
     window.draw(titleText);
     window.draw(startButton);

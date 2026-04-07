@@ -57,6 +57,21 @@
     <ClCompile Include="ui\app\CasinoApp.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="core\roulette\RouletteBet.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\roulette\RouletteGame.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\roulette\RoulettePayout.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\roulette\RouletteWheel.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\screens\roulette\RouletteUI.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\session\Bankroll.h">
@@ -114,6 +129,27 @@
       <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="ui\app\CasinoApp.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\roulette\RouletteBet.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\roulette\RouletteGame.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\roulette\RoulettePayout.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\roulette\RouletteRoundResult.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\roulette\RouletteTypes.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\roulette\RouletteWheel.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\screens\roulette\RouletteUI.h">
       <Filter>ui</Filter>
     </ClInclude>
   </ItemGroup>

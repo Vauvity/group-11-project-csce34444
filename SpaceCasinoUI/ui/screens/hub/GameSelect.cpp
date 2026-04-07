@@ -3,55 +3,74 @@
 
 GameSelect::GameSelect(sf::Font& sharedFont)
     : font(sharedFont),
-    titleText(font, "CHOOSE YOUR GAME", 48),
-    subtitleText(font, "Welcome to the casino floor", 20),
-    messageText(font, "", 18),
-    bankrollText(font, "Bankroll: $1000", 24),
-    blackjackText(font, "BLACKJACK", 22),
-    rouletteText(font, "ROULETTE", 22),
-    slotsText(font, "SLOTS", 22),
-    backText(font, "BACK", 22),
-    addMoneyLabelText(font, "ADD MORE MONEY", 24),
-    addMoneyInputText(font, "", 28),
-    addHintText(font, "", 18),
+    titleText(font, "SELECT A GAME", 52),
+    subtitleText(font, "Choose where you want to play", 24),
+    messageText(font, "", 22),
+    bankrollText(font, "", 28),
+
+    blackjackButton({ 220.f, 90.f }),
+    rouletteButton({ 220.f, 90.f }),
+    slotsButton({ 220.f, 90.f }),
+    backButton({ 180.f, 50.f }),
+
+    blackjackText(font, "BLACKJACK", 26),
+    rouletteText(font, "ROULETTE", 26),
+    slotsText(font, "SLOTS", 26),
+    backText(font, "MAIN MENU", 20),
+
+    overlay({ 1000.f, 760.f }),
+    popupPanel({ 420.f, 240.f }),
+    addMoneyBox({ 180.f, 48.f }),
+    addConfirmButton({ 140.f, 45.f }),
+    addCancelButton({ 140.f, 45.f }),
+
+    addMoneyLabelText(font, "Add Money", 28),
+    addMoneyInputText(font, "", 26),
+    addHintText(font, "Enter amount and click confirm", 18),
     addErrorText(font, "", 18),
-    addConfirmText(font, "CONFIRM", 20),
-    addCancelText(font, "CANCEL", 20),
-    gameOverTitle(font, "GAME OVER!", 34),
-    gameOverMessage(font, "You're Broke!", 24),
+    addConfirmText(font, "CONFIRM", 18),
+    addCancelText(font, "CANCEL", 18),
+
+    showingGameOverPopup(false),
+    gameOverPanel({ 460.f, 230.f }),
+    gameOverTitle(font, "Game Over!", 34),
+    gameOverMessage(font, "You're Broke!", 28),
+    gameOverButton({ 180.f, 50.f }),
     gameOverButtonText(font, "MAIN MENU", 20),
-    currentBankroll(1000.0),
+
+    currentBankroll(0.0),
     addMoneyInput(""),
-    showingAddMoneyPopup(false),
-    showingGameOverPopup(false)
+    showingAddMoneyPopup(false)
 {
-    titleText.setFillColor(sf::Color::White);
-    titleText.setPosition({ 285.f, 85.f });
-
-    subtitleText.setFillColor(sf::Color(235, 220, 90));
-    subtitleText.setPosition({ 350.f, 145.f });
-
+    titleText.setFillColor(sf::Color(255, 210, 90));
+    subtitleText.setFillColor(sf::Color::White);
+    messageText.setFillColor(sf::Color(255, 170, 170));
     bankrollText.setFillColor(sf::Color::White);
+
+    titleText.setPosition({ 295.f, 35.f });
+    subtitleText.setPosition({ 315.f, 105.f });
+    messageText.setPosition({ 260.f, 620.f });
     bankrollText.setPosition({ 20.f, 20.f });
 
-    messageText.setFillColor(sf::Color::Yellow);
-    messageText.setPosition({ 315.f, 670.f });
+    blackjackButton.setPosition({ 390.f, 180.f });
+    rouletteButton.setPosition({ 390.f, 310.f });
+    slotsButton.setPosition({ 390.f, 440.f });
+    backButton.setPosition({ 785.f, 660.f });
 
-    blackjackButton.setSize({ 320.f, 80.f });
-    blackjackButton.setPosition({ 340.f, 220.f });
-    blackjackButton.setFillColor(sf::Color(45, 130, 60));
+    blackjackButton.setFillColor(sf::Color(50, 115, 230));
+    rouletteButton.setFillColor(sf::Color(180, 65, 85));
+    slotsButton.setFillColor(sf::Color(150, 80, 220));
+    backButton.setFillColor(sf::Color(80, 80, 90));
 
-    rouletteButton.setSize({ 320.f, 80.f });
-    rouletteButton.setPosition({ 340.f, 330.f });
-    rouletteButton.setFillColor(sf::Color(150, 80, 30));
+    blackjackButton.setOutlineThickness(2.f);
+    rouletteButton.setOutlineThickness(2.f);
+    slotsButton.setOutlineThickness(2.f);
+    backButton.setOutlineThickness(2.f);
 
-    slotsButton.setSize({ 320.f, 80.f });
-    slotsButton.setPosition({ 340.f, 440.f });
-    slotsButton.setFillColor(sf::Color(110, 35, 140));
-
-    backButton.setSize({ 220.f, 65.f });
-    backButton.setPosition({ 390.f, 575.f });
-    backButton.setFillColor(sf::Color(110, 110, 110));
+    blackjackButton.setOutlineColor(sf::Color(255, 210, 90));
+    rouletteButton.setOutlineColor(sf::Color(255, 210, 90));
+    slotsButton.setOutlineColor(sf::Color(255, 210, 90));
+    backButton.setOutlineColor(sf::Color(255, 210, 90));
 
     blackjackText.setFillColor(sf::Color::White);
     rouletteText.setFillColor(sf::Color::White);
@@ -63,40 +82,39 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     centerTextInButton(slotsText, slotsButton);
     centerTextInButton(backText, backButton);
 
-    overlay.setSize({ 1000.f, 760.f });
-    overlay.setFillColor(sf::Color(0, 0, 0, 165));
+    overlay.setFillColor(sf::Color(0, 0, 0, 160));
 
-    popupPanel.setSize({ 470.f, 290.f });
-    popupPanel.setPosition({ 265.f, 190.f });
-    popupPanel.setFillColor(sf::Color(12, 28, 55));
-    popupPanel.setOutlineThickness(3.f);
-    popupPanel.setOutlineColor(sf::Color(90, 210, 255));
+    popupPanel.setPosition({ 290.f, 220.f });
+    popupPanel.setFillColor(sf::Color(30, 35, 45));
+    popupPanel.setOutlineThickness(2.f);
+    popupPanel.setOutlineColor(sf::Color(255, 210, 90));
 
-    addMoneyLabelText.setFillColor(sf::Color(235, 220, 90));
-    addMoneyLabelText.setPosition({ 385.f, 225.f });
+    addMoneyLabelText.setFillColor(sf::Color(255, 210, 90));
+    addMoneyLabelText.setPosition({ 415.f, 245.f });
 
-    addMoneyBox.setSize({ 320.f, 58.f });
-    addMoneyBox.setPosition({ 340.f, 275.f });
-    addMoneyBox.setFillColor(sf::Color(20, 20, 60));
+    addMoneyBox.setPosition({ 410.f, 305.f });
+    addMoneyBox.setFillColor(sf::Color(20, 20, 35));
     addMoneyBox.setOutlineThickness(2.f);
-    addMoneyBox.setOutlineColor(sf::Color(90, 210, 255));
+    addMoneyBox.setOutlineColor(sf::Color(255, 210, 90));
 
     addMoneyInputText.setFillColor(sf::Color::White);
-    addMoneyInputText.setPosition({ 360.f, 285.f });
 
-    addHintText.setFillColor(sf::Color(180, 180, 180));
-    addHintText.setPosition({ 340.f, 345.f });
+    addHintText.setFillColor(sf::Color(200, 200, 200));
+    addHintText.setPosition({ 355.f, 365.f });
 
-    addErrorText.setFillColor(sf::Color(255, 120, 120));
-    addErrorText.setPosition({ 340.f, 372.f });
+    addErrorText.setFillColor(sf::Color(255, 140, 140));
+    addErrorText.setPosition({ 350.f, 395.f });
 
-    addConfirmButton.setSize({ 160.f, 52.f });
-    addConfirmButton.setPosition({ 340.f, 410.f });
-    addConfirmButton.setFillColor(sf::Color(70, 70, 100));
+    addConfirmButton.setPosition({ 330.f, 430.f });
+    addCancelButton.setPosition({ 530.f, 430.f });
 
-    addCancelButton.setSize({ 160.f, 52.f });
-    addCancelButton.setPosition({ 520.f, 410.f });
-    addCancelButton.setFillColor(sf::Color(120, 120, 120));
+    addConfirmButton.setFillColor(sf::Color(50, 115, 230));
+    addCancelButton.setFillColor(sf::Color(180, 65, 85));
+
+    addConfirmButton.setOutlineThickness(2.f);
+    addCancelButton.setOutlineThickness(2.f);
+    addConfirmButton.setOutlineColor(sf::Color(255, 210, 90));
+    addCancelButton.setOutlineColor(sf::Color(255, 210, 90));
 
     addConfirmText.setFillColor(sf::Color::White);
     addCancelText.setFillColor(sf::Color::White);
@@ -104,21 +122,21 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     centerTextInButton(addConfirmText, addConfirmButton);
     centerTextInButton(addCancelText, addCancelButton);
 
-    gameOverPanel.setSize({ 430.f, 230.f });
-    gameOverPanel.setPosition({ 285.f, 250.f });
-    gameOverPanel.setFillColor(sf::Color(30, 10, 10));
-    gameOverPanel.setOutlineThickness(3.f);
-    gameOverPanel.setOutlineColor(sf::Color(220, 70, 70));
+    gameOverPanel.setPosition({ 270.f, 225.f });
+    gameOverPanel.setFillColor(sf::Color(30, 35, 45));
+    gameOverPanel.setOutlineThickness(2.f);
+    gameOverPanel.setOutlineColor(sf::Color(255, 210, 90));
 
-    gameOverTitle.setFillColor(sf::Color(255, 90, 90));
-    gameOverTitle.setPosition({ 380.f, 285.f });
-
+    gameOverTitle.setFillColor(sf::Color(255, 140, 140));
     gameOverMessage.setFillColor(sf::Color::White);
-    gameOverMessage.setPosition({ 410.f, 340.f });
 
-    gameOverButton.setSize({ 180.f, 55.f });
-    gameOverButton.setPosition({ 410.f, 395.f });
-    gameOverButton.setFillColor(sf::Color(110, 110, 110));
+    gameOverTitle.setPosition({ 385.f, 255.f });
+    gameOverMessage.setPosition({ 390.f, 310.f });
+
+    gameOverButton.setPosition({ 410.f, 385.f });
+    gameOverButton.setFillColor(sf::Color(180, 65, 85));
+    gameOverButton.setOutlineThickness(2.f);
+    gameOverButton.setOutlineColor(sf::Color(255, 210, 90));
 
     gameOverButtonText.setFillColor(sf::Color::White);
     centerTextInButton(gameOverButtonText, gameOverButton);
@@ -127,27 +145,16 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     refreshAddMoneyDisplay();
 }
 
-void GameSelect::setBankroll(double bankroll)
+void GameSelect::centerTextInButton(sf::Text& text, const sf::RectangleShape& button)
 {
-    currentBankroll = bankroll;
+    sf::FloatRect bounds = text.getLocalBounds();
+    sf::Vector2f pos = button.getPosition();
+    sf::Vector2f size = button.getSize();
 
-    if (currentBankroll <= 0)
-    {
-        currentBankroll = 0;
-        showingGameOverPopup = true;
-        showingAddMoneyPopup = false;
-        addMoneyInput.clear();
-        addHintText.setString("");
-        addErrorText.setString("");
-    }
-
-    refreshBankrollDisplay();
-    refreshAddMoneyDisplay();
-}
-
-double GameSelect::getBankroll() const
-{
-    return currentBankroll;
+    text.setPosition({
+        pos.x + (size.x - bounds.size.x) / 2.f - bounds.position.x,
+        pos.y + (size.y - bounds.size.y) / 2.f - bounds.position.y
+        });
 }
 
 void GameSelect::refreshBankrollDisplay()
@@ -157,44 +164,25 @@ void GameSelect::refreshBankrollDisplay()
 
 void GameSelect::refreshAddMoneyDisplay()
 {
-    if (addMoneyInput.empty())
-    {
-        addMoneyInputText.setString("$");
-    }
-    else
-    {
-        addMoneyInputText.setString("$" + addMoneyInput);
-    }
+    std::string shown = addMoneyInput.empty() ? "$" : "$" + addMoneyInput;
+    addMoneyInputText.setString(shown);
 
-    if (addMoneyInput == "0")
-    {
-        addErrorText.setString("Amount must be greater than 0.");
-    }
-    else
-    {
-        addErrorText.setString("");
-    }
-
-    if (!addMoneyInput.empty() && addMoneyInput != "0")
-    {
-        addConfirmButton.setFillColor(sf::Color(60, 60, 180));
-    }
-    else
-    {
-        addConfirmButton.setFillColor(sf::Color(70, 70, 100));
-    }
+    sf::FloatRect bounds = addMoneyInputText.getLocalBounds();
+    addMoneyInputText.setPosition({
+        addMoneyBox.getPosition().x + (addMoneyBox.getSize().x - bounds.size.x) / 2.f - bounds.position.x,
+        addMoneyBox.getPosition().y + (addMoneyBox.getSize().y - bounds.size.y) / 2.f - bounds.position.y
+        });
 }
 
 bool GameSelect::hasValidAddAmount() const
 {
     if (addMoneyInput.empty())
-    {
         return false;
-    }
 
     try
     {
-        return std::stod(addMoneyInput) > 0.0;
+        int amount = std::stoi(addMoneyInput);
+        return amount > 0;
     }
     catch (...)
     {
@@ -202,61 +190,60 @@ bool GameSelect::hasValidAddAmount() const
     }
 }
 
+void GameSelect::setBankroll(double bankroll)
+{
+    currentBankroll = bankroll;
+    refreshBankrollDisplay();
+
+    if (currentBankroll <= 0.0)
+    {
+        showingGameOverPopup = true;
+        showingAddMoneyPopup = false;
+    }
+    else
+    {
+        showingGameOverPopup = false;
+    }
+}
+
+double GameSelect::getBankroll() const
+{
+    return currentBankroll;
+}
+
 void GameSelect::handleTextEntered(unsigned int unicode)
 {
-    if (!showingAddMoneyPopup || showingGameOverPopup)
-    {
+    if (!showingAddMoneyPopup)
         return;
-    }
-
-    addHintText.setString("");
 
     if (unicode >= '0' && unicode <= '9')
     {
         if (addMoneyInput.size() < 7)
         {
             addMoneyInput += static_cast<char>(unicode);
+            addErrorText.setString("");
+            refreshAddMoneyDisplay();
         }
     }
-    else if (unicode >= 32 && unicode <= 126)
-    {
-        addHintText.setString("Type numbers only.");
-    }
-
-    refreshAddMoneyDisplay();
 }
 
 void GameSelect::handleBackspace()
 {
-    if (!showingAddMoneyPopup || showingGameOverPopup)
-    {
+    if (!showingAddMoneyPopup)
         return;
-    }
 
     if (!addMoneyInput.empty())
     {
         addMoneyInput.pop_back();
+        addErrorText.setString("");
+        refreshAddMoneyDisplay();
     }
-
-    addHintText.setString("");
-    refreshAddMoneyDisplay();
 }
 
-void GameSelect::centerTextInButton(sf::Text& text, const sf::RectangleShape& button)
-{
-    sf::FloatRect textBounds = text.getLocalBounds();
-    sf::Vector2f buttonPos = button.getPosition();
-    sf::Vector2f buttonSize = button.getSize();
-
-    text.setPosition({
-        buttonPos.x + (buttonSize.x - textBounds.size.x) / 2.f - textBounds.position.x,
-        buttonPos.y + (buttonSize.y - textBounds.size.y) / 2.f - textBounds.position.y - 2.f
-        });
-}
-
-void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& openSlots, bool& backToMain)
+void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& openRoulette, bool& openSlots, bool& backToMain)
 {
     openBlackjack = false;
+    openRoulette = false;
     openSlots = false;
     backToMain = false;
 
@@ -272,17 +259,25 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
 
     if (showingAddMoneyPopup)
     {
+        if (addMoneyBox.getGlobalBounds().contains(mousePos))
+        {
+            return;
+        }
+
         if (addConfirmButton.getGlobalBounds().contains(mousePos))
         {
             if (hasValidAddAmount())
             {
-                currentBankroll += std::stod(addMoneyInput);
+                currentBankroll += std::stoi(addMoneyInput);
                 addMoneyInput.clear();
-                addHintText.setString("");
                 addErrorText.setString("");
                 showingAddMoneyPopup = false;
                 refreshBankrollDisplay();
                 refreshAddMoneyDisplay();
+            }
+            else
+            {
+                addErrorText.setString("Enter a valid amount greater than 0.");
             }
             return;
         }
@@ -290,7 +285,6 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
         if (addCancelButton.getGlobalBounds().contains(mousePos))
         {
             addMoneyInput.clear();
-            addHintText.setString("");
             addErrorText.setString("");
             showingAddMoneyPopup = false;
             refreshAddMoneyDisplay();
@@ -304,7 +298,6 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
     {
         showingAddMoneyPopup = true;
         addMoneyInput.clear();
-        addHintText.setString("");
         addErrorText.setString("");
         refreshAddMoneyDisplay();
         return;
@@ -312,44 +305,61 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
 
     if (blackjackButton.getGlobalBounds().contains(mousePos))
     {
-        openBlackjack = true;
-        messageText.setString("");
+        if (currentBankroll > 0.0)
+        {
+            openBlackjack = true;
+            messageText.setString("");
+        }
+        return;
     }
-    else if (rouletteButton.getGlobalBounds().contains(mousePos))
+
+    if (rouletteButton.getGlobalBounds().contains(mousePos))
     {
-        messageText.setString("Roulette does not work right now.");
+        if (currentBankroll > 0.0)
+        {
+            openRoulette = true;
+            messageText.setString("");
+        }
+        return;
     }
-    else if (slotsButton.getGlobalBounds().contains(mousePos))
+
+    if (slotsButton.getGlobalBounds().contains(mousePos))
     {
-        openSlots = true;
-        messageText.setString("");
+        if (currentBankroll > 0.0)
+        {
+            openSlots = true;
+            messageText.setString("");
+        }
+        return;
     }
-    else if (backButton.getGlobalBounds().contains(mousePos))
+
+    if (backButton.getGlobalBounds().contains(mousePos))
     {
         backToMain = true;
-        messageText.setString("");
+        return;
     }
 }
 
 void GameSelect::draw(sf::RenderWindow& window)
 {
     sf::RectangleShape background({ 1000.f, 760.f });
-    background.setFillColor(sf::Color(0, 85, 20));
+    background.setFillColor(sf::Color(20, 55, 30));
     window.draw(background);
 
-    sf::RectangleShape topLine({ 700.f, 3.f });
-    topLine.setPosition({ 150.f, 185.f });
-    topLine.setFillColor(sf::Color(220, 180, 40));
+    sf::RectangleShape topLine({ 880.f, 3.f });
+    topLine.setPosition({ 58.f, 140.f });
+    topLine.setFillColor(sf::Color(255, 210, 90));
     window.draw(topLine);
 
-    sf::RectangleShape bottomLine({ 700.f, 3.f });
-    bottomLine.setPosition({ 150.f, 550.f });
-    bottomLine.setFillColor(sf::Color(220, 180, 40));
+    sf::RectangleShape bottomLine({ 880.f, 3.f });
+    bottomLine.setPosition({ 58.f, 600.f });
+    bottomLine.setFillColor(sf::Color(255, 210, 90));
     window.draw(bottomLine);
 
-    window.draw(bankrollText);
     window.draw(titleText);
     window.draw(subtitleText);
+    window.draw(bankrollText);
+    window.draw(messageText);
 
     window.draw(blackjackButton);
     window.draw(rouletteButton);
@@ -360,7 +370,6 @@ void GameSelect::draw(sf::RenderWindow& window)
     window.draw(rouletteText);
     window.draw(slotsText);
     window.draw(backText);
-    window.draw(messageText);
 
     if (showingAddMoneyPopup)
     {
@@ -369,17 +378,8 @@ void GameSelect::draw(sf::RenderWindow& window)
         window.draw(addMoneyLabelText);
         window.draw(addMoneyBox);
         window.draw(addMoneyInputText);
-
-        if (addHintText.getString() != "")
-        {
-            window.draw(addHintText);
-        }
-
-        if (addErrorText.getString() != "")
-        {
-            window.draw(addErrorText);
-        }
-
+        window.draw(addHintText);
+        window.draw(addErrorText);
         window.draw(addConfirmButton);
         window.draw(addCancelButton);
         window.draw(addConfirmText);

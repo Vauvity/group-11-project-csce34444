@@ -25,6 +25,10 @@
     <ClCompile Include="core\blackjack\Card.cpp" />
     <ClCompile Include="core\blackjack\Hand.cpp" />
     <ClCompile Include="core\blackjack\Shoe.cpp" />
+    <ClCompile Include="core\roulette\RouletteBet.cpp" />
+    <ClCompile Include="core\roulette\RouletteGame.cpp" />
+    <ClCompile Include="core\roulette\RoulettePayout.cpp" />
+    <ClCompile Include="core\roulette\RouletteWheel.cpp" />
     <ClCompile Include="core\session\Bankroll.cpp" />
     <ClCompile Include="core\session\SessionManager.cpp" />
     <ClCompile Include="core\session\SessionStats.cpp" />
@@ -33,6 +37,7 @@
     <ClCompile Include="ui\app\CasinoApp.cpp" />
     <ClCompile Include="ui\screens\blackjack\BlackjackUI.cpp" />
     <ClCompile Include="ui\screens\hub\GameSelect.cpp" />
+    <ClCompile Include="ui\screens\roulette\RouletteUI.cpp" />
     <ClCompile Include="ui\screens\slots\SlotsUI.cpp" />
     <ClCompile Include="ui\screens\welcome\MainMenu.cpp" />
   </ItemGroup>
@@ -44,6 +49,12 @@
     <ClInclude Include="core\blackjack\Card.h" />
     <ClInclude Include="core\blackjack\Hand.h" />
     <ClInclude Include="core\blackjack\Shoe.h" />
+    <ClInclude Include="core\roulette\RouletteBet.h" />
+    <ClInclude Include="core\roulette\RouletteGame.h" />
+    <ClInclude Include="core\roulette\RoulettePayout.h" />
+    <ClInclude Include="core\roulette\RouletteRoundResult.h" />
+    <ClInclude Include="core\roulette\RouletteTypes.h" />
+    <ClInclude Include="core\roulette\RouletteWheel.h" />
     <ClInclude Include="core\session\Bankroll.h" />
     <ClInclude Include="core\session\SessionManager.h" />
     <ClInclude Include="core\session\SessionStats.h" />
@@ -54,6 +65,7 @@
     <ClInclude Include="ui\app\CasinoApp.h" />
     <ClInclude Include="ui\screens\blackjack\BlackjackUI.h" />
     <ClInclude Include="ui\screens\hub\GameSelect.h" />
+    <ClInclude Include="ui\screens\roulette\RouletteUI.h" />
     <ClInclude Include="ui\screens\slots\SlotsUI.h" />
     <ClInclude Include="ui\screens\welcome\MainMenu.h" />
   </ItemGroup>

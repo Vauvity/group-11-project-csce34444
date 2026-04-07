@@ -6,7 +6,8 @@ enum class AppState
     MainMenu,
     GameSelect,
     Blackjack,
-    Slots
+    Slots,
+    Roulette
 };
 
 #endif

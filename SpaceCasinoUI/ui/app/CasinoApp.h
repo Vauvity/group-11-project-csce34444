@@ -8,6 +8,7 @@
 #include "../screens/hub/GameSelect.h"
 #include "../screens/blackjack/BlackjackUI.h"
 #include "../screens/slots/SlotsUI.h"
+#include "../screens/roulette/RouletteUI.h"
 
 class CasinoApp
 {
@@ -21,6 +22,7 @@ private:
     void syncGameSelectBankroll();
     void syncBlackjackBankroll();
     void syncSlotsBankroll();
+    void syncRouletteBankroll();
     void resetSessionIfNeeded();
 
     sf::RenderWindow window;
@@ -30,6 +32,7 @@ private:
     std::unique_ptr<GameSelect> gameSelect;
     std::unique_ptr<BlackjackUI> blackjackUI;
     std::unique_ptr<SlotsUI> slotsUI;
+    std::unique_ptr<RouletteUI> rouletteUI;
 
     AppState currentState;
     double sharedBankroll;
