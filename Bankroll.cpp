@@ -7,24 +7,21 @@
 */
 
 #include "Bankroll.h"
-#include <iostream>
-#include <iomanip>
+
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
-using std::cout;
-using std::fixed;
-using std::setprecision;
-
-
-//  Constructor
+namespace
+{
+    constexpr double EPSILON = 1e-9;
+}
 
 Bankroll::Bankroll(double startingAmount)
     : balance(startingAmount),
       startingBalance(startingAmount),
       peakBalance(startingAmount),
-      lowestBalance(startingAmount),
-      lastError(ErrorCode::None)
+      lowestBalance(startingAmount)
 {
     if (startingAmount <= 0.0)
     {
@@ -32,116 +29,98 @@ Bankroll::Bankroll(double startingAmount)
     }
 }
 
-
-//  Internal helper — updates peak and lowest after any change
-
 void Bankroll::updateTracking()
 {
-    peakBalance   = std::max(peakBalance,   balance);
+    peakBalance = std::max(peakBalance, balance);
     lowestBalance = std::min(lowestBalance, balance);
 }
 
-
-//  withdraw — called by a game when player places a bet
-
-bool Bankroll::withdraw(double amount)
+bool Bankroll::canAfford(double amount) const
 {
     if (amount <= 0.0)
     {
-        lastError = ErrorCode::InvalidAmount;
         return false;
     }
 
-    if (amount > balance)
+    return amount <= balance + EPSILON;
+}
+
+bool Bankroll::withdraw(double amount)
+{
+    if (!canAfford(amount))
     {
-        lastError = ErrorCode::InsufficientFunds;
         return false;
     }
 
     balance -= amount;
+
+    if (std::abs(balance) < EPSILON)
+    {
+        balance = 0.0;
+    }
+
     updateTracking();
-    lastError = ErrorCode::None;
     return true;
 }
 
-
-//  deposit — called by a game when payout is returned to player
-
-void Bankroll::deposit(double amount)
+bool Bankroll::deposit(double amount)
 {
     if (amount <= 0.0)
-    {
-        lastError = ErrorCode::InvalidAmount;
-        return;   // no-op for zero payouts (losses); games handle messaging
-    }
-
-    balance += amount;
-    updateTracking();
-    lastError = ErrorCode::None;
-}
-
-
-//  validateBalance — call after each round to confirm integrity
-
-bool Bankroll::validateBalance() const
-{
-    if (balance < 0.0)
     {
         return false;
     }
 
+    balance += amount;
+    updateTracking();
     return true;
 }
 
-Bankroll::ErrorCode Bankroll::getLastError() const
+bool Bankroll::applyNetChange(double amount)
 {
-    return lastError;
-}
-
-string Bankroll::getLastErrorMessage() const
-{
-    switch (lastError)
+    if (std::abs(amount) < EPSILON)
     {
-        case ErrorCode::None:
-            return "";
-        case ErrorCode::InvalidAmount:
-            return "Amount must be greater than 0.";
-        case ErrorCode::InsufficientFunds:
-            return "Insufficient funds.";
-        case ErrorCode::NegativeBalance:
-            return "Balance is negative. Possible accounting error.";
-        default:
-            return "Unknown bankroll error.";
+        return true;
     }
+
+    if (amount > 0.0)
+    {
+        return deposit(amount);
+    }
+
+    return withdraw(-amount);
 }
 
-//  Getters
-
-double Bankroll::getBalance()         const { return balance; }
-double Bankroll::getStartingBalance() const { return startingBalance; }
-double Bankroll::getNetGainLoss()     const { return balance - startingBalance; }
-double Bankroll::getPeakBalance()     const { return peakBalance; }
-double Bankroll::getLowestBalance()   const { return lowestBalance; }
-bool   Bankroll::isBroke()            const { return balance <= 0.0; }
-
-
-//  printSummary
-
-void Bankroll::printSummary() const
+bool Bankroll::validateBalance() const
 {
-    double net = getNetGainLoss();
+    return balance >= -EPSILON;
+}
 
-    cout << "\n========== Bankroll Summary ==========\n";
-    cout << fixed << setprecision(2);
-    cout << "  Starting Balance : $" << startingBalance << "\n";
-    cout << "  Current Balance  : $" << balance         << "\n";
-    cout << "  Peak Balance     : $" << peakBalance     << "\n";
-    cout << "  Lowest Balance   : $" << lowestBalance   << "\n";
+double Bankroll::getBalance() const
+{
+    return balance;
+}
 
-    if (net >= 0.0)
-        cout << "  Net Gain / Loss  : +$" << net << "\n";
-    else
-        cout << "  Net Gain / Loss  : -$" << (-net) << "\n";
+double Bankroll::getStartingBalance() const
+{
+    return startingBalance;
+}
 
-    cout << "======================================\n";
+double Bankroll::getNetGainLoss() const
+{
+    return balance - startingBalance;
+}
+
+double Bankroll::getPeakBalance() const
+{
+    return peakBalance;
+}
+
+double Bankroll::getLowestBalance() const
+{
+    return lowestBalance;
+}
+
+bool Bankroll::isBroke() const
+{
+    return balance <= EPSILON;
 }
