@@ -1,3 +1,10 @@
+/*
+    Name:       Prayush Panta
+    Team:       Group 11 - Team Galactic - Space Casino
+    Course:     CSCE 3444.400 Software Engineering
+    Instructor: Bahareh M. Dorri
+*/
+
 #ifndef ROULETTESTATS_H
 #define ROULETTESTATS_H
 
