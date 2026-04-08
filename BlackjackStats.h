@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "BlackjackTypes.h"
+#include "../games/blackjack/BlackjackTypes.h"
 
 using std::string;
 using std::vector;
