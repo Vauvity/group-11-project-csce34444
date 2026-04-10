@@ -6,12 +6,11 @@
 //
 //	Team Galactic's Space Casino casino simulator project
 //	Slots Module
-//	SlotsGame.cpp version 4
+//	SlotsGame.cpp version 5
 //		The SlotsGame class Slots
-//	last updated: 4/6/26
-//		UPDATE ADD: add the function SlotsSummary statSummary() to pass struct with
-//		slot spin stats through.
-//		UPDATE FIX: fixes issue with reading the reels in the correct order
+//	last updated: 4/9/26
+//		UPDATE ADD: added paytable calculation values to stats summary.
+//		UPDATE FIX: paytable now calculates payout correctly!
 //*/
 
 #include "SlotsGame.h"
@@ -21,9 +20,7 @@
 #include <stack>
 
 
-//	CURRENT TO-DOS: (4/6/26)
-//	-> Keep troubleshooting to identify paytable calculation flaws
-// 
+//	CURRENT TO-DOS: (4/9/26)
 //	-> Look into progressive jackpot/payout? (do some research)
 //	-> Continue with error handling
 //
@@ -35,6 +32,11 @@
 Slots::Slots(double startingBankroll) {
 	initbank = startingBankroll;
 	bankroll = startingBankroll;
+	highwins = 0;
+	lowwins = 0;
+	barseven = 0;
+	mult2 = 0;
+	mult5 = false;
 //	gamestate = SlotState::WaitingForBet;
 }// End Slots()
 
@@ -89,60 +91,56 @@ SlotWindow Slots::reelsSpin(double b) {
 // Scans the reels and calculates the payout 
 // of the spin. Returns payout.
 double Slots::paytable() {
-	payout = 0;
-	won = 0;
-
-	//CURRENT BUGS:
-	// Not properly calculating payout because of stack handling (current conspiracy)
-	// Unable to recognize multipliers showing up (?may be caused by above issue)
+	payout = 0.0;
+	won = false;
+	highwins = 0;
+	lowwins = 0;
+	barseven = 0;
+	mult2 = 0;
+	mult5 = false;
 
 	//check for multipliers
 	for (int c = 0; c < 3; c++) {
 		for (int r = 0; r < 3; r++) {
-			if (reels[r][c] == 'W') {
-				payCalc.push('w');
-				won = 1;
+			if (slotw.getDisplay(r,c) == 'W') {
+				mult2++;
+				won = true;
 			}
-			else if (reels[r][c] == 'F') {
-				payCalc.push('f');
-				won = 1;
+			else if (slotw.getDisplay(r, c) == 'F') {
+				mult5 = true;	// currently only 1 5x multiplier can be disp @ a time
+				won = true;
 			}
 		}
 	}
 	//check three in a row on rows
 	for (int i = 0; i < 3; i++) {
-		if (reels[i][0] == reels[i][1] && reels[0][i] == reels[i][2]) {
-			if (reels[i][0] == 'J' || reels[i][0] == 'Q' || reels[i][0] == 'T' ||
-					reels[i][0] == 'K') {
-				payCalc.push('l');
+		if (slotw.getDisplay(i, 0) == slotw.getDisplay(i, 1) && slotw.getDisplay(i, 0) 
+					== slotw.getDisplay(i, 2)) 
+		{
+			char row3in = slotw.getDisplay(i, 0);
+			if (row3in == 'J' || row3in == 'Q' || row3in == 'T' || row3in == 'K') {
+				lowwins++;
 			}
-			else if (reels[i][0] == 'V' || reels[i][0] == 'B') {
-				payCalc.push('b');
+			else if (row3in == 'V' || row3in == 'B') {
+				barseven++;
 			}
 			else {
-				payCalc.push('h');
+				highwins++;
 			}
-			won = 1;
+			won = true;
 		}
 	}
 	// Calculates the payout if there was a win
 	if (won) {
 		payout += currentbet;
-		//insert loop for item in stack, assess payout
-		while (!payCalc.empty()) {
-			switch (payCalc.top()) {
-			case 'h':	//high-paying
-				payout += 200;
-			case 'l':	//low-paying
-				payout += 50;
-			case 'b':
-				payout += 750;
-			case 'w':
-				payout *= 2;
-			case 'f':
-				payout *= 5;
-			}
-			payCalc.pop();
+		payout += lowwins * 50.00;
+		payout += highwins * 200.00;
+		payout += barseven * 750.00;
+		if (mult2 > 0) {
+			payout *= mult2 * 2;
+		}
+		if (mult5) {
+			payout *= 5;
 		}
 	}
 	bankroll += payout;	
@@ -164,14 +162,18 @@ SlotsSummary Slots::statSummary() {
 	roundStats.endingBankroll = bankroll;
 	roundStats.netChange = bankroll - initbank;
 	roundStats.slotDisplay = slotw;
-	//roundStats.paytablCalc = ;		//pay table calculation still WIP
+	
+	//Pay calculations listed below:
+	roundStats.numLowWins = lowwins;	//adds $50
+	roundStats.numHighWins = highwins;	//adds $200
+	roundStats.numBarOr7 = barseven;	//adds $750
+	roundStats.num2Multiply = mult2;	//multiplies total payout by 2x
+	if (mult5) {						//multiplies total payout by 5x
+		roundStats.num5Multiply = 1;
+	}
 
 	return roundStats;
 } // End statSummary()
 
 
-
-//TESTING FUNCT ONLY!!!
-char Slots::dispStack() {
-	return payCalc.top();
-}
+//space saver for displaying how payout calculated

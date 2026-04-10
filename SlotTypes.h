@@ -6,10 +6,10 @@
 //
 //	Team Galactic's Space Casino casino simulator project
 //	Slots Module
-//	SlotTypes.h version 4
+//	SlotTypes.h version 5
 //		SlotTypes creates slot game states and the groundworks for the slot stats
-//	last updated: 4/6/26
-//		UPDATE ADD: adds groundwork for payout calculation variables. WIP
+//	last updated: 4/9/26
+//		UPDATE ADD: added variables for paytable calculation data
 //*/
 
 #ifndef SLOTTYPES_H
@@ -37,10 +37,11 @@ struct SlotsSummary {		//The skeleton of slots stats for backend and session sta
 										//	on the entire reel
 	SlotWindow slotDisplay;		// Holds the display of the window
 
-	//std::stack<char> paytablCalc;		//Stack to store the payout calculation method
-			//char paytablCalc[7];		// Holds payCalc stack list
-	// NOTE TO PRAYUSH: Above are two possible ways I will be passing the payout calculation.
-	// Still troubleshooting
+	int numLowWins = 0;
+	int numHighWins = 0;
+	int numBarOr7 = 0;
+	int num2Multiply = 0;
+	int num5Multiply = 0;
 
 };
 
