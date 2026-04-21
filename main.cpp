@@ -6,10 +6,10 @@
 
 	Team Galactic's Space Casino casino simulator project
 	Slots Module
-	main.cpp version 4
+	main.cpp version 6
 		Runs the slots module in terminal for testing purposes
-	last updated: 4/6/26
-		Works with version 4 of all slots files.
+	last updated: 4/20/26
+		Works with versions 4 and 6 of all slots files.
 */
 
 #include <iostream>
@@ -30,6 +30,7 @@ int main() {
 	cout << "Welcome to Slots. Please tell us how much money is in your bank account:   $";
 	cin >> bank;
 	Slots game(bank);
+	cout << "Here is the starting jackpot: $" << game.displayProgressiveJackpot() << endl;
 	do {
 		cout << "Great! Now how much would you like to bet today?   $";
 		cin >> money;
@@ -58,6 +59,7 @@ int main() {
 													//	after taking out bet.
 			cout << "Your new bank balance is: " << bank;
 			payOut = 0.0;
+			cout << endl << "Here is the current jackpot: $" << game.displayProgressiveJackpot();
 		}
 		cout << endl << "Would you like to play again? Y/N:   ";
 		cin >> cont;
