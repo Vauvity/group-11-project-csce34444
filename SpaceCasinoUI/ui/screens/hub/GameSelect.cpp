@@ -11,11 +11,13 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     blackjackButton({ 220.f, 90.f }),
     rouletteButton({ 220.f, 90.f }),
     slotsButton({ 220.f, 90.f }),
+    statsButton({ 220.f, 90.f }),
     backButton({ 180.f, 50.f }),
 
     blackjackText(font, "BLACKJACK", 26),
     rouletteText(font, "ROULETTE", 26),
     slotsText(font, "SLOTS", 26),
+    statsText(font, "SESSION STATS", 22),
     backText(font, "MAIN MENU", 20),
 
     overlay({ 1000.f, 760.f }),
@@ -52,34 +54,41 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     messageText.setPosition({ 260.f, 620.f });
     bankrollText.setPosition({ 20.f, 20.f });
 
-    blackjackButton.setPosition({ 390.f, 180.f });
-    rouletteButton.setPosition({ 390.f, 310.f });
-    slotsButton.setPosition({ 390.f, 440.f });
+    const float centerX = 500.f;
+    blackjackButton.setPosition({ centerX - blackjackButton.getSize().x / 2.f, 180.f });
+    rouletteButton.setPosition({ centerX - rouletteButton.getSize().x / 2.f, 300.f });
+    slotsButton.setPosition({ centerX - slotsButton.getSize().x / 2.f, 420.f });
+    statsButton.setPosition({ centerX - statsButton.getSize().x / 2.f, 540.f });
     backButton.setPosition({ 785.f, 660.f });
 
     blackjackButton.setFillColor(sf::Color(50, 115, 230));
     rouletteButton.setFillColor(sf::Color(180, 65, 85));
     slotsButton.setFillColor(sf::Color(150, 80, 220));
+    statsButton.setFillColor(sf::Color(80, 140, 200));
     backButton.setFillColor(sf::Color(80, 80, 90));
 
     blackjackButton.setOutlineThickness(2.f);
     rouletteButton.setOutlineThickness(2.f);
     slotsButton.setOutlineThickness(2.f);
+    statsButton.setOutlineThickness(2.f);
     backButton.setOutlineThickness(2.f);
 
     blackjackButton.setOutlineColor(sf::Color(255, 210, 90));
     rouletteButton.setOutlineColor(sf::Color(255, 210, 90));
     slotsButton.setOutlineColor(sf::Color(255, 210, 90));
+    statsButton.setOutlineColor(sf::Color(255, 210, 90));
     backButton.setOutlineColor(sf::Color(255, 210, 90));
 
     blackjackText.setFillColor(sf::Color::White);
     rouletteText.setFillColor(sf::Color::White);
     slotsText.setFillColor(sf::Color::White);
+    statsText.setFillColor(sf::Color::White);
     backText.setFillColor(sf::Color::White);
 
     centerTextInButton(blackjackText, blackjackButton);
     centerTextInButton(rouletteText, rouletteButton);
     centerTextInButton(slotsText, slotsButton);
+    centerTextInButton(statsText, statsButton);
     centerTextInButton(backText, backButton);
 
     overlay.setFillColor(sf::Color(0, 0, 0, 160));
@@ -240,11 +249,12 @@ void GameSelect::handleBackspace()
     }
 }
 
-void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& openRoulette, bool& openSlots, bool& backToMain)
+void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& openRoulette, bool& openSlots, bool& openStats, bool& backToMain)
 {
     openBlackjack = false;
     openRoulette = false;
     openSlots = false;
+    openStats = false;
     backToMain = false;
 
     if (showingGameOverPopup)
@@ -333,6 +343,16 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
         return;
     }
 
+    if (statsButton.getGlobalBounds().contains(mousePos))
+    {
+        if (currentBankroll > 0.0)
+        {
+            openStats = true;
+            messageText.setString("");
+        }
+        return;
+    }
+
     if (backButton.getGlobalBounds().contains(mousePos))
     {
         backToMain = true;
@@ -352,7 +372,7 @@ void GameSelect::draw(sf::RenderWindow& window)
     window.draw(topLine);
 
     sf::RectangleShape bottomLine({ 880.f, 3.f });
-    bottomLine.setPosition({ 58.f, 600.f });
+    bottomLine.setPosition({ 58.f, 640.f });
     bottomLine.setFillColor(sf::Color(255, 210, 90));
     window.draw(bottomLine);
 
@@ -364,11 +384,13 @@ void GameSelect::draw(sf::RenderWindow& window)
     window.draw(blackjackButton);
     window.draw(rouletteButton);
     window.draw(slotsButton);
+    window.draw(statsButton);
     window.draw(backButton);
 
     window.draw(blackjackText);
     window.draw(rouletteText);
     window.draw(slotsText);
+    window.draw(statsText);
     window.draw(backText);
 
     if (showingAddMoneyPopup)

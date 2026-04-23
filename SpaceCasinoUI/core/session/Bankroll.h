@@ -1,55 +1,29 @@
-/*
-    Name:       Prayush Panta
-    UID:        PP1008
-    Team:       Group 11 - Team Galactic - Space Casino
-    Course:     CSCE 3444 Software Engineering
-    Instructor: Bahareh M. Dorri
-
-    Bankroll
-    -------
-    Shared session-level money tracker.
-
-    Design intent:
-      - SessionManager owns one Bankroll instance.
-      - Game modules do NOT own the real bankroll.
-      - Game modules calculate local bets/payouts and return round updates.
-      - SessionManager applies those updates to Bankroll.
-
-    Responsibilities:
-      - Store current balance
-      - Validate affordability
-      - Withdraw and deposit funds
-      - Track starting / peak / lowest balances
-      - Provide summary information
-
-    Non-responsibilities:
-      - No game-specific payout logic
-      - No blackjack / roulette / slots betting rules
-      - No UI or terminal messaging
-*/
-
-#ifndef BANKROLL_H
-#define BANKROLL_H
+#pragma once
+#include <string>
 
 class Bankroll
 {
-private:
-    double balance;
-    double startingBalance;
-    double peakBalance;
-    double lowestBalance;
-
-    void updateTracking();
-
 public:
+    enum class ErrorCode
+    {
+        None,
+        InvalidAmount,
+        InsufficientFunds,
+        NegativeBalance
+    };
+
     explicit Bankroll(double startingAmount = 1000.0);
 
-    bool canAfford(double amount) const;
     bool withdraw(double amount);
-    bool deposit(double amount);
-    bool applyNetChange(double amount);
+    void deposit(double amount);
+    void applyNetChange(double amount);
+    void syncToBalance(double newBalance);
+    void reset(double startingAmount);
 
     bool validateBalance() const;
+
+    ErrorCode getLastError() const;
+    std::string getLastErrorMessage() const;
 
     double getBalance() const;
     double getStartingBalance() const;
@@ -57,6 +31,15 @@ public:
     double getPeakBalance() const;
     double getLowestBalance() const;
     bool isBroke() const;
-};
 
-#endif
+    void printSummary() const;
+
+private:
+    double balance;
+    double startingBalance;
+    double peakBalance;
+    double lowestBalance;
+    ErrorCode lastError;
+
+    void updateTracking();
+};

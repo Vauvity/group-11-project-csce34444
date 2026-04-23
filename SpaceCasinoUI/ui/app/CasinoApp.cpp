@@ -3,9 +3,10 @@
 
 CasinoApp::CasinoApp()
     : window(sf::VideoMode({ 1000, 760 }), "Space Casino"),
-    currentState(AppState::MainMenu),
-    sharedBankroll(0.0),
-    bankrollInitialized(false)
+      currentState(AppState::MainMenu),
+      sharedBankroll(0.0),
+      bankrollInitialized(false),
+      sessionStats(1000.0)
 {
     window.setFramerateLimit(60);
 
@@ -19,6 +20,11 @@ CasinoApp::CasinoApp()
     blackjackUI = std::make_unique<BlackjackUI>(font);
     slotsUI = std::make_unique<SlotsUI>(font);
     rouletteUI = std::make_unique<RouletteUI>(font);
+    sessionStatsUI = std::make_unique<SessionStatsUI>(font);
+
+    blackjackUI->setSessionStats(&sessionStats);
+    slotsUI->setSessionStats(&sessionStats);
+    rouletteUI->setSessionStats(&sessionStats);
 }
 
 void CasinoApp::run()
@@ -43,35 +49,37 @@ void CasinoApp::processEvents()
             if (currentState == AppState::MainMenu)
             {
                 if (textEntered->unicode == 8)
-                {
                     mainMenu->handleBackspace();
-                }
                 else
-                {
                     mainMenu->handleTextEntered(textEntered->unicode);
-                }
             }
             else if (currentState == AppState::GameSelect)
             {
                 if (textEntered->unicode == 8)
-                {
                     gameSelect->handleBackspace();
-                }
                 else
-                {
                     gameSelect->handleTextEntered(textEntered->unicode);
-                }
+            }
+            else if (currentState == AppState::Blackjack)
+            {
+                if (textEntered->unicode == 8)
+                    blackjackUI->handleBackspace();
+                else
+                    blackjackUI->handleTextEntered(textEntered->unicode);
+            }
+            else if (currentState == AppState::Slots)
+            {
+                if (textEntered->unicode == 8)
+                    slotsUI->handleBackspace();
+                else
+                    slotsUI->handleTextEntered(textEntered->unicode);
             }
             else if (currentState == AppState::Roulette)
             {
                 if (textEntered->unicode == 8)
-                {
                     rouletteUI->handleBackspace();
-                }
                 else
-                {
                     rouletteUI->handleTextEntered(textEntered->unicode);
-                }
             }
         }
         else if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
@@ -88,7 +96,6 @@ void CasinoApp::processEvents()
             {
                 bool startGame = false;
                 bool exitGame = false;
-
                 mainMenu->handleMouseClick(mousePos, startGame, exitGame);
 
                 if (exitGame)
@@ -101,13 +108,13 @@ void CasinoApp::processEvents()
                     {
                         sharedBankroll = mainMenu->getEnteredBankroll();
                         bankrollInitialized = true;
+                        sessionStats.startSession(sharedBankroll);
                     }
 
                     syncGameSelectBankroll();
                     syncBlackjackBankroll();
                     syncSlotsBankroll();
                     syncRouletteBankroll();
-
                     currentState = AppState::GameSelect;
                 }
             }
@@ -116,10 +123,12 @@ void CasinoApp::processEvents()
                 bool openBlackjack = false;
                 bool openRoulette = false;
                 bool openSlots = false;
+                bool openStats = false;
                 bool backToMain = false;
 
-                gameSelect->handleMouseClick(mousePos, openBlackjack, openRoulette, openSlots, backToMain);
+                gameSelect->handleMouseClick(mousePos, openBlackjack, openRoulette, openSlots, openStats, backToMain);
                 sharedBankroll = gameSelect->getBankroll();
+                sessionStats.syncCurrentBalance(sharedBankroll);
 
                 if (openBlackjack)
                 {
@@ -136,8 +145,13 @@ void CasinoApp::processEvents()
                     syncSlotsBankroll();
                     currentState = AppState::Slots;
                 }
+                else if (openStats)
+                {
+                    currentState = AppState::SessionStats;
+                }
                 else if (backToMain)
                 {
+                    sessionStats.endSession();
                     resetSessionIfNeeded();
                     currentState = AppState::MainMenu;
                 }
@@ -146,10 +160,10 @@ void CasinoApp::processEvents()
             {
                 bool backToMenu = false;
                 blackjackUI->handleScreenClick(mousePos, backToMenu);
-
                 if (backToMenu)
                 {
                     sharedBankroll = blackjackUI->getCurrentBankroll();
+                    sessionStats.syncCurrentBalance(sharedBankroll);
                     syncGameSelectBankroll();
                     syncSlotsBankroll();
                     syncRouletteBankroll();
@@ -160,10 +174,10 @@ void CasinoApp::processEvents()
             {
                 bool backToMenu = false;
                 slotsUI->handleScreenClick(mousePos, backToMenu);
-
                 if (backToMenu)
                 {
                     sharedBankroll = slotsUI->getCurrentBankroll();
+                    sessionStats.syncCurrentBalance(sharedBankroll);
                     syncGameSelectBankroll();
                     syncBlackjackBankroll();
                     syncRouletteBankroll();
@@ -174,13 +188,22 @@ void CasinoApp::processEvents()
             {
                 bool backToMenu = false;
                 rouletteUI->handleScreenClick(mousePos, backToMenu);
-
                 if (backToMenu)
                 {
                     sharedBankroll = rouletteUI->getCurrentBankroll();
+                    sessionStats.syncCurrentBalance(sharedBankroll);
                     syncGameSelectBankroll();
                     syncBlackjackBankroll();
                     syncSlotsBankroll();
+                    currentState = AppState::GameSelect;
+                }
+            }
+            else if (currentState == AppState::SessionStats)
+            {
+                bool backToMenu = false;
+                sessionStatsUI->handleMouseClick(mousePos, backToMenu);
+                if (backToMenu)
+                {
                     currentState = AppState::GameSelect;
                 }
             }
@@ -193,25 +216,17 @@ void CasinoApp::render()
     window.clear();
 
     if (currentState == AppState::MainMenu)
-    {
         mainMenu->draw(window);
-    }
     else if (currentState == AppState::GameSelect)
-    {
         gameSelect->draw(window);
-    }
     else if (currentState == AppState::Blackjack)
-    {
         blackjackUI->draw(window);
-    }
     else if (currentState == AppState::Slots)
-    {
         slotsUI->draw(window);
-    }
     else if (currentState == AppState::Roulette)
-    {
         rouletteUI->draw(window);
-    }
+    else if (currentState == AppState::SessionStats)
+        sessionStatsUI->draw(window, sessionStats);
 
     window.display();
 }
@@ -238,10 +253,7 @@ void CasinoApp::syncRouletteBankroll()
 
 void CasinoApp::resetSessionIfNeeded()
 {
-    if (sharedBankroll <= 0.0)
-    {
-        bankrollInitialized = false;
-        sharedBankroll = 0.0;
-        mainMenu->resetSession();
-    }
+    bankrollInitialized = false;
+    sharedBankroll = 0.0;
+    mainMenu->resetSession();
 }

@@ -1,4 +1,4 @@
-///*
+//
 //	Elizabeth Stillwell
 //	CSCE-3444-400, Software Engineering
 //	University of North Texas
@@ -6,10 +6,13 @@
 //
 //	Team Galactic's Space Casino casino simulator project
 //	Slots Module
-//	SlotsGame.cpp version 3
+//	SlotsGame.cpp version 6
 //		The SlotsGame class Slots
-//	last updated: 3/30/26
-//*/
+//	last updated: 4/20/26
+//		UPDATE ADD: added progressive jackpot functions to game,
+//			display, and stats
+//		UPDATE FIX: increased payout amounts for 3 in a row
+//
 
 #include "SlotsGame.h"
 #include <cstdlib>
@@ -17,52 +20,52 @@
 #include "SlotWindow.h"
 #include <stack>
 
-
-//===========SLOTS FUNCTION==============
-// Initializes the starting bankroll in 
-// slots game and starting gamestate
 Slots::Slots(double startingBankroll) {
 	initbank = startingBankroll;
 	bankroll = startingBankroll;
-//	gamestate = SlotState::WaitingForBet;
-}// End Slots()
+	highwins = 0;
+	lowwins = 0;
+	barseven = 0;
+	mult2 = 0;
+	mult5 = 0;
+	jackpotratio = 0.0;
+	payout = 0.0;
+	won = false;
+	currentbet = 0.0;
+	seededRng = false;
+}
 
+void Slots::ensureSeeded() {
+	if (!seededRng) {
+		srand(static_cast<unsigned int>(time(NULL)));
+		seededRng = true;
+	}
+}
 
-//===========PLACEBET FUNCTION==============
-// Initializes the user bet. Called by reelsSpin
 void Slots::placeBet(double bet) {
 	currentbet = bet;
+	updateProgJackpot(currentbet);
 	bankroll -= bet;
-//	gamestate = SlotState::Spinning;
-} // End placeBet()
+}
 
-
-//===========REELSSPIN FUNCTION==============
-// Spins the slot machine and returns class
-// SlotWindow with the symbols shown in the
-// slot machine window.
 SlotWindow Slots::reelsSpin(double b) {
 	placeBet(b);
+	spinNum++;
+	ensureSeeded();
 
-	//RNG for all 3 reel posit holders seeded with the time
-	srand(time(NULL));
-	rpos[0] = rand() % 30;
-	rpos[1] = rand() % 30;
-	rpos[2] = rand() % 30;
+	rpos[0] = rand() % 35;
+	rpos[1] = rand() % 35;
+	rpos[2] = rand() % 35;
 
-	//Put reel symbols in an array
-	for (int i = 0; i < 3; i++) {			//iterates through reels
-		//middle posit on reel
+	for (int i = 0; i < 3; i++) {
 		slotw.setDisplay(reels[i][rpos[i]], i, 1);
-		//upper posit on reel
-		if (rpos[i] == 0) {	//checks for top end of reel to put on bottom
-			slotw.setDisplay(reels[i][29], i, 0);
+		if (rpos[i] == 0) {
+			slotw.setDisplay(reels[i][34], i, 0);
 		}
 		else {
 			slotw.setDisplay(reels[i][rpos[i] - 1], i, 0);
 		}
-		//lower posit on reel
-		if (rpos[i] == 29) {	//checks for bottom end of reel to put on top
+		if (rpos[i] == 34) {
 			slotw.setDisplay(reels[i][0], i, 2);
 		}
 		else {
@@ -70,73 +73,128 @@ SlotWindow Slots::reelsSpin(double b) {
 		}
 	}
 	return slotw;
-} // End reelsSpin()
+}
 
-
-//===========PAYTABLE FUNCTION==============
-// Scans the reels and calculates the payout 
-// of the spin. Returns payout.
 double Slots::paytable() {
-	payout = 0;
-	won = 0;
+	payout = 0.0;
+	won = false;
+	highwins = 0;
+	lowwins = 0;
+	barseven = 0;
+	mult2 = 0;
+	mult5 = 0;
+	jackpotratio = 0.0;
 
-	//CURRENT BUG:
-	// Unable to recognize multipliers showing up
-	//check for multipliers
 	for (int c = 0; c < 3; c++) {
 		for (int r = 0; r < 3; r++) {
-			if (reels[c][r] == 'W') {
-				payCalc.push('w');
-				won = 1;
+			if (slotw.getDisplay(r, c) == '2') {
+				mult2++;
+				won = true;
 			}
-			else if (reels[c][r] == 'F') {
-				payCalc.push('f');
-				won = 1;
+			else if (slotw.getDisplay(r, c) == '5') {
+				mult5++;
+				won = true;
 			}
 		}
 	}
-	//check three in a row on rows
+
+	for (int d = 0; d < 3; d++) {
+		if (slotw.getDisplay(d, 2) == 'M') {
+			jackpotratio = 120.0;
+			won = true;
+		}
+	}
+
 	for (int i = 0; i < 3; i++) {
-		if (reels[0][i] == reels[1][i] && reels[0][i] == reels[2][i]) {
-			if (reels[0][i] == 'J' || reels[0][i] == 'Q' || reels[0][i] == 'T' ||
-					reels[0][i] == 'K') {
-				payCalc.push('l');
+		if (slotw.getDisplay(i, 0) == slotw.getDisplay(i, 1) &&
+			slotw.getDisplay(i, 0) == slotw.getDisplay(i, 2))
+		{
+			char row3in = slotw.getDisplay(i, 0);
+			if (row3in == 'J' || row3in == 'Q') {
+				lowwins++;
 			}
-			else if (reels[0][i] == 'V' || reels[0][i] == 'B') {
-				payCalc.push('b');
+			else if (row3in == '7' || row3in == 'B') {
+				barseven++;
+			}
+			else if (row3in == 'G') {
+				jackpotratio = 1.0;
 			}
 			else {
-				payCalc.push('h');
+				highwins++;
 			}
-			won = 1;
+			won = true;
 		}
 	}
-	// Calculates the payout if there was a win
+
 	if (won) {
 		payout += currentbet;
-		//insert loop for item in stack, assess payout
-		while (!payCalc.empty()) {
-			switch (payCalc.top()) {
-			case 'h':	//high-paying
-				payout += 200;
-			case 'l':	//low-paying
-				payout += 50;
-			case 'b':
-				payout += 750;
-			case 'w':
-				payout *= 2;
-			case 'f':
-				payout *= 5;
-			}
-			payCalc.pop();
+		payout += lowwins * 100.00;
+		payout += highwins * 500.00;
+		payout += barseven * 1000.00;
+		if (mult2 > 0) {
+			payout *= mult2 * 2;
+		}
+		if (mult5 > 0) {
+			payout *= mult5 * 5;
+		}
+		if (jackpotratio > 0.0) {
+			payout += winProgJackpot(jackpotratio);
 		}
 	}
 
 	bankroll += payout;
 	return payout;
-} // End paytable()
+}
 
-double Slots::getBankroll() const
-{
+SlotsSummary Slots::statSummary() {
+	SlotsSummary roundStats;
+	roundStats.spinNumber = spinNum;
+	roundStats.startingBankroll = initbank;
+	roundStats.betMade = currentbet;
+	roundStats.payoutAmount = payout;
+	roundStats.endingBankroll = bankroll;
+	roundStats.netChange = bankroll - initbank;
+	roundStats.slotDisplay = slotw;
+	roundStats.numLowWins = lowwins;
+	roundStats.numHighWins = highwins;
+	roundStats.numBarOr7 = barseven;
+	roundStats.num2Multiply = mult2;
+	roundStats.num5Multiply = mult5;
+	if (jackpotratio > 0.0) {
+		roundStats.wonJackpot = 'Y';
+		if (jackpotratio == 1.0) {
+			roundStats.typeJackpot = 'M';
+		}
+		else {
+			roundStats.typeJackpot = 'm';
+		}
+	}
+
+	roundStats.startingJackpot = startjackpot;
+	roundStats.endingJackpot = progjackpot;
+	roundStats.amountToJackpot = amounttojackpot;
+	return roundStats;
+}
+
+double Slots::displayProgressiveJackpot() {
+	return progjackpot;
+}
+
+void Slots::updateProgJackpot(double bet) {
+	if (progjackpot <= 0.00) {
+		progjackpot = 20000.00;
+	}
+	amounttojackpot = bet / 10;
+	startjackpot = progjackpot;
+	progjackpot += amounttojackpot;
+}
+
+double Slots::winProgJackpot(double portion) {
+	jackpotPortion = progjackpot / portion;
+	progjackpot -= jackpotPortion;
+	return jackpotPortion;
+}
+
+double Slots::getBankroll() const {
 	return bankroll;
 }

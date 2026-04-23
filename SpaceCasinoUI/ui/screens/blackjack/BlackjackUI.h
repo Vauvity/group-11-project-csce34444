@@ -5,6 +5,7 @@
 #include <vector>
 #include "../../../core/blackjack/BlackjackGame.h"
 #include "../../../core/blackjack/Card.h"
+#include "../../../core/session/SessionStats.h"
 
 class BlackjackUI
 {
@@ -15,7 +16,10 @@ public:
     double getCurrentBankroll() const;
 
     void handleScreenClick(sf::Vector2f mousePos, bool& backToMenu);
+    void handleTextEntered(unsigned int unicode);
+    void handleBackspace();
     void draw(sf::RenderWindow& window);
+    void setSessionStats(SessionStats* stats);
 
 private:
     BlackjackGame game;
@@ -42,7 +46,25 @@ private:
     sf::Text backText;
 
     float currentBet;
+    std::string betInput;
+    bool enteringBet;
+
+    sf::RectangleShape overlay;
+    sf::RectangleShape popupPanel;
+    sf::Text betInputLabelText;
+    sf::RectangleShape betBox;
+    sf::Text betInputText;
+    sf::Text betHintText;
+    sf::Text betErrorText;
+    sf::RectangleShape betConfirmButton;
+    sf::RectangleShape betCancelButton;
+    sf::Text betConfirmText;
+    sf::Text betCancelText;
+
+    void refreshBetInputDisplay();
     bool roundStarted;
+    SessionStats* sessionStats;
+    int lastRecordedRoundNumber;
 
     void setupButtons();
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
@@ -55,4 +77,6 @@ private:
 
     void updateText();
     void handleGameClick(sf::Vector2f mousePos);
+    void commitBetInput();
+    void recordRoundIfNeeded();
 };

@@ -5,6 +5,7 @@
 #include "../../../core/roulette/RouletteGame.h"
 #include "../../../core/roulette/RouletteBet.h"
 #include "../../../core/roulette/RouletteTypes.h"
+#include "../../../core/session/SessionStats.h"
 
 class RouletteUI
 {
@@ -19,6 +20,7 @@ public:
     void handleBackspace();
 
     void draw(sf::RenderWindow& window);
+    void setSessionStats(SessionStats* stats);
 
 private:
     RouletteGame game;
@@ -55,6 +57,22 @@ private:
     sf::Text straightText;
 
     double currentBet;
+    std::string chipInput;
+    bool enteringChip;
+
+    sf::RectangleShape overlay;
+    sf::RectangleShape popupPanel;
+    sf::Text chipInputLabelText;
+    sf::RectangleShape chipBox;
+    sf::Text chipInputText;
+    sf::Text chipHintText;
+    sf::Text chipErrorText;
+    sf::RectangleShape chipConfirmButton;
+    sf::RectangleShape chipCancelButton;
+    sf::Text chipConfirmText;
+    sf::Text chipCancelText;
+
+    void refreshChipInputDisplay();
     std::string numberInput;
     bool enteringNumber;
 
@@ -71,9 +89,16 @@ private:
 
     SelectedBet selectedBet;
     bool hasSpun;
+    SessionStats* sessionStats;
 
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
     void updateText();
     void spinRound();
+    void commitChipInput();
     std::string getSelectedBetLabel() const;
+
+    int getClickedTableNumber(sf::Vector2f mousePos) const;
+    sf::FloatRect getTableCellBounds(int number) const;
+    sf::FloatRect getZeroCellBounds() const;
+    bool isRedNumber(int number) const;
 };

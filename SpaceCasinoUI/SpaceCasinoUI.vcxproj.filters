@@ -21,9 +21,6 @@
     <ClCompile Include="core\blackjack\BlackjackGame.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="core\blackjack\BlackjackStats.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="core\blackjack\BlackjackStrategy.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -72,6 +69,18 @@
     <ClCompile Include="ui\screens\roulette\RouletteUI.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="core\session\BlackjackStats.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\session\RouletteStats.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\session\SlotsStats.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\screens\session\SessionStatsUI.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\session\Bankroll.h">
@@ -84,9 +93,6 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="core\blackjack\BlackjackGame.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\blackjack\BlackjackStats.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="core\blackjack\BlackjackStrategy.h">
@@ -150,6 +156,18 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="ui\screens\roulette\RouletteUI.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="core\session\BlackjackStats.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\session\RouletteStats.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\session\SlotsStats.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\screens\session\SessionStatsUI.h">
       <Filter>ui</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,6 +4,7 @@
 #include <string>
 #include "../../../core/slots/SlotsGame.h"
 #include "../../../core/slots/SlotWindow.h"
+#include "../../../core/session/SessionStats.h"
 
 class SlotsUI
 {
@@ -14,7 +15,10 @@ public:
     double getCurrentBankroll() const;
 
     void handleScreenClick(sf::Vector2f mousePos, bool& backToMenu);
+    void handleTextEntered(unsigned int unicode);
+    void handleBackspace();
     void draw(sf::RenderWindow& window);
+    void setSessionStats(SessionStats* stats);
 
 private:
     Slots game;
@@ -23,6 +27,7 @@ private:
     sf::Text titleText;
     sf::Text bankrollText;
     sf::Text betText;
+    sf::Text jackpotText;
     sf::Text resultText;
     sf::Text payoutText;
     sf::Text backText;
@@ -34,9 +39,28 @@ private:
     SlotWindow currentWindow;
     bool hasSpun;
     double currentBet;
+    std::string betInput;
+    bool enteringBet;
     double lastPayout;
+    
+    sf::RectangleShape overlay;
+    sf::RectangleShape popupPanel;
+    sf::Text betInputLabelText;
+    sf::RectangleShape betBox;
+    sf::Text betInputText;
+    sf::Text betHintText;
+    sf::Text betErrorText;
+    sf::RectangleShape betConfirmButton;
+    sf::RectangleShape betCancelButton;
+    sf::Text betConfirmText;
+    sf::Text betCancelText;
+
+    void refreshBetInputDisplay();
+    SessionStats* sessionStats;
+    int lastRecordedSpinNumber;
 
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
     std::string symbolToString(char c) const;
     void updateText();
+    void commitBetInput();
 };

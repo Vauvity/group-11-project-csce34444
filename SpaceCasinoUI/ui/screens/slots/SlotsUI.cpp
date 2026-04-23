@@ -7,22 +7,36 @@ SlotsUI::SlotsUI(sf::Font& sharedFont)
     titleText(font, "SLOTS", 54),
     bankrollText(font, "", 28),
     betText(font, "", 28),
+    jackpotText(font, "", 28),
     resultText(font, "", 26),
     payoutText(font, "", 24),
     backText(font, "BACK TO MENU", 20),
     spinText(font, "SPIN", 20),
     hasSpun(false),
     currentBet(50.0),
-    lastPayout(0.0)
+    betInput("50"),
+    enteringBet(false),
+    lastPayout(0.0),
+    betInputLabelText(font, "Enter Bet Amount", 24),
+    betInputText(font, "", 28),
+    betHintText(font, "Enter bet and confirm", 18),
+    betErrorText(font, "", 18),
+    betConfirmText(font, "CONFIRM", 20),
+    betCancelText(font, "CANCEL", 20),
+    sessionStats(nullptr),
+    lastRecordedSpinNumber(0)
 {
     titleText.setFillColor(sf::Color(210, 120, 255));
-    titleText.setPosition({ 425.f, 40.f });
+    titleText.setPosition({ 400.f, 40.f });
 
     bankrollText.setFillColor(sf::Color::White);
     bankrollText.setPosition({ 20.f, 20.f });
 
     betText.setFillColor(sf::Color::White);
     betText.setPosition({ 20.f, 55.f });
+
+    jackpotText.setFillColor(sf::Color::White);
+    jackpotText.setPosition({ 580.f, 55.f });
 
     resultText.setFillColor(sf::Color(230, 230, 255));
     resultText.setPosition({ 0.f, 500.f });
@@ -42,7 +56,86 @@ SlotsUI::SlotsUI(sf::Font& sharedFont)
     centerTextInButton(spinText, spinButton);
     centerTextInButton(backText, backButton);
 
+    overlay.setSize({ 1000.f, 760.f });
+    overlay.setFillColor(sf::Color(0, 0, 0, 160));
+
+    popupPanel.setSize({ 470.f, 290.f });
+    popupPanel.setPosition({ 265.f, 190.f });
+    popupPanel.setFillColor(sf::Color(12, 28, 55));
+    popupPanel.setOutlineThickness(3.f);
+    popupPanel.setOutlineColor(sf::Color(210, 120, 255));
+
+    betInputLabelText.setFillColor(sf::Color(210, 120, 255));
+    sf::FloatRect labelBounds = betInputLabelText.getLocalBounds();
+    betInputLabelText.setPosition({
+        500.f - labelBounds.size.x / 2.f - labelBounds.position.x,
+        225.f
+    });
+
+    betBox.setSize({ 320.f, 58.f });
+    betBox.setPosition({ 340.f, 275.f });
+    betBox.setFillColor(sf::Color(20, 20, 60));
+    betBox.setOutlineThickness(2.f);
+    betBox.setOutlineColor(sf::Color(210, 120, 255));
+
+    betInputText.setFillColor(sf::Color::White);
+    betInputText.setPosition({ 360.f, 285.f });
+
+    betHintText.setFillColor(sf::Color(200, 200, 200));
+    betHintText.setPosition({ 340.f, 345.f });
+
+    betErrorText.setFillColor(sf::Color(255, 140, 140));
+    betErrorText.setPosition({ 340.f, 372.f });
+
+    betConfirmButton.setSize({ 160.f, 52.f });
+    betConfirmButton.setPosition({ 340.f, 410.f });
+    betConfirmButton.setFillColor(sf::Color(70, 70, 100));
+    betConfirmButton.setOutlineThickness(2.f);
+    betConfirmButton.setOutlineColor(sf::Color(210, 120, 255));
+
+    betCancelButton.setSize({ 160.f, 52.f });
+    betCancelButton.setPosition({ 520.f, 410.f });
+    betCancelButton.setFillColor(sf::Color(180, 65, 85));
+    betCancelButton.setOutlineThickness(2.f);
+    betCancelButton.setOutlineColor(sf::Color(210, 120, 255));
+
+    betConfirmText.setFillColor(sf::Color::White);
+    betCancelText.setFillColor(sf::Color::White);
+
+    centerTextInButton(betConfirmText, betConfirmButton);
+    centerTextInButton(betCancelText, betCancelButton);
+
     updateText();
+}
+
+void SlotsUI::refreshBetInputDisplay()
+{
+    if (betInput.empty())
+    {
+        betInputText.setString("$");
+    }
+    else
+    {
+        betInputText.setString("$" + betInput);
+    }
+
+    if (betInput == "0")
+    {
+        betErrorText.setString("Bet must be greater than 0.");
+    }
+    else
+    {
+        betErrorText.setString("");
+    }
+
+    if (!betInput.empty() && betInput != "0")
+    {
+        betConfirmButton.setFillColor(sf::Color(125, 45, 180));
+    }
+    else
+    {
+        betConfirmButton.setFillColor(sf::Color(70, 70, 100));
+    }
 }
 
 void SlotsUI::setStartingBankroll(double bankroll)
@@ -50,13 +143,21 @@ void SlotsUI::setStartingBankroll(double bankroll)
     game = Slots(bankroll);
     hasSpun = false;
     currentBet = 50.0;
+    betInput = "50";
+    enteringBet = false;
     lastPayout = 0.0;
+    lastRecordedSpinNumber = 0;
     updateText();
 }
 
 double SlotsUI::getCurrentBankroll() const
 {
     return game.getBankroll();
+}
+
+void SlotsUI::setSessionStats(SessionStats* stats)
+{
+    sessionStats = stats;
 }
 
 void SlotsUI::centerTextInButton(sf::Text& text, const sf::RectangleShape& button)
@@ -76,17 +177,16 @@ std::string SlotsUI::symbolToString(char c) const
     switch (c)
     {
     case 'B': return "BAR";
-    case 'V': return "7";
+    case '7': return "7";
     case 'J': return "J";
     case 'Q': return "Q";
-    case 'K': return "K";
-    case 'T': return "10";
     case 'S': return "STAR";
     case 'A': return "ALIEN";
     case 'M': return "MOON";
     case 'R': return "ROCKET";
-    case 'W': return "2X";
-    case 'F': return "5X";
+    case 'G': return "GALAXY";
+    case '2': return "2X";
+    case '5': return "5X";
     default:  return "?";
     }
 }
@@ -94,7 +194,8 @@ std::string SlotsUI::symbolToString(char c) const
 void SlotsUI::updateText()
 {
     bankrollText.setString("Bankroll: $" + std::to_string(static_cast<int>(game.getBankroll())));
-    betText.setString("Current Bet: $" + std::to_string(static_cast<int>(currentBet)));
+    betText.setString("Current Bet: $" + std::to_string(static_cast<int>(currentBet)) + "  (click to change)");
+    jackpotText.setString("Jackpot: $" + std::to_string(static_cast<int>(game.displayProgressiveJackpot())));
 
     if (!hasSpun)
     {
@@ -128,12 +229,98 @@ void SlotsUI::updateText()
         });
 }
 
+
+void SlotsUI::commitBetInput()
+{
+    if (betInput.empty() || betInput == "0")
+    {
+        betErrorText.setString("Enter a valid bet amount.");
+        return;
+    }
+
+    try
+    {
+        int value = std::stoi(betInput);
+        if (value > 0)
+        {
+            currentBet = static_cast<double>(value);
+        }
+    }
+    catch (...)
+    {
+    }
+
+    enteringBet = false;
+    updateText();
+}
+
+void SlotsUI::handleTextEntered(unsigned int unicode)
+{
+    if (!enteringBet)
+    {
+        return;
+    }
+
+    if (unicode >= '0' && unicode <= '9')
+    {
+        if (betInput.size() < 6)
+        {
+            if (betInput == "0")
+            {
+                betInput.clear();
+            }
+            betInput += static_cast<char>(unicode);
+            refreshBetInputDisplay();
+        }
+    }
+}
+
+void SlotsUI::handleBackspace()
+{
+    if (!enteringBet)
+    {
+        return;
+    }
+
+    if (!betInput.empty())
+    {
+        betInput.pop_back();
+        refreshBetInputDisplay();
+    }
+}
+
 void SlotsUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
 {
     backToMenu = false;
 
+    if (enteringBet)
+    {
+        if (betConfirmButton.getGlobalBounds().contains(mousePos))
+        {
+            commitBetInput();
+        }
+        else if (betCancelButton.getGlobalBounds().contains(mousePos))
+        {
+            enteringBet = false;
+            updateText();
+        }
+        return;
+    }
+
+    if (betText.getGlobalBounds().contains(mousePos))
+    {
+        enteringBet = true;
+        betInput = std::to_string(static_cast<int>(currentBet));
+        refreshBetInputDisplay();
+        return;
+    }
+
     if (backButton.getGlobalBounds().contains(mousePos))
     {
+        if (sessionStats)
+        {
+            sessionStats->syncCurrentBalance(game.getBankroll());
+        }
         backToMenu = true;
         return;
     }
@@ -145,6 +332,15 @@ void SlotsUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
             currentWindow = game.reelsSpin(currentBet);
             lastPayout = game.paytable();
             hasSpun = true;
+            if (sessionStats)
+            {
+                SlotsSummary summary = game.statSummary();
+                if (summary.spinNumber > lastRecordedSpinNumber)
+                {
+                    sessionStats->recordSlotsRound(summary);
+                    lastRecordedSpinNumber = summary.spinNumber;
+                }
+            }
             updateText();
         }
     }
@@ -180,6 +376,7 @@ void SlotsUI::draw(sf::RenderWindow& window)
     window.draw(titleText);
     window.draw(bankrollText);
     window.draw(betText);
+    window.draw(jackpotText);
 
     sf::RectangleShape machineBody({ 520.f, 300.f });
     machineBody.setPosition({ 240.f, 180.f });
@@ -241,4 +438,19 @@ void SlotsUI::draw(sf::RenderWindow& window)
     window.draw(backText);
     window.draw(resultText);
     window.draw(payoutText);
+
+    if (enteringBet)
+    {
+        window.draw(overlay);
+        window.draw(popupPanel);
+        window.draw(betInputLabelText);
+        window.draw(betBox);
+        window.draw(betInputText);
+        window.draw(betHintText);
+        window.draw(betErrorText);
+        window.draw(betConfirmButton);
+        window.draw(betCancelButton);
+        window.draw(betConfirmText);
+        window.draw(betCancelText);
+    }
 }

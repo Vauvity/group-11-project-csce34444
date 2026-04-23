@@ -9,6 +9,8 @@
 #include "../screens/blackjack/BlackjackUI.h"
 #include "../screens/slots/SlotsUI.h"
 #include "../screens/roulette/RouletteUI.h"
+#include "../screens/session/SessionStatsUI.h"
+#include "../../core/session/SessionStats.h"
 
 class CasinoApp
 {
@@ -33,10 +35,12 @@ private:
     std::unique_ptr<BlackjackUI> blackjackUI;
     std::unique_ptr<SlotsUI> slotsUI;
     std::unique_ptr<RouletteUI> rouletteUI;
+    std::unique_ptr<SessionStatsUI> sessionStatsUI;
 
     AppState currentState;
     double sharedBankroll;
     bool bankrollInitialized;
+    SessionStats sessionStats;
 };
 
 #endif

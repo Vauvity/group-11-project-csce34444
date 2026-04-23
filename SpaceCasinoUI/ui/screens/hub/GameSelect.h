@@ -8,7 +8,7 @@ class GameSelect
 public:
     explicit GameSelect(sf::Font& sharedFont);
 
-    void handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& openRoulette, bool& openSlots, bool& backToMain);
+    void handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bool& openRoulette, bool& openSlots, bool& openStats, bool& backToMain);
     void handleTextEntered(unsigned int unicode);
     void handleBackspace();
 
@@ -28,11 +28,13 @@ private:
     sf::RectangleShape blackjackButton;
     sf::RectangleShape rouletteButton;
     sf::RectangleShape slotsButton;
+    sf::RectangleShape statsButton;
     sf::RectangleShape backButton;
 
     sf::Text blackjackText;
     sf::Text rouletteText;
     sf::Text slotsText;
+    sf::Text statsText;
     sf::Text backText;
 
     sf::RectangleShape overlay;

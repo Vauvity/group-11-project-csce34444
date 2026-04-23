@@ -7,7 +7,8 @@ enum class AppState
     GameSelect,
     Blackjack,
     Slots,
-    Roulette
+    Roulette,
+    SessionStats
 };
 
 #endif

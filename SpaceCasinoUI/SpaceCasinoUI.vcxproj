@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\blackjack\BlackjackGame.cpp" />
-    <ClCompile Include="core\blackjack\BlackjackStats.cpp" />
     <ClCompile Include="core\blackjack\BlackjackStrategy.cpp" />
     <ClCompile Include="core\blackjack\Card.cpp" />
     <ClCompile Include="core\blackjack\Hand.cpp" />
@@ -30,20 +29,23 @@
     <ClCompile Include="core\roulette\RoulettePayout.cpp" />
     <ClCompile Include="core\roulette\RouletteWheel.cpp" />
     <ClCompile Include="core\session\Bankroll.cpp" />
+    <ClCompile Include="core\session\BlackjackStats.cpp" />
+    <ClCompile Include="core\session\RouletteStats.cpp" />
     <ClCompile Include="core\session\SessionManager.cpp" />
     <ClCompile Include="core\session\SessionStats.cpp" />
+    <ClCompile Include="core\session\SlotsStats.cpp" />
     <ClCompile Include="core\slots\SlotsGame.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ui\app\CasinoApp.cpp" />
     <ClCompile Include="ui\screens\blackjack\BlackjackUI.cpp" />
     <ClCompile Include="ui\screens\hub\GameSelect.cpp" />
     <ClCompile Include="ui\screens\roulette\RouletteUI.cpp" />
+    <ClCompile Include="ui\screens\session\SessionStatsUI.cpp" />
     <ClCompile Include="ui\screens\slots\SlotsUI.cpp" />
     <ClCompile Include="ui\screens\welcome\MainMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\blackjack\BlackjackGame.h" />
-    <ClInclude Include="core\blackjack\BlackjackStats.h" />
     <ClInclude Include="core\blackjack\BlackjackStrategy.h" />
     <ClInclude Include="core\blackjack\BlackjackTypes.h" />
     <ClInclude Include="core\blackjack\Card.h" />
@@ -56,8 +58,11 @@
     <ClInclude Include="core\roulette\RouletteTypes.h" />
     <ClInclude Include="core\roulette\RouletteWheel.h" />
     <ClInclude Include="core\session\Bankroll.h" />
+    <ClInclude Include="core\session\BlackjackStats.h" />
+    <ClInclude Include="core\session\RouletteStats.h" />
     <ClInclude Include="core\session\SessionManager.h" />
     <ClInclude Include="core\session\SessionStats.h" />
+    <ClInclude Include="core\session\SlotsStats.h" />
     <ClInclude Include="core\slots\SlotsGame.h" />
     <ClInclude Include="core\slots\SlotTypes.h" />
     <ClInclude Include="core\slots\SlotWindow.h" />
@@ -66,6 +71,7 @@
     <ClInclude Include="ui\screens\blackjack\BlackjackUI.h" />
     <ClInclude Include="ui\screens\hub\GameSelect.h" />
     <ClInclude Include="ui\screens\roulette\RouletteUI.h" />
+    <ClInclude Include="ui\screens\session\SessionStatsUI.h" />
     <ClInclude Include="ui\screens\slots\SlotsUI.h" />
     <ClInclude Include="ui\screens\welcome\MainMenu.h" />
   </ItemGroup>
