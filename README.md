@@ -1,8 +1,8 @@
  Stats — UI Integration Guide
 
 This folder contains session statistics trackers for all three casino games.
-They are currently fully integrated with **terminal mode** (SessionManager).
-They are **ready for UI integration** but not yet connected to the GUI screens.
+They are currently fully integrated with terminal mode (SessionManager).
+They are ready for UI integration but not yet connected to the GUI screens.
 
  Available Stats Classes
 
