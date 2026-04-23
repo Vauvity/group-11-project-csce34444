@@ -5,7 +5,7 @@
     Course:     CSCE 3444 Software Engineering
     Instructor: Bahareh M. Dorri
 
-    Bankroll
+
     Shared session-level money tracker.
 
     Design intent:
@@ -33,6 +33,7 @@ public:
   bool withdraw(double amount);
   bool deposit(double amount);
   bool applyNetChange(double amount);
+  void setBalance(double amount);
 
   bool validateBalance() const;
 

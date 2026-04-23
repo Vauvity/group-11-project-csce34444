@@ -41,18 +41,15 @@ private:
 
     //  Per-game stats modules 
     BlackjackStats blackjackStats;
-    // SlotsStats    slotsStats;      // Sprint 2
-    // RouletteStats rouletteStats;   // Sprint 2
+    SlotsStats slotsStats;
+    RouletteStats rouletteStats;
 
     //  Session timer 
     time_point<steady_clock> sessionStart;
     bool sessionStarted;
 
     //  Helpers 
-    string formatMoney(double amount)    const;
-    string formatDuration(double secs)   const;
-    void   printDivider(char c = '-', int width = 52) const;
-    void   printRow(const string& label, const string& value, int width = 52) const;
+    //  (Terminal format helpers removed)
 
 public:
     explicit SessionStats(double startingBalance);
@@ -61,13 +58,7 @@ public:
     void startSession();
     void endSession();
 
-    //  Game runners 
-    void playBlackjack();
-    void playSlots();      // Sprint 2 placeholder
-    void playRoulette();   // Sprint 2 placeholder
-
-    //  Display 
-    void displaySessionSummary() const;
+    //  (Terminal runners and display removed)
 
     //  Getters 
     double getCurrentBalance()  const { return bankroll.getBalance(); }
@@ -79,6 +70,33 @@ public:
     double getSessionDuration() const;
 
     const BlackjackStats& getBlackjackStats() const { return blackjackStats; }
+    const SlotsStats& getSlotsStats() const { return slotsStats; }
+    const RouletteStats& getRouletteStats() const { return rouletteStats; }
+
+    void recordBlackjackRound(const BlackjackRoundSummary& summary) {
+        blackjackStats.recordRound(summary);
+        totalRoundsAllGames++;
+        if (!playedBlackjack) { playedBlackjack = true; gamesPlayed++; }
+        bankroll.setBalance(summary.endingBankroll);
+    }
+    
+    void recordSlotsRound(const SlotsRoundSummary& summary) {
+        slotsStats.recordRound(summary);
+        totalRoundsAllGames++;
+        if (!playedSlots) { playedSlots = true; gamesPlayed++; }
+        bankroll.deposit(summary.payoutAmount);
+        bankroll.withdraw(summary.betAmount); // rough estimation for deposit/withdraw tracking if needed
+    }
+    
+    void recordRouletteRound(const RouletteRoundSummary& summary) {
+        rouletteStats.recordRound(summary);
+        totalRoundsAllGames++;
+        if (!playedRoulette) { playedRoulette = true; gamesPlayed++; }
+        bankroll.deposit(summary.payoutAmount);
+        bankroll.withdraw(summary.betAmount);
+    }
+    
+    Bankroll& getBankroll() { return bankroll; }
 };
 
 #endif

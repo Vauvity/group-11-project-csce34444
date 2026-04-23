@@ -124,3 +124,12 @@ bool Bankroll::isBroke() const
 {
     return balance <= EPSILON;
 }
+
+void Bankroll::setBalance(double amount)
+{
+    if (amount >= 0.0)
+    {
+        balance = amount;
+        updateTracking();
+    }
+}
