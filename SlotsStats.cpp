@@ -1,24 +1,6 @@
-/*
-    Name:       Prayush Panta
-    Team:       Group 11 - Team Galactic - Space Casino
-    Course:     CSCE 3444.400 Software Engineering
-    Instructor: Bahareh M. Dorri
-*/
-
-
 #include "SlotsStats.h"
-#include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <cmath>
 
-using std::cout;
-using std::endl;
-using std::setw;
-using std::right;
-using std::fixed;
-using std::setprecision;
-using std::ostringstream;
 using std::string;
 
 // Constructor
@@ -63,73 +45,7 @@ void SlotsStats::recordRound(const SlotsRoundSummary& summary)
     if (summary.wasJackpot)     jackpotHits++;
 }
 
-// displayStats
-
-void SlotsStats::displayStats() const
-{
-    const int W = 50;
-
-    cout << endl;
-    printDivider('=', W);
-    cout << setw((W + 22) / 2) << right
-         << "* GALACTIC CASINO  --  SLOTS STATS *" << endl;
-    printDivider('=', W);
-
-    // Session overview
-    cout << " SESSION OVERVIEW" << endl;
-    printDivider('-', W);
-    printRow("Rounds Played",     std::to_string(totalRounds),              W);
-    printRow("Wins",              std::to_string(totalWins),                W);
-    printRow("Losses",            std::to_string(totalLosses),              W);
-
-    ostringstream wr;
-    wr << fixed << setprecision(1) << getWinRate() * 100.0 << "%";
-    printRow("Win Rate", wr.str(), W);
-
-    // Financial
-    cout << endl;
-    cout << " FINANCIAL" << endl;
-    printDivider('-', W);
-    printRow("Total Wagered",       formatMoney(totalAmountBet),               W);
-    printRow("Total Payout",        formatMoney(totalPayoutReceived),           W);
-    printRow("Net Profit / Loss",   formatMoney(getNetProfit()),               W);
-    printRow("Biggest Single Win",  formatMoney(biggestWin),                   W);
-    printRow("Biggest Single Loss", formatMoney(biggestLoss),                  W);
-
-    // Special events
-    cout << endl;
-    cout << " SPECIAL EVENTS" << endl;
-    printDivider('-', W);
-    printRow("3-in-a-Row Matches",  std::to_string(threeInARowHits),          W);
-    printRow("Jackpots (Bar/Seven)", std::to_string(jackpotHits),             W);
-
-    printDivider('=', W);
-    cout << endl;
-}
-
-// Helpers
-
-string SlotsStats::formatMoney(double amount) const
-{
-    ostringstream out;
-    if (amount >= 0)
-        out << "+$" << fixed << setprecision(2) << amount;
-    else
-        out << "-$" << fixed << setprecision(2) << std::abs(amount);
-    return out.str();
-}
-
-void SlotsStats::printDivider(char c, int width) const
-{
-    cout << string(width, c) << endl;
-}
-
-void SlotsStats::printRow(const string& label, const string& value, int width) const
-{
-    int gap = width - 2 - (int)label.size() - (int)value.size();
-    if (gap < 1) gap = 1;
-    cout << "  " << label << string(gap, '.') << value << endl;
-}
+// (Terminal display functions removed)
 
 // Getters
 

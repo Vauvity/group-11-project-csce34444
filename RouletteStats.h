@@ -1,10 +1,3 @@
-/*
-    Name:       Prayush Panta
-    Team:       Group 11 - Team Galactic - Space Casino
-    Course:     CSCE 3444.400 Software Engineering
-    Instructor: Bahareh M. Dorri
-*/
-
 #ifndef ROULETTESTATS_H
 #define ROULETTESTATS_H
 
@@ -37,16 +30,12 @@ private:
 
     int straightUpHits;
 
-    // Helpers
-    string formatMoney(double amount) const;
-    void printDivider(char c = '-', int width = 50) const;
-    void printRow(const string& label, const string& value, int width = 50) const;
+    // (Terminal format helpers removed)
 
 public:
     RouletteStats(double startingBankroll = 0.0);
 
     void recordRound(const RouletteRoundSummary& summary);
-    void displayStats() const;
 
     // Getters
     int    getTotalRounds()        const;

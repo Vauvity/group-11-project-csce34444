@@ -1,11 +1,3 @@
-/*
-    Name:       Prayush Panta
-    UID:        PP1008
-    Team:       Group 11 - Team Galactic - Space Casino
-    Course:     CSCE 3444 Software Engineering
-    Instructor: Bahareh M. Dorri
-*/
-
 #ifndef BLACKJACKSTATS_H
 #define BLACKJACKSTATS_H
 
@@ -18,7 +10,6 @@ using std::vector;
 
 // Tracks and displays cumulative blackjack session statistics.
 // Usage: after every round ends, call recordRound(game.getRoundSummary()).
-// Call displayStats() anytime to print a formatted stats screen.
 
 class BlackjackStats
 {
@@ -59,12 +50,7 @@ private:
     };
     vector<RoundResult> history;
 
-    //  Helpers 
-    string formatMoney(double amount) const;
-    string formatPercent(double numerator, double denominator) const;
-    string buildBar(double ratio, int width) const;
-    void printDivider(char c = '-', int width = 50) const;
-    void printRow(const string& label, const string& value, int width = 50) const;
+    // (Terminal format helpers removed)
 
 public:
     // Pass in the starting bankroll once when the session begins
@@ -72,9 +58,6 @@ public:
 
     // Call this after every round using game.getRoundSummary()
     void recordRound(const BlackjackRoundSummary& summary);
-
-    // Print the full stats screen to the terminal
-    void displayStats() const;
 
     //  Individual getters (for future app integration) 
     int   getTotalRounds()       const;
