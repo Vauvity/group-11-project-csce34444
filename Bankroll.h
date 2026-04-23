@@ -1,18 +1,16 @@
 /*
-    Name:       Prayush Panta
-    UID:        PP1008
-    Team:       Group 11 - Team Galactic - Space Casino
-    Course:     CSCE 3444 Software Engineering
-    Instructor: Bahareh M. Dorri
-
-
-    Shared session-level money tracker.
-
-    Design intent:
-      - SessionManager owns one Bankroll instance.
-      - Game modules do NOT own the real bankroll.
-      - Game modules calculate local bets/payouts and return round updates.
-*/
+ * Name:       Prayush Panta
+ * UID:        PP1008
+ * Team:       Group 11 - Team Galactic - Space Casino
+ * Course:     CSCE 3444 Software Engineering
+ * Instructor: Bahareh M. Dorri
+ * Description: Header for the Bankroll class, a shared session-level money tracker.
+ *
+ * Design intent:
+ *   - SessionManager owns one Bankroll instance.
+ *   - Game modules do NOT own the real bankroll.
+ *   - Game modules calculate local bets/payouts and return round updates.
+ */
 
 #ifndef BANKROLL_H
 #define BANKROLL_H

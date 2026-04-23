@@ -1,3 +1,12 @@
+/*
+ * Name:       Prayush Panta
+ * UID:        PP1008
+ * Team:       Group 11 - Team Galactic - Space Casino
+ * Course:     CSCE 3444 Software Engineering
+ * Instructor: Bahareh M. Dorri
+ * Description: Header for the BlackjackStats class tracking cumulative blackjack session statistics.
+ */
+
 #ifndef BLACKJACKSTATS_H
 #define BLACKJACKSTATS_H
 

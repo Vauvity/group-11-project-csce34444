@@ -1,16 +1,11 @@
 /*
-    Name:       Prayush Panta
-    UID:        PP1008
-    Team:       Group 11 - Team Galactic - Space Casino
-    Course:     CSCE 3444 Software Engineering
-    Instructor: Bahareh M. Dorri
-
-    SessionStats — Main session manager.
-    - Manages the Bankroll.
-    - Tracks session duration.
-    - Tracks game play.
-    - Displays session summary.
-*/
+ * Name:       Prayush Panta
+ * UID:        PP1008
+ * Team:       Group 11 - Team Galactic - Space Casino
+ * Course:     CSCE 3444 Software Engineering
+ * Instructor: Bahareh M. Dorri
+ * Description: Header for the SessionStats class, which manages session bankroll, duration, and cross-game statistics.
+ */
 
 #ifndef SESSIONSTATS_H
 #define SESSIONSTATS_H
