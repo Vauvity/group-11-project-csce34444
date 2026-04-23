@@ -1,45 +1,46 @@
-#pragma once
-#include <string>
+/*
+ * Name:       Prayush Panta
+ * UID:        PP1008
+ * Team:       Group 11 - Team Galactic - Space Casino
+ * Course:     CSCE 3444 Software Engineering
+ * Instructor: Bahareh M. Dorri
+ * Description: Header for the Bankroll class, a shared session-level money tracker.
+ *
+ * Design intent:
+ *   - SessionManager owns one Bankroll instance.
+ *   - Game modules do NOT own the real bankroll.
+ *   - Game modules calculate local bets/payouts and return round updates.
+ */
 
-class Bankroll
-{
-public:
-    enum class ErrorCode
-    {
-        None,
-        InvalidAmount,
-        InsufficientFunds,
-        NegativeBalance
-    };
+#ifndef BANKROLL_H
+#define BANKROLL_H
 
-    explicit Bankroll(double startingAmount = 1000.0);
-
-    bool withdraw(double amount);
-    void deposit(double amount);
-    void applyNetChange(double amount);
-    void syncToBalance(double newBalance);
-    void reset(double startingAmount);
-
-    bool validateBalance() const;
-
-    ErrorCode getLastError() const;
-    std::string getLastErrorMessage() const;
-
-    double getBalance() const;
-    double getStartingBalance() const;
-    double getNetGainLoss() const;
-    double getPeakBalance() const;
-    double getLowestBalance() const;
-    bool isBroke() const;
-
-    void printSummary() const;
-
+class Bankroll {
 private:
-    double balance;
-    double startingBalance;
-    double peakBalance;
-    double lowestBalance;
-    ErrorCode lastError;
+  double balance;
+  double startingBalance;
+  double peakBalance;
+  double lowestBalance;
 
-    void updateTracking();
+  void updateTracking();
+
+public:
+  explicit Bankroll(double startingAmount = 1000.0);
+
+  bool canAfford(double amount) const;
+  bool withdraw(double amount);
+  bool deposit(double amount);
+  bool applyNetChange(double amount);
+  void setBalance(double amount);
+
+  bool validateBalance() const;
+
+  double getBalance() const;
+  double getStartingBalance() const;
+  double getNetGainLoss() const;
+  double getPeakBalance() const;
+  double getLowestBalance() const;
+  bool isBroke() const;
 };
+
+#endif

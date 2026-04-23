@@ -577,6 +577,7 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
         }
     }
 
+    recordRoundIfNeeded();
     updateText();
 }
 
@@ -626,7 +627,7 @@ void BlackjackUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
         recordRoundIfNeeded();
         if (sessionStats)
         {
-            sessionStats->syncCurrentBalance(game.getTableBalance());
+            sessionStats->getBankroll().setBalance(game.getTableBalance());
         }
         roundStarted = false;
         updateText();

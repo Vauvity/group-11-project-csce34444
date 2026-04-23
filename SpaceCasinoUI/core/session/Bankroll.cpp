@@ -1,20 +1,28 @@
-#include "Bankroll.h"
-#include <iostream>
-#include <iomanip>
-#include <algorithm>
-#include <stdexcept>
-#include <cmath>
+/*
+ * Name:       Prayush Panta
+ * UID:        PP1008
+ * Team:       Group 11 - Team Galactic - Space Casino
+ * Course:     CSCE 3444 Software Engineering
+ * Instructor: Bahareh M. Dorri
+ * Description: Implementation of the Bankroll class for session-level money tracking.
+ */
 
-using std::cout;
-using std::fixed;
-using std::setprecision;
+#include "Bankroll.h"
+
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
+
+namespace
+{
+    constexpr double EPSILON = 1e-9;
+}
 
 Bankroll::Bankroll(double startingAmount)
     : balance(startingAmount),
-    startingBalance(startingAmount),
-    peakBalance(startingAmount),
-    lowestBalance(startingAmount),
-    lastError(ErrorCode::None)
+      startingBalance(startingAmount),
+      peakBalance(startingAmount),
+      lowestBalance(startingAmount)
 {
     if (startingAmount <= 0.0)
     {
@@ -28,101 +36,64 @@ void Bankroll::updateTracking()
     lowestBalance = std::min(lowestBalance, balance);
 }
 
-bool Bankroll::withdraw(double amount)
+bool Bankroll::canAfford(double amount) const
 {
     if (amount <= 0.0)
     {
-        lastError = ErrorCode::InvalidAmount;
         return false;
     }
 
-    if (amount > balance)
+    return amount <= balance + EPSILON;
+}
+
+bool Bankroll::withdraw(double amount)
+{
+    if (!canAfford(amount))
     {
-        lastError = ErrorCode::InsufficientFunds;
         return false;
     }
 
     balance -= amount;
+
+    if (std::abs(balance) < EPSILON)
+    {
+        balance = 0.0;
+    }
+
     updateTracking();
-    lastError = ErrorCode::None;
     return true;
 }
 
-void Bankroll::deposit(double amount)
+bool Bankroll::deposit(double amount)
 {
-    if (amount < 0.0)
+    if (amount <= 0.0)
     {
-        lastError = ErrorCode::InvalidAmount;
-        return;
+        return false;
     }
 
     balance += amount;
     updateTracking();
-    lastError = ErrorCode::None;
+    return true;
 }
 
-void Bankroll::applyNetChange(double amount)
+bool Bankroll::applyNetChange(double amount)
 {
-    balance += amount;
-    updateTracking();
-
-    if (balance < 0.0)
-        lastError = ErrorCode::NegativeBalance;
-    else
-        lastError = ErrorCode::None;
-}
-
-void Bankroll::syncToBalance(double newBalance)
-{
-    balance = newBalance;
-    updateTracking();
-
-    if (balance < 0.0)
-        lastError = ErrorCode::NegativeBalance;
-    else
-        lastError = ErrorCode::None;
-}
-
-void Bankroll::reset(double newStartingAmount)
-{
-    if (newStartingAmount <= 0.0)
+    if (std::abs(amount) < EPSILON)
     {
-        lastError = ErrorCode::InvalidAmount;
-        return;
+        return true;
     }
 
-    startingBalance = newStartingAmount;
-    balance = newStartingAmount;
-    peakBalance = newStartingAmount;
-    lowestBalance = newStartingAmount;
-    lastError = ErrorCode::None;
+    if (amount > 0.0)
+    {
+        return deposit(amount);
+    }
+
+    return withdraw(-amount);
 }
 
 bool Bankroll::validateBalance() const
 {
-    return balance >= 0.0;
-}
-
-Bankroll::ErrorCode Bankroll::getLastError() const
-{
-    return lastError;
-}
-
-std::string Bankroll::getLastErrorMessage() const
-{
-    switch (lastError)
-    {
-    case ErrorCode::None:
-        return "";
-    case ErrorCode::InvalidAmount:
-        return "Amount must be greater than 0.";
-    case ErrorCode::InsufficientFunds:
-        return "Insufficient funds.";
-    case ErrorCode::NegativeBalance:
-        return "Balance is negative. Possible accounting error.";
-    default:
-        return "Unknown bankroll error.";
-    }
+    return balance >= -EPSILON;
 }
 
 double Bankroll::getBalance() const
@@ -152,24 +123,14 @@ double Bankroll::getLowestBalance() const
 
 bool Bankroll::isBroke() const
 {
-    return balance <= 0.0;
+    return balance <= EPSILON;
 }
 
-void Bankroll::printSummary() const
+void Bankroll::setBalance(double amount)
 {
-    double net = getNetGainLoss();
-
-    cout << "\n========== Bankroll Summary ==========\n";
-    cout << fixed << setprecision(2);
-    cout << "  Starting Balance : $" << startingBalance << "\n";
-    cout << "  Current Balance  : $" << balance << "\n";
-    cout << "  Peak Balance     : $" << peakBalance << "\n";
-    cout << "  Lowest Balance   : $" << lowestBalance << "\n";
-
-    if (net >= 0.0)
-        cout << "  Net Gain / Loss  : +$" << net << "\n";
-    else
-        cout << "  Net Gain / Loss  : -$" << std::abs(net) << "\n";
-
-    cout << "======================================\n";
+    if (amount >= 0.0)
+    {
+        balance = amount;
+        updateTracking();
+    }
 }

@@ -92,7 +92,7 @@ void SessionStatsUI::draw(sf::RenderWindow& window, const SessionStats& sessionS
     drawPanel(window, {520.f, 405.f}, {300.f, 230.f}, "Quick Summary");
 
     float y = 175.f;
-    drawStatLine(window, "Starting Balance", money(sessionStats.getStartingBalance()), 55.f, y); y += 30.f;
+    drawStatLine(window, "Starting Balance", money(sessionStats.getBankroll().getStartingBalance()), 55.f, y); y += 30.f;
     drawStatLine(window, "Current Balance", money(sessionStats.getCurrentBalance()), 55.f, y); y += 30.f;
     drawStatLine(window, "Net Gain/Loss", money(sessionStats.getNetGainLoss()), 55.f, y); y += 30.f;
     drawStatLine(window, "Peak Balance", money(sessionStats.getPeakBalance()), 55.f, y); y += 30.f;
@@ -130,10 +130,10 @@ void SessionStatsUI::draw(sf::RenderWindow& window, const SessionStats& sessionS
     drawStatLine(window, "Net", money(rou.getNetProfit()), 195.f, y);
 
     y = 450.f;
-    drawStatLine(window, "Blackjack Played", sessionStats.hasPlayedBlackjack() ? "Yes" : "No", 535.f, y); y += 30.f;
-    drawStatLine(window, "Slots Played", sessionStats.hasPlayedSlots() ? "Yes" : "No", 535.f, y); y += 30.f;
-    drawStatLine(window, "Roulette Played", sessionStats.hasPlayedRoulette() ? "Yes" : "No", 535.f, y); y += 30.f;
-    drawStatLine(window, "Session Active", sessionStats.isSessionStarted() ? "Yes" : "No", 535.f, y); y += 30.f;
+    drawStatLine(window, "Blackjack Played", sessionStats.getBlackjackStats().getTotalRounds() > 0 ? "Yes" : "No", 535.f, y); y += 30.f;
+    drawStatLine(window, "Slots Played", sessionStats.getSlotsStats().getTotalRounds() > 0 ? "Yes" : "No", 535.f, y); y += 30.f;
+    drawStatLine(window, "Roulette Played", sessionStats.getRouletteStats().getTotalRounds() > 0 ? "Yes" : "No", 535.f, y); y += 30.f;
+    drawStatLine(window, "Session Active", sessionStats.getSessionDuration() > 0.0 ? "Yes" : "No", 535.f, y); y += 30.f;
     drawStatLine(window, "Duration", std::to_string(static_cast<int>(sessionStats.getSessionDuration())) + "s", 535.f, y);
 
     window.draw(backButton);

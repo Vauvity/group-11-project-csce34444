@@ -336,7 +336,7 @@ void SlotsUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
     {
         if (sessionStats)
         {
-            sessionStats->syncCurrentBalance(game.getBankroll());
+            sessionStats->getBankroll().setBalance(game.getBankroll());
         }
         backToMenu = true;
         return;
@@ -354,7 +354,13 @@ void SlotsUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
                 SlotsSummary summary = game.statSummary();
                 if (summary.spinNumber > lastRecordedSpinNumber)
                 {
-                    sessionStats->recordSlotsRound(summary);
+                    SlotsRoundSummary rs;
+                    rs.betAmount = summary.betMade;
+                    rs.payoutAmount = summary.payoutAmount;
+                    rs.netChange = summary.netChange;
+                    rs.wasThreeInARow = (summary.numLowWins > 0 || summary.numHighWins > 0 || summary.numBarOr7 > 0);
+                    rs.wasJackpot = (summary.wonJackpot == 'Y');
+                    sessionStats->recordSlotsRound(rs);
                     lastRecordedSpinNumber = summary.spinNumber;
                 }
             }

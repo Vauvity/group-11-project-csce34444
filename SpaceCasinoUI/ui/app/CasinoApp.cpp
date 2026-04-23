@@ -108,7 +108,8 @@ void CasinoApp::processEvents()
                     {
                         sharedBankroll = mainMenu->getEnteredBankroll();
                         bankrollInitialized = true;
-                        sessionStats.startSession(sharedBankroll);
+                        sessionStats = SessionStats(sharedBankroll);
+                        sessionStats.startSession();
                     }
 
                     syncGameSelectBankroll();
@@ -128,7 +129,7 @@ void CasinoApp::processEvents()
 
                 gameSelect->handleMouseClick(mousePos, openBlackjack, openRoulette, openSlots, openStats, backToMain);
                 sharedBankroll = gameSelect->getBankroll();
-                sessionStats.syncCurrentBalance(sharedBankroll);
+                sessionStats.getBankroll().setBalance(sharedBankroll);
 
                 if (openBlackjack)
                 {
@@ -163,7 +164,7 @@ void CasinoApp::processEvents()
                 if (backToMenu)
                 {
                     sharedBankroll = blackjackUI->getCurrentBankroll();
-                    sessionStats.syncCurrentBalance(sharedBankroll);
+                    sessionStats.getBankroll().setBalance(sharedBankroll);
                     syncGameSelectBankroll();
                     syncSlotsBankroll();
                     syncRouletteBankroll();
@@ -177,7 +178,7 @@ void CasinoApp::processEvents()
                 if (backToMenu)
                 {
                     sharedBankroll = slotsUI->getCurrentBankroll();
-                    sessionStats.syncCurrentBalance(sharedBankroll);
+                    sessionStats.getBankroll().setBalance(sharedBankroll);
                     syncGameSelectBankroll();
                     syncBlackjackBankroll();
                     syncRouletteBankroll();
@@ -191,7 +192,7 @@ void CasinoApp::processEvents()
                 if (backToMenu)
                 {
                     sharedBankroll = rouletteUI->getCurrentBankroll();
-                    sessionStats.syncCurrentBalance(sharedBankroll);
+                    sessionStats.getBankroll().setBalance(sharedBankroll);
                     syncGameSelectBankroll();
                     syncBlackjackBankroll();
                     syncSlotsBankroll();

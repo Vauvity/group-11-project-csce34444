@@ -446,7 +446,7 @@ void RouletteUI::spinRound()
         summary.payoutAmount = net > 0 ? currentBet + net : 0.0;
         summary.wasStraightUp = (selectedBet == SelectedBet::Straight);
         summary.straightUpWon = (selectedBet == SelectedBet::Straight && net > 0);
-        sessionStats->recordRouletteRound(summary, static_cast<double>(after));
+        sessionStats->recordRouletteRound(summary);
     }
 
     hasSpun = true;
@@ -556,7 +556,7 @@ void RouletteUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
     {
         if (sessionStats)
         {
-            sessionStats->syncCurrentBalance(static_cast<double>(game.getBalance()));
+            sessionStats->getBankroll().setBalance(static_cast<double>(game.getBalance()));
         }
         backToMenu = true;
         return;
