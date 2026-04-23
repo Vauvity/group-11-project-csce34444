@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <vector>
+#include <map>
 #include "../../../core/blackjack/BlackjackGame.h"
 #include "../../../core/blackjack/Card.h"
 #include "../../../core/session/SessionStats.h"
@@ -44,6 +45,11 @@ private:
     sf::Text doubleText;
     sf::Text newRoundText;
     sf::Text backText;
+    sf::Text hintText;
+
+    sf::RectangleShape hintButton;
+
+    std::string currentHint;
 
     float currentBet;
     std::string betInput;
@@ -72,11 +78,19 @@ private:
     std::string getDealerDisplay() const;
     std::string getPlayerDisplay() const;
     std::string getStatusMessage() const;
-    std::string shortenResultText(const std::string& text) const;
+    std::string shortenResultText(const std::string& fullText) const;
+    void commitBetInput();
+
+    std::map<std::string, sf::Texture> cardTextures;
+    sf::Texture cardBackTexture;
+
+    void loadCardTextures();
+    std::string rankToString(Rank r) const;
+    std::string suitToString(Suit s) const;
+
     std::string getPostRoundStats() const;
 
     void updateText();
     void handleGameClick(sf::Vector2f mousePos);
-    void commitBetInput();
     void recordRoundIfNeeded();
 };

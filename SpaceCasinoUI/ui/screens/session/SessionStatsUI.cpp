@@ -50,7 +50,7 @@ void SessionStatsUI::drawPanel(sf::RenderWindow& window, sf::Vector2f pos, sf::V
     window.draw(header);
 }
 
-void SessionStatsUI::drawStatLine(sf::RenderWindow& window, const std::string& label, const std::string& value, float x, float y, unsigned int size) const
+void SessionStatsUI::drawStatLine(sf::RenderWindow& window, const std::string& label, const std::string& value, float x, float y, float width, unsigned int size) const
 {
     sf::Text left(font, label, size);
     left.setFillColor(sf::Color::White);
@@ -59,7 +59,7 @@ void SessionStatsUI::drawStatLine(sf::RenderWindow& window, const std::string& l
     sf::Text right(font, value, size);
     right.setFillColor(sf::Color(210, 235, 255));
     auto bounds = right.getLocalBounds();
-    right.setPosition({x + 280.f - bounds.size.x - bounds.position.x, y});
+    right.setPosition({x + width - bounds.size.x - bounds.position.x, y});
     window.draw(right);
 }
 
@@ -85,11 +85,11 @@ void SessionStatsUI::draw(sf::RenderWindow& window, const SessionStats& sessionS
     window.draw(titleText);
     window.draw(subTitleText);
 
-    drawPanel(window, {40.f, 130.f}, {300.f, 240.f}, "Overall Session");
-    drawPanel(window, {360.f, 130.f}, {280.f, 240.f}, "Blackjack");
-    drawPanel(window, {660.f, 130.f}, {300.f, 240.f}, "Slots");
-    drawPanel(window, {180.f, 395.f}, {300.f, 220.f}, "Roulette");
-    drawPanel(window, {520.f, 395.f}, {300.f, 220.f}, "Quick Summary");
+    drawPanel(window, {40.f, 130.f}, {300.f, 260.f}, "Overall Session");
+    drawPanel(window, {360.f, 130.f}, {280.f, 260.f}, "Blackjack");
+    drawPanel(window, {660.f, 130.f}, {300.f, 260.f}, "Slots");
+    drawPanel(window, {180.f, 405.f}, {300.f, 230.f}, "Roulette");
+    drawPanel(window, {520.f, 405.f}, {300.f, 230.f}, "Quick Summary");
 
     float y = 175.f;
     drawStatLine(window, "Starting Balance", money(sessionStats.getStartingBalance()), 55.f, y); y += 30.f;
@@ -102,13 +102,13 @@ void SessionStatsUI::draw(sf::RenderWindow& window, const SessionStats& sessionS
 
     const auto& bj = sessionStats.getBlackjackStats();
     y = 175.f;
-    drawStatLine(window, "Rounds", std::to_string(bj.getTotalRounds()), 375.f, y); y += 30.f;
-    drawStatLine(window, "Wins", std::to_string(bj.getTotalWins()), 375.f, y); y += 30.f;
-    drawStatLine(window, "Losses", std::to_string(bj.getTotalLosses()), 375.f, y); y += 30.f;
-    drawStatLine(window, "Pushes", std::to_string(bj.getTotalPushes()), 375.f, y); y += 30.f;
-    drawStatLine(window, "Blackjacks", std::to_string(bj.getTotalBlackjacks()), 375.f, y); y += 30.f;
-    drawStatLine(window, "Win Rate", percent(bj.getWinRate()), 375.f, y); y += 30.f;
-    drawStatLine(window, "Net", money(bj.getNetProfit()), 375.f, y);
+    drawStatLine(window, "Rounds", std::to_string(bj.getTotalRounds()), 375.f, y, 255.f); y += 30.f;
+    drawStatLine(window, "Wins", std::to_string(bj.getTotalWins()), 375.f, y, 255.f); y += 30.f;
+    drawStatLine(window, "Losses", std::to_string(bj.getTotalLosses()), 375.f, y, 255.f); y += 30.f;
+    drawStatLine(window, "Pushes", std::to_string(bj.getTotalPushes()), 375.f, y, 255.f); y += 30.f;
+    drawStatLine(window, "Blackjacks", std::to_string(bj.getTotalBlackjacks()), 375.f, y, 255.f); y += 30.f;
+    drawStatLine(window, "Win Rate", percent(bj.getWinRate()), 375.f, y, 255.f); y += 30.f;
+    drawStatLine(window, "Net", money(bj.getNetProfit()), 375.f, y, 255.f);
 
     const auto& slots = sessionStats.getSlotsStats();
     y = 175.f;
@@ -121,7 +121,7 @@ void SessionStatsUI::draw(sf::RenderWindow& window, const SessionStats& sessionS
     drawStatLine(window, "Net", money(slots.getNetProfit()), 675.f, y);
 
     const auto& rou = sessionStats.getRouletteStats();
-    y = 440.f;
+    y = 450.f;
     drawStatLine(window, "Rounds", std::to_string(rou.getTotalRounds()), 195.f, y); y += 30.f;
     drawStatLine(window, "Wins", std::to_string(rou.getTotalWins()), 195.f, y); y += 30.f;
     drawStatLine(window, "Losses", std::to_string(rou.getTotalLosses()), 195.f, y); y += 30.f;
@@ -129,7 +129,7 @@ void SessionStatsUI::draw(sf::RenderWindow& window, const SessionStats& sessionS
     drawStatLine(window, "Win Rate", percent(rou.getWinRate()), 195.f, y); y += 30.f;
     drawStatLine(window, "Net", money(rou.getNetProfit()), 195.f, y);
 
-    y = 440.f;
+    y = 450.f;
     drawStatLine(window, "Blackjack Played", sessionStats.hasPlayedBlackjack() ? "Yes" : "No", 535.f, y); y += 30.f;
     drawStatLine(window, "Slots Played", sessionStats.hasPlayedSlots() ? "Yes" : "No", 535.f, y); y += 30.f;
     drawStatLine(window, "Roulette Played", sessionStats.hasPlayedRoulette() ? "Yes" : "No", 535.f, y); y += 30.f;

@@ -11,9 +11,10 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     exitText(font, "EXIT", 22),
     confirmText(font, "CONFIRM", 20),
     cancelText(font, "CANCEL", 20),
-    bankrollInput("")
+    bankrollInput(""),
+    bgSprite(bgTexture)
 {
-    titleText.setFillColor(sf::Color(255, 210, 90));
+    titleText.setFillColor(sf::Color(90, 210, 255));
     sf::FloatRect bounds = titleText.getLocalBounds();
     titleText.setPosition({
         500.f - bounds.size.x / 2.f - bounds.position.x,
@@ -24,13 +25,13 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     startButton.setPosition({ 370.f, 250.f });
     startButton.setFillColor(sf::Color(50, 115, 230));
     startButton.setOutlineThickness(2.f);
-    startButton.setOutlineColor(sf::Color(255, 210, 90));
+    startButton.setOutlineColor(sf::Color(90, 210, 255));
 
     exitButton.setSize({ 260.f, 90.f });
     exitButton.setPosition({ 370.f, 390.f });
     exitButton.setFillColor(sf::Color(180, 65, 85));
     exitButton.setOutlineThickness(2.f);
-    exitButton.setOutlineColor(sf::Color(255, 210, 90));
+    exitButton.setOutlineColor(sf::Color(90, 210, 255));
 
     startText.setFillColor(sf::Color::White);
     exitText.setFillColor(sf::Color::White);
@@ -47,7 +48,7 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     popupPanel.setOutlineThickness(3.f);
     popupPanel.setOutlineColor(sf::Color(90, 210, 255));
 
-    bankrollLabelText.setFillColor(sf::Color(255, 210, 90));
+    bankrollLabelText.setFillColor(sf::Color(90, 210, 255));
     sf::FloatRect labelBounds = bankrollLabelText.getLocalBounds();
     bankrollLabelText.setPosition({
         500.f - labelBounds.size.x / 2.f - labelBounds.position.x,
@@ -73,19 +74,27 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     confirmButton.setPosition({ 340.f, 410.f });
     confirmButton.setFillColor(sf::Color(70, 70, 100));
     confirmButton.setOutlineThickness(2.f);
-    confirmButton.setOutlineColor(sf::Color(255, 210, 90));
+    confirmButton.setOutlineColor(sf::Color(90, 210, 255));
 
     cancelButton.setSize({ 160.f, 52.f });
     cancelButton.setPosition({ 520.f, 410.f });
     cancelButton.setFillColor(sf::Color(120, 120, 120));
     cancelButton.setOutlineThickness(2.f);
-    cancelButton.setOutlineColor(sf::Color(255, 210, 90));
+    cancelButton.setOutlineColor(sf::Color(90, 210, 255));
 
     confirmText.setFillColor(sf::Color::White);
     cancelText.setFillColor(sf::Color::White);
 
     centerTextInButton(confirmText, confirmButton);
     centerTextInButton(cancelText, cancelButton);
+
+    (void)bgTexture.loadFromFile("assets/images/global/bg_nebula.png");
+    bgSprite.setTexture(bgTexture, true);
+    sf::FloatRect bgBounds = bgSprite.getLocalBounds();
+    if (bgBounds.size.x > 0 && bgBounds.size.y > 0)
+    {
+        bgSprite.setScale({ 1000.f / bgBounds.size.x, 760.f / bgBounds.size.y });
+    }
 
     refreshBankrollText();
 }
@@ -274,18 +283,16 @@ void MainMenu::handleMouseClick(sf::Vector2f mousePos, bool& startGame, bool& ex
 
 void MainMenu::draw(sf::RenderWindow& window)
 {
-    sf::RectangleShape background({ 1000.f, 760.f });
-    background.setFillColor(sf::Color(20, 55, 30));
-    window.draw(background);
+    window.draw(bgSprite);
 
     sf::RectangleShape topLine({ 880.f, 3.f });
     topLine.setPosition({ 58.f, 170.f });
-    topLine.setFillColor(sf::Color(255, 210, 90));
+    topLine.setFillColor(sf::Color(90, 210, 255));
     window.draw(topLine);
 
     sf::RectangleShape bottomLine({ 880.f, 3.f });
     bottomLine.setPosition({ 58.f, 610.f });
-    bottomLine.setFillColor(sf::Color(255, 210, 90));
+    bottomLine.setFillColor(sf::Color(90, 210, 255));
     window.draw(bottomLine);
 
     window.draw(titleText);

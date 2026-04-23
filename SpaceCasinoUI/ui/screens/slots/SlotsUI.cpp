@@ -26,6 +26,8 @@ SlotsUI::SlotsUI(sf::Font& sharedFont)
     sessionStats(nullptr),
     lastRecordedSpinNumber(0)
 {
+    loadTextures();
+
     titleText.setFillColor(sf::Color(210, 120, 255));
     titleText.setPosition({ 400.f, 40.f });
 
@@ -106,6 +108,21 @@ SlotsUI::SlotsUI(sf::Font& sharedFont)
     centerTextInButton(betCancelText, betCancelButton);
 
     updateText();
+}
+
+void SlotsUI::loadTextures()
+{
+    symbolTextures['B'].loadFromFile("assets/images/slots/bar.png");
+    symbolTextures['7'].loadFromFile("assets/images/slots/seven.png");
+    symbolTextures['J'].loadFromFile("assets/images/slots/letter-j.png");
+    symbolTextures['Q'].loadFromFile("assets/images/slots/Q.png");
+    symbolTextures['S'].loadFromFile("assets/images/slots/star.png");
+    symbolTextures['A'].loadFromFile("assets/images/slots/alien.png");
+    symbolTextures['M'].loadFromFile("assets/images/slots/full-moon.png");
+    symbolTextures['R'].loadFromFile("assets/images/slots/rocket.png");
+    symbolTextures['G'].loadFromFile("assets/images/slots/galaxy.png");
+    symbolTextures['2'].loadFromFile("assets/images/slots/2x.png");
+    symbolTextures['5'].loadFromFile("assets/images/slots/5x.png");
 }
 
 void SlotsUI::refreshBetInputDisplay()
@@ -404,23 +421,56 @@ void SlotsUI::draw(sf::RenderWindow& window)
             cell.setOutlineColor(sf::Color(110, 80, 160));
             window.draw(cell);
 
-            std::string displayText = "?";
-
             if (hasSpun)
             {
-                displayText = symbolToString(currentWindow.getDisplay(col, row));
+                char symbolChar = currentWindow.getDisplay(col, row);
+                if (symbolTextures.find(symbolChar) != symbolTextures.end())
+                {
+                    sf::Sprite sprite(symbolTextures[symbolChar]);
+                    sf::FloatRect bounds = sprite.getLocalBounds();
+                    
+                    // scale to fit nicely within the cell
+                    float scaleX = (cell.getSize().x - 20.f) / bounds.size.x;
+                    float scaleY = (cell.getSize().y - 20.f) / bounds.size.y;
+                    float scale = std::min(scaleX, scaleY);
+                    
+                    sprite.setScale({scale, scale});
+                    
+                    sf::FloatRect scaledBounds = sprite.getGlobalBounds();
+                    sprite.setPosition({
+                        cell.getPosition().x + (cell.getSize().x - scaledBounds.size.x) / 2.f,
+                        cell.getPosition().y + (cell.getSize().y - scaledBounds.size.y) / 2.f
+                    });
+                    
+                    window.draw(sprite);
+                }
+                else
+                {
+                    sf::Text symbol(font, symbolToString(symbolChar), 24);
+                    symbol.setFillColor(sf::Color::White);
+
+                    sf::FloatRect bounds = symbol.getLocalBounds();
+                    symbol.setPosition({
+                        cell.getPosition().x + (cell.getSize().x - bounds.size.x) / 2.f - bounds.position.x,
+                        cell.getPosition().y + (cell.getSize().y - bounds.size.y) / 2.f - bounds.position.y
+                        });
+
+                    window.draw(symbol);
+                }
             }
+            else
+            {
+                sf::Text symbol(font, "?", 24);
+                symbol.setFillColor(sf::Color::White);
 
-            sf::Text symbol(font, displayText, 24);
-            symbol.setFillColor(sf::Color::White);
+                sf::FloatRect bounds = symbol.getLocalBounds();
+                symbol.setPosition({
+                    cell.getPosition().x + (cell.getSize().x - bounds.size.x) / 2.f - bounds.position.x,
+                    cell.getPosition().y + (cell.getSize().y - bounds.size.y) / 2.f - bounds.position.y
+                    });
 
-            sf::FloatRect bounds = symbol.getLocalBounds();
-            symbol.setPosition({
-                cell.getPosition().x + (cell.getSize().x - bounds.size.x) / 2.f - bounds.position.x,
-                cell.getPosition().y + (cell.getSize().y - bounds.size.y) / 2.f - bounds.position.y
-                });
-
-            window.draw(symbol);
+                window.draw(symbol);
+            }
         }
     }
 

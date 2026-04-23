@@ -60,6 +60,9 @@ private:
     std::string chipInput;
     bool enteringChip;
 
+    sf::Texture wheelTexture;
+    sf::Sprite wheelSprite;
+
     sf::RectangleShape overlay;
     sf::RectangleShape popupPanel;
     sf::Text chipInputLabelText;
@@ -90,6 +93,10 @@ private:
     SelectedBet selectedBet;
     bool hasSpun;
     SessionStats* sessionStats;
+
+    sf::Clock ballAnimationClock;
+    bool isBallSpinning;
+    float ballAngle;
 
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
     void updateText();

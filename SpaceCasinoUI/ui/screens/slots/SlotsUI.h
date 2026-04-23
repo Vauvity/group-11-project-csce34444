@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <string>
+#include <map>
 #include "../../../core/slots/SlotsGame.h"
 #include "../../../core/slots/SlotWindow.h"
 #include "../../../core/session/SessionStats.h"
@@ -61,6 +62,9 @@ private:
 
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
     std::string symbolToString(char c) const;
+
+    std::map<char, sf::Texture> symbolTextures;
+    void loadTextures();
     void updateText();
     void commitBetInput();
 };

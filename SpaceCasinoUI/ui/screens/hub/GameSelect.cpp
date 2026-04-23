@@ -50,7 +50,7 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     showingInfoPopup(false),
     infoPanel({ 600.f, 400.f }),
     infoTitleText(font, "Game Rules", 32),
-    infoBodyText(font, "", 20),
+    infoBodyText(font, "", 24),
     infoCloseButton({ 180.f, 50.f }),
     infoCloseText(font, "CLOSE", 20),
 
@@ -198,6 +198,7 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     
     infoBodyText.setFillColor(sf::Color::White);
     infoBodyText.setPosition({ 230.f, 280.f });
+    infoBodyText.setLineSpacing(1.5f);
     
     infoCloseButton.setPosition({ 410.f, 500.f });
     infoCloseButton.setFillColor(sf::Color(180, 65, 85));

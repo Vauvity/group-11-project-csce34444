@@ -41,7 +41,10 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     chipConfirmText(font, "CONFIRM", 20),
     chipCancelText(font, "CANCEL", 20),
     hasSpun(false),
-    sessionStats(nullptr)
+    sessionStats(nullptr),
+    wheelSprite(wheelTexture),
+    isBallSpinning(false),
+    ballAngle(0.f)
 {
     titleText.setFillColor(sf::Color(255, 85, 85));
     titleText.setPosition({ 355.f, 35.f });
@@ -56,10 +59,10 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     selectedBetText.setPosition({ 70.f, 155.f });
 
     numberInputLabelText.setFillColor(sf::Color(255, 230, 230));
-    numberInputLabelText.setPosition({ 690.f, 370.f });
+    numberInputLabelText.setPosition({ 760.f, 370.f });
 
     numberBox.setSize({ 120.f, 46.f });
-    numberBox.setPosition({ 725.f, 405.f });
+    numberBox.setPosition({ 795.f, 405.f });
     numberBox.setFillColor(sf::Color(28, 10, 18));
     numberBox.setOutlineThickness(2.f);
     numberBox.setOutlineColor(sf::Color(255, 70, 70));
@@ -115,6 +118,13 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     centerTextInButton(straightText, straightButton);
     centerTextInButton(spinText, spinButton);
     centerTextInButton(backText, backButton);
+
+    wheelTexture.loadFromFile("assets/images/roulette/pngimg.com - roulette_PNG50.png");
+    wheelSprite.setTexture(wheelTexture, true);
+    sf::FloatRect bounds = wheelSprite.getLocalBounds();
+    wheelSprite.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
+    wheelSprite.setScale({ 220.f / bounds.size.x, 220.f / bounds.size.y });
+    wheelSprite.setPosition({ 830.f, 260.f });
 
     overlay.setSize({ 1000.f, 760.f });
     overlay.setFillColor(sf::Color(0, 0, 0, 160));
@@ -440,6 +450,10 @@ void RouletteUI::spinRound()
     }
 
     hasSpun = true;
+    isBallSpinning = true;
+    ballAngle = 0.f;
+    ballAnimationClock.restart();
+    
     updateText();
 }
 
@@ -683,19 +697,8 @@ void RouletteUI::draw(sf::RenderWindow& window)
         window.draw(numberText);
     }
 
-    sf::CircleShape wheel(95.f);
-    wheel.setPosition({ 700.f, 185.f });
-    wheel.setFillColor(sf::Color(240, 240, 240));
-    wheel.setOutlineThickness(4.f);
-    wheel.setOutlineColor(sf::Color(255, 70, 70));
-    window.draw(wheel);
 
-    sf::Text wheelLabel(font, "WHEEL", 22);
-    wheelLabel.setFillColor(sf::Color(60, 20, 20));
-    wheelLabel.setPosition({ 735.f, 205.f });
-    window.draw(wheelLabel);
-
-    if (hasSpun)
+    if (hasSpun && !isBallSpinning)
     {
         RouletteRoundResult round = game.getLastResult();
         sf::Text lastNumber(font, std::to_string(round.number), 46);
@@ -713,9 +716,11 @@ void RouletteUI::draw(sf::RenderWindow& window)
         }
 
         auto lastBounds = lastNumber.getLocalBounds();
+        lastNumber.setOutlineThickness(2.f);
+        lastNumber.setOutlineColor(sf::Color(255, 255, 255, 150));
         lastNumber.setPosition({
-            795.f - lastBounds.size.x / 2.f - lastBounds.position.x,
-            255.f - lastBounds.size.y / 2.f - lastBounds.position.y
+            830.f - lastBounds.size.x / 2.f - lastBounds.position.x,
+            260.f - lastBounds.size.y / 2.f - lastBounds.position.y
             });
         window.draw(lastNumber);
     }
@@ -753,8 +758,37 @@ void RouletteUI::draw(sf::RenderWindow& window)
     window.draw(straightText);
     window.draw(spinText);
     window.draw(backText);
-    window.draw(resultText);
-    window.draw(payoutText);
+    if (!isBallSpinning)
+    {
+        window.draw(resultText);
+        window.draw(payoutText);
+    }
+    
+    window.draw(wheelSprite);
+
+    if (isBallSpinning)
+    {
+        float elapsed = ballAnimationClock.getElapsedTime().asSeconds();
+        if (elapsed > 1.5f) 
+        {
+            isBallSpinning = false;
+        }
+        else
+        {
+            ballAngle += 12.f; 
+            
+            sf::CircleShape ball(6.f);
+            ball.setFillColor(sf::Color::White);
+            ball.setOrigin({ 6.f, 6.f });
+            
+            float rad = ballAngle * 3.14159f / 180.f;
+            float bx = 830.f + std::cos(rad) * 92.f;
+            float by = 260.f + std::sin(rad) * 92.f;
+            
+            ball.setPosition({ bx, by });
+            window.draw(ball);
+        }
+    }
 
     if (enteringChip)
     {

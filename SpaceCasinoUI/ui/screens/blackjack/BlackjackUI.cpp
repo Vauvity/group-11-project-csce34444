@@ -17,6 +17,8 @@ BlackjackUI::BlackjackUI(sf::Font& sharedFont)
     doubleText(font, "DOUBLE", 20),
     newRoundText(font, "NEW ROUND", 20),
     backText(font, "BACK TO MENU", 20),
+    hintText(font, "HINT", 20),
+    currentHint(""),
     currentBet(50.0f),
     betInput("50"),
     enteringBet(false),
@@ -30,6 +32,8 @@ BlackjackUI::BlackjackUI(sf::Font& sharedFont)
     sessionStats(nullptr),
     lastRecordedRoundNumber(0)
 {
+    loadCardTextures();
+
     titleText.setFillColor(sf::Color(90, 210, 255));
     titleText.setPosition({ 355.f, 40.f });
 
@@ -105,6 +109,57 @@ BlackjackUI::BlackjackUI(sf::Font& sharedFont)
     updateText();
 }
 
+std::string BlackjackUI::rankToString(Rank r) const
+{
+    switch (r)
+    {
+    case Rank::Two: return "2";
+    case Rank::Three: return "3";
+    case Rank::Four: return "4";
+    case Rank::Five: return "5";
+    case Rank::Six: return "6";
+    case Rank::Seven: return "7";
+    case Rank::Eight: return "8";
+    case Rank::Nine: return "9";
+    case Rank::Ten: return "10";
+    case Rank::Jack: return "jack";
+    case Rank::Queen: return "queen";
+    case Rank::King: return "king";
+    case Rank::Ace: return "ace";
+    }
+    return "";
+}
+
+std::string BlackjackUI::suitToString(Suit s) const
+{
+    switch (s)
+    {
+    case Suit::Clubs: return "clubs";
+    case Suit::Diamonds: return "diamonds";
+    case Suit::Hearts: return "hearts";
+    case Suit::Spades: return "spades";
+    }
+    return "";
+}
+
+void BlackjackUI::loadCardTextures()
+{
+    cardBackTexture.loadFromFile("assets/images/blackjack/card back red.png");
+
+    std::vector<Rank> ranks = { Rank::Two, Rank::Three, Rank::Four, Rank::Five, Rank::Six, Rank::Seven, Rank::Eight, Rank::Nine, Rank::Ten, Rank::Jack, Rank::Queen, Rank::King, Rank::Ace };
+    std::vector<Suit> suits = { Suit::Clubs, Suit::Diamonds, Suit::Hearts, Suit::Spades };
+
+    for (Rank r : ranks)
+    {
+        for (Suit s : suits)
+        {
+            std::string key = rankToString(r) + "_of_" + suitToString(s);
+            std::string path = "assets/images/blackjack/" + key + ".png";
+            cardTextures[key].loadFromFile(path);
+        }
+    }
+}
+
 void BlackjackUI::refreshBetInputDisplay()
 {
     if (betInput.empty())
@@ -158,30 +213,35 @@ void BlackjackUI::setSessionStats(SessionStats* stats)
 
 void BlackjackUI::setupButtons()
 {
-    hitButton.setSize({ 150.f, 50.f });
-    hitButton.setPosition({ 55.f, 660.f });
+    hitButton.setSize({ 130.f, 50.f });
+    hitButton.setPosition({ 30.f, 660.f });
 
-    standButton.setSize({ 150.f, 50.f });
-    standButton.setPosition({ 235.f, 660.f });
+    standButton.setSize({ 130.f, 50.f });
+    standButton.setPosition({ 180.f, 660.f });
 
-    doubleButton.setSize({ 150.f, 50.f });
-    doubleButton.setPosition({ 415.f, 660.f });
+    doubleButton.setSize({ 130.f, 50.f });
+    doubleButton.setPosition({ 330.f, 660.f });
 
-    newRoundButton.setSize({ 180.f, 50.f });
-    newRoundButton.setPosition({ 595.f, 660.f });
+    hintButton.setSize({ 130.f, 50.f });
+    hintButton.setPosition({ 480.f, 660.f });
 
-    backButton.setSize({ 180.f, 50.f });
-    backButton.setPosition({ 785.f, 660.f });
+    newRoundButton.setSize({ 160.f, 50.f });
+    newRoundButton.setPosition({ 630.f, 660.f });
+
+    backButton.setSize({ 160.f, 50.f });
+    backButton.setPosition({ 810.f, 660.f });
 
     hitText.setFillColor(sf::Color::White);
     standText.setFillColor(sf::Color::White);
     doubleText.setFillColor(sf::Color::White);
+    hintText.setFillColor(sf::Color::White);
     newRoundText.setFillColor(sf::Color::White);
     backText.setFillColor(sf::Color::White);
 
     centerTextInButton(hitText, hitButton);
     centerTextInButton(standText, standButton);
     centerTextInButton(doubleText, doubleButton);
+    centerTextInButton(hintText, hintButton);
     centerTextInButton(newRoundText, newRoundButton);
     centerTextInButton(backText, backButton);
 }
@@ -377,7 +437,14 @@ void BlackjackUI::updateText()
     betText.setString("Current Bet: $" + std::to_string(static_cast<int>(currentBet)));
 
     dealerText.setString(getDealerDisplay());
-    messageText.setString(getStatusMessage());
+    if (!currentHint.empty())
+    {
+        messageText.setString(getStatusMessage() + "\nHint: " + currentHint);
+    }
+    else
+    {
+        messageText.setString(getStatusMessage());
+    }
     playerText.setString(getPlayerDisplay());
     statsText.setString(getPostRoundStats());
 
@@ -467,6 +534,7 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
         if (roundStarted && !game.isRoundOver() && game.canHit())
         {
             game.playerHit();
+            currentHint = "";
         }
     }
 
@@ -475,6 +543,7 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
         if (roundStarted && !game.isRoundOver() && game.canStand())
         {
             game.playerStand();
+            currentHint = "";
         }
     }
 
@@ -483,6 +552,16 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
         if (roundStarted && !game.isRoundOver() && game.canDoubleDown())
         {
             game.playerDoubleDown();
+            currentHint = "";
+        }
+    }
+
+    if (hintButton.getGlobalBounds().contains(mousePos))
+    {
+        if (roundStarted && !game.isRoundOver() && game.canRequestHint())
+        {
+            currentHint = game.getHintText();
+            game.requestHint();
         }
     }
 
@@ -493,6 +572,7 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
             if (game.startNewRound(currentBet))
             {
                 roundStarted = true;
+                currentHint = "";
             }
         }
     }
@@ -609,61 +689,97 @@ void BlackjackUI::draw(sf::RenderWindow& window)
         float y = 150.f;
 
         drawCenteredYellowLine(
-            "Dealer: " + game.getDealerHand().toString() +
-            " (" + std::to_string(game.getDealerValue()) + ")",
+            "Dealer: " + std::to_string(game.getDealerValue()),
             y,
             26
         );
-        y += 50.f;
+        y += 40.f;
 
-        drawCenteredYellowLine("Player Hands:", y, 26);
-        y += 36.f;
+        // Draw Dealer Hand
+        float xOffset = 500.f - (game.getDealerHand().getCardCount() * 90.f) / 2.f;
+        for (const Card& card : game.getDealerHand().getCards())
+        {
+            std::string key = rankToString(card.getRank()) + "_of_" + suitToString(card.getSuit());
+            sf::Sprite sprite(cardTextures[key]);
+            sf::FloatRect bounds = sprite.getLocalBounds();
+            sprite.setScale({ 80.f / bounds.size.x, 112.f / bounds.size.y });
+            sprite.setPosition({ xOffset, y });
+            window.draw(sprite);
+            xOffset += 90.f;
+        }
+        y += 130.f;
 
-        drawCenteredYellowLine(
-            game.getPlayerHand().toString() +
-            " (" + std::to_string(game.getPlayerHand().getValue()) + ")",
-            y,
-            26
-        );
-        y += 50.f;
+        drawCenteredYellowLine("Player: " + std::to_string(game.getPlayerHand().getValue()), y, 26);
+        y += 40.f;
 
-        drawCenteredYellowLine("Results:", y, 26);
-        y += 36.f;
+        // Draw Player Hand
+        xOffset = 500.f - (game.getPlayerHand().getCardCount() * 90.f) / 2.f;
+        for (const Card& card : game.getPlayerHand().getCards())
+        {
+            std::string key = rankToString(card.getRank()) + "_of_" + suitToString(card.getSuit());
+            sf::Sprite sprite(cardTextures[key]);
+            sf::FloatRect bounds = sprite.getLocalBounds();
+            sprite.setScale({ 80.f / bounds.size.x, 112.f / bounds.size.y });
+            sprite.setPosition({ xOffset, y });
+            window.draw(sprite);
+            xOffset += 90.f;
+        }
+        y += 125.f;
 
-        drawCenteredYellowLine(shortenResultText(game.getRoundResultText()), y, 26);
-        y += 50.f;
+        drawCenteredYellowLine("Result: " + shortenResultText(game.getRoundResultText()), y, 26);
+        y += 45.f;
 
-        drawCenteredYellowLine("Round Insight:", y, 26);
-        y += 36.f;
-
-        drawCenteredYellowLine("You played that hand well.", y, 26);
-        y += 50.f;
-
-        drawCenteredYellowLine("Post Round Stats", y, 26);
-        y += 36.f;
-
-        drawCenteredYellowLine(
-            "Bankroll: $" + std::to_string(static_cast<int>(game.getTableBalance())),
-            y,
-            26
-        );
-        y += 36.f;
-
-        drawCenteredYellowLine(
-            "Bet: $" + std::to_string(static_cast<int>(currentBet)),
-            y,
-            26
-        );
+        drawCenteredYellowLine("Insight: You played that hand well.", y, 26);
     }
     else
     {
-        dealerText.setFillColor(sf::Color(190, 235, 235));
         messageText.setFillColor(sf::Color(190, 235, 235));
-        playerText.setFillColor(sf::Color(190, 235, 235));
-
-        window.draw(dealerText);
         window.draw(messageText);
-        window.draw(playerText);
+
+        if (roundStarted)
+        {
+            sf::Text dealerLabel(font, "Dealer:", 24);
+            dealerLabel.setPosition({ 58.f, 160.f });
+            window.draw(dealerLabel);
+
+            float xOffset = 180.f;
+            const auto& dealerCards = game.getDealerHand().getCards();
+            for (size_t i = 0; i < dealerCards.size(); ++i)
+            {
+                const sf::Texture* tex = nullptr;
+                if (!game.isRoundOver() && i == 1)
+                {
+                    tex = &cardBackTexture;
+                }
+                else
+                {
+                    std::string key = rankToString(dealerCards[i].getRank()) + "_of_" + suitToString(dealerCards[i].getSuit());
+                    tex = &cardTextures[key];
+                }
+                sf::Sprite sprite(*tex);
+                sf::FloatRect bounds = sprite.getLocalBounds();
+                sprite.setScale({ 80.f / bounds.size.x, 112.f / bounds.size.y });
+                sprite.setPosition({ xOffset, 160.f });
+                window.draw(sprite);
+                xOffset += 90.f;
+            }
+
+            sf::Text playerLabel(font, "Player: (" + std::to_string(game.getPlayerHand().getValue()) + ")", 24);
+            playerLabel.setPosition({ 58.f, 445.f });
+            window.draw(playerLabel);
+
+            xOffset = 180.f;
+            for (const Card& card : game.getPlayerHand().getCards())
+            {
+                std::string key = rankToString(card.getRank()) + "_of_" + suitToString(card.getSuit());
+                sf::Sprite sprite(cardTextures[key]);
+                sf::FloatRect bounds = sprite.getLocalBounds();
+                sprite.setScale({ 80.f / bounds.size.x, 112.f / bounds.size.y });
+                sprite.setPosition({ xOffset, 445.f });
+                window.draw(sprite);
+                xOffset += 90.f;
+            }
+        }
     }
 
     hitButton.setFillColor(
@@ -679,15 +795,21 @@ void BlackjackUI::draw(sf::RenderWindow& window)
     );
 
     doubleButton.setFillColor(
-        (roundStarted && !game.isRoundOver() && game.canDoubleDown())
-        ? sf::Color(50, 115, 230)
-        : sf::Color(70, 70, 110)
+        (!roundStarted || game.isRoundOver() || !game.canDoubleDown())
+        ? sf::Color(70, 70, 110)
+        : sf::Color(150, 80, 220)
+    );
+
+    hintButton.setFillColor(
+        (!roundStarted || game.isRoundOver() || !game.canRequestHint())
+        ? sf::Color(70, 70, 110)
+        : sf::Color(200, 150, 50)
     );
 
     newRoundButton.setFillColor(
-        (!roundStarted || game.isRoundOver())
-        ? sf::Color(50, 115, 230)
-        : sf::Color(70, 70, 110)
+        (roundStarted && !game.isRoundOver())
+        ? sf::Color(70, 70, 110)
+        : sf::Color(50, 115, 230)
     );
 
     backButton.setFillColor(sf::Color(180, 65, 85));
@@ -695,12 +817,14 @@ void BlackjackUI::draw(sf::RenderWindow& window)
     window.draw(hitButton);
     window.draw(standButton);
     window.draw(doubleButton);
+    window.draw(hintButton);
     window.draw(newRoundButton);
     window.draw(backButton);
 
     window.draw(hitText);
     window.draw(standText);
     window.draw(doubleText);
+    window.draw(hintText);
     window.draw(newRoundText);
     window.draw(backText);
 

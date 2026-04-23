@@ -20,6 +20,8 @@ public:
 
 private:
     sf::Font& font;
+    sf::Texture bgTexture;
+    sf::Sprite bgSprite;
 
     sf::Text titleText;
     sf::Text bankrollLabelText;
