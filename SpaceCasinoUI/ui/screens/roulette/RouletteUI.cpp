@@ -297,7 +297,7 @@ bool RouletteUI::isRedNumber(int number) const
 void RouletteUI::updateText()
 {
     bankrollText.setString("Bankroll: $" + std::to_string(game.getBalance()));
-    betText.setString("Chip Value: $" + std::to_string(static_cast<int>(currentBet)) + "  (click to change)");
+    betText.setString("Chip Value: $" + std::to_string(static_cast<int>(currentBet)));
     selectedBetText.setString(getSelectedBetLabel());
 
     numberInputText.setString(numberInput);

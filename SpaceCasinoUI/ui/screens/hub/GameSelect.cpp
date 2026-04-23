@@ -20,6 +20,13 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     statsText(font, "SESSION STATS", 22),
     backText(font, "MAIN MENU", 20),
 
+    blackjackInfoBtn({ 40.f, 40.f }),
+    rouletteInfoBtn({ 40.f, 40.f }),
+    slotsInfoBtn({ 40.f, 40.f }),
+    blackjackInfoText(font, "?", 24),
+    rouletteInfoText(font, "?", 24),
+    slotsInfoText(font, "?", 24),
+
     overlay({ 1000.f, 760.f }),
     popupPanel({ 420.f, 240.f }),
     addMoneyBox({ 180.f, 48.f }),
@@ -39,6 +46,13 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     gameOverMessage(font, "You're Broke!", 28),
     gameOverButton({ 180.f, 50.f }),
     gameOverButtonText(font, "MAIN MENU", 20),
+
+    showingInfoPopup(false),
+    infoPanel({ 600.f, 400.f }),
+    infoTitleText(font, "Game Rules", 32),
+    infoBodyText(font, "", 20),
+    infoCloseButton({ 180.f, 50.f }),
+    infoCloseText(font, "CLOSE", 20),
 
     currentBankroll(0.0),
     addMoneyInput(""),
@@ -90,6 +104,30 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     centerTextInButton(slotsText, slotsButton);
     centerTextInButton(statsText, statsButton);
     centerTextInButton(backText, backButton);
+
+    blackjackInfoBtn.setPosition({ 620.f, 205.f });
+    rouletteInfoBtn.setPosition({ 620.f, 325.f });
+    slotsInfoBtn.setPosition({ 620.f, 445.f });
+    
+    blackjackInfoBtn.setFillColor(sf::Color(80, 80, 100));
+    rouletteInfoBtn.setFillColor(sf::Color(80, 80, 100));
+    slotsInfoBtn.setFillColor(sf::Color(80, 80, 100));
+    
+    blackjackInfoBtn.setOutlineThickness(2.f);
+    rouletteInfoBtn.setOutlineThickness(2.f);
+    slotsInfoBtn.setOutlineThickness(2.f);
+    
+    blackjackInfoBtn.setOutlineColor(sf::Color(255, 210, 90));
+    rouletteInfoBtn.setOutlineColor(sf::Color(255, 210, 90));
+    slotsInfoBtn.setOutlineColor(sf::Color(255, 210, 90));
+    
+    blackjackInfoText.setFillColor(sf::Color::White);
+    rouletteInfoText.setFillColor(sf::Color::White);
+    slotsInfoText.setFillColor(sf::Color::White);
+    
+    centerTextInButton(blackjackInfoText, blackjackInfoBtn);
+    centerTextInButton(rouletteInfoText, rouletteInfoBtn);
+    centerTextInButton(slotsInfoText, slotsInfoBtn);
 
     overlay.setFillColor(sf::Color(0, 0, 0, 160));
 
@@ -149,6 +187,25 @@ GameSelect::GameSelect(sf::Font& sharedFont)
 
     gameOverButtonText.setFillColor(sf::Color::White);
     centerTextInButton(gameOverButtonText, gameOverButton);
+
+    infoPanel.setPosition({ 200.f, 180.f });
+    infoPanel.setFillColor(sf::Color(30, 35, 45));
+    infoPanel.setOutlineThickness(2.f);
+    infoPanel.setOutlineColor(sf::Color(255, 210, 90));
+    
+    infoTitleText.setFillColor(sf::Color(255, 210, 90));
+    infoTitleText.setPosition({ 410.f, 210.f });
+    
+    infoBodyText.setFillColor(sf::Color::White);
+    infoBodyText.setPosition({ 230.f, 280.f });
+    
+    infoCloseButton.setPosition({ 410.f, 500.f });
+    infoCloseButton.setFillColor(sf::Color(180, 65, 85));
+    infoCloseButton.setOutlineThickness(2.f);
+    infoCloseButton.setOutlineColor(sf::Color(255, 210, 90));
+    
+    infoCloseText.setFillColor(sf::Color::White);
+    centerTextInButton(infoCloseText, infoCloseButton);
 
     refreshBankrollDisplay();
     refreshAddMoneyDisplay();
@@ -257,6 +314,15 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
     openStats = false;
     backToMain = false;
 
+    if (showingInfoPopup)
+    {
+        if (infoCloseButton.getGlobalBounds().contains(mousePos))
+        {
+            showingInfoPopup = false;
+        }
+        return;
+    }
+
     if (showingGameOverPopup)
     {
         if (gameOverButton.getGlobalBounds().contains(mousePos))
@@ -301,6 +367,39 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
             return;
         }
 
+        return;
+    }
+
+    if (blackjackInfoBtn.getGlobalBounds().contains(mousePos))
+    {
+        showingInfoPopup = true;
+        infoTitleText.setString("Blackjack Rules");
+        infoBodyText.setString("Beat the dealer by getting a hand value as close\nto 21 as possible without going over.\nFace cards are 10, Aces are 1 or 11.");
+        
+        sf::FloatRect bounds = infoTitleText.getLocalBounds();
+        infoTitleText.setPosition({ 500.f - bounds.size.x / 2.f - bounds.position.x, 210.f });
+        return;
+    }
+
+    if (rouletteInfoBtn.getGlobalBounds().contains(mousePos))
+    {
+        showingInfoPopup = true;
+        infoTitleText.setString("Roulette Rules");
+        infoBodyText.setString("Bet on where the ball will land on the wheel.\nYou can bet on specific numbers, red/black,\nodd/even, or high/low.");
+        
+        sf::FloatRect bounds = infoTitleText.getLocalBounds();
+        infoTitleText.setPosition({ 500.f - bounds.size.x / 2.f - bounds.position.x, 210.f });
+        return;
+    }
+
+    if (slotsInfoBtn.getGlobalBounds().contains(mousePos))
+    {
+        showingInfoPopup = true;
+        infoTitleText.setString("Slots Rules");
+        infoBodyText.setString("Spin the reels and match symbols to win.\nDifferent combinations yield different payouts.\nMatch 3 symbols for the biggest reward!");
+        
+        sf::FloatRect bounds = infoTitleText.getLocalBounds();
+        infoTitleText.setPosition({ 500.f - bounds.size.x / 2.f - bounds.position.x, 210.f });
         return;
     }
 
@@ -393,7 +492,23 @@ void GameSelect::draw(sf::RenderWindow& window)
     window.draw(statsText);
     window.draw(backText);
 
-    if (showingAddMoneyPopup)
+    window.draw(blackjackInfoBtn);
+    window.draw(rouletteInfoBtn);
+    window.draw(slotsInfoBtn);
+    window.draw(blackjackInfoText);
+    window.draw(rouletteInfoText);
+    window.draw(slotsInfoText);
+
+    if (showingInfoPopup)
+    {
+        window.draw(overlay);
+        window.draw(infoPanel);
+        window.draw(infoTitleText);
+        window.draw(infoBodyText);
+        window.draw(infoCloseButton);
+        window.draw(infoCloseText);
+    }
+    else if (showingAddMoneyPopup)
     {
         window.draw(overlay);
         window.draw(popupPanel);

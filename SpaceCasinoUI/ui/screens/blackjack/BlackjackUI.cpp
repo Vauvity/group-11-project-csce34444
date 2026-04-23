@@ -374,7 +374,7 @@ std::string BlackjackUI::getStatusMessage() const
 void BlackjackUI::updateText()
 {
     bankrollText.setString("Bankroll: $" + std::to_string(static_cast<int>(game.getTableBalance())));
-    betText.setString("Current Bet: $" + std::to_string(static_cast<int>(currentBet)) + "  (click to change)");
+    betText.setString("Current Bet: $" + std::to_string(static_cast<int>(currentBet)));
 
     dealerText.setString(getDealerDisplay());
     messageText.setString(getStatusMessage());

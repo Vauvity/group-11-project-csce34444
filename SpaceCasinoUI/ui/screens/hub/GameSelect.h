@@ -37,6 +37,14 @@ private:
     sf::Text statsText;
     sf::Text backText;
 
+    sf::RectangleShape blackjackInfoBtn;
+    sf::RectangleShape rouletteInfoBtn;
+    sf::RectangleShape slotsInfoBtn;
+    
+    sf::Text blackjackInfoText;
+    sf::Text rouletteInfoText;
+    sf::Text slotsInfoText;
+
     sf::RectangleShape overlay;
     sf::RectangleShape popupPanel;
     sf::RectangleShape addMoneyBox;
@@ -56,6 +64,13 @@ private:
     sf::Text gameOverMessage;
     sf::RectangleShape gameOverButton;
     sf::Text gameOverButtonText;
+
+    bool showingInfoPopup;
+    sf::RectangleShape infoPanel;
+    sf::Text infoTitleText;
+    sf::Text infoBodyText;
+    sf::RectangleShape infoCloseButton;
+    sf::Text infoCloseText;
 
     double currentBankroll;
     std::string addMoneyInput;

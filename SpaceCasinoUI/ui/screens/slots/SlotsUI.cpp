@@ -194,7 +194,7 @@ std::string SlotsUI::symbolToString(char c) const
 void SlotsUI::updateText()
 {
     bankrollText.setString("Bankroll: $" + std::to_string(static_cast<int>(game.getBankroll())));
-    betText.setString("Current Bet: $" + std::to_string(static_cast<int>(currentBet)) + "  (click to change)");
+    betText.setString("Current Bet: $" + std::to_string(static_cast<int>(currentBet)));
     jackpotText.setString("Jackpot: $" + std::to_string(static_cast<int>(game.displayProgressiveJackpot())));
 
     if (!hasSpun)
