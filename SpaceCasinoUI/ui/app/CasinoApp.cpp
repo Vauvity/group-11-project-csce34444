@@ -204,7 +204,16 @@ void CasinoApp::processEvents()
                 sessionStatsUI->handleMouseClick(mousePos, backToMenu);
                 if (backToMenu)
                 {
-                    currentState = AppState::GameSelect;
+                    if (sharedBankroll <= 0.0)
+                    {
+                        sessionStats.endSession();
+                        resetSessionIfNeeded();
+                        currentState = AppState::MainMenu;
+                    }
+                    else
+                    {
+                        currentState = AppState::GameSelect;
+                    }
                 }
             }
         }

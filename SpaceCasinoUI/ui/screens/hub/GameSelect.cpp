@@ -329,7 +329,7 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
         if (gameOverButton.getGlobalBounds().contains(mousePos))
         {
             showingGameOverPopup = false;
-            backToMain = true;
+            openStats = true;
         }
         return;
     }
