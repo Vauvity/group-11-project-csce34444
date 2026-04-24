@@ -15,6 +15,7 @@ BlackjackUI::BlackjackUI(sf::Font& sharedFont)
     hitText(font, "HIT", 20),
     standText(font, "STAND", 20),
     doubleText(font, "DOUBLE", 20),
+    splitText(font, "SPLIT", 20),
     newRoundText(font, "NEW ROUND", 20),
     backText(font, "BACK TO MENU", 20),
     hintText(font, "HINT", 20),
@@ -144,7 +145,7 @@ std::string BlackjackUI::suitToString(Suit s) const
 
 void BlackjackUI::loadCardTextures()
 {
-    cardBackTexture.loadFromFile("assets/images/blackjack/card back red.png");
+    (void)cardBackTexture.loadFromFile("assets/images/blackjack/card back red.png");
 
     std::vector<Rank> ranks = { Rank::Two, Rank::Three, Rank::Four, Rank::Five, Rank::Six, Rank::Seven, Rank::Eight, Rank::Nine, Rank::Ten, Rank::Jack, Rank::Queen, Rank::King, Rank::Ace };
     std::vector<Suit> suits = { Suit::Clubs, Suit::Diamonds, Suit::Hearts, Suit::Spades };
@@ -155,7 +156,7 @@ void BlackjackUI::loadCardTextures()
         {
             std::string key = rankToString(r) + "_of_" + suitToString(s);
             std::string path = "assets/images/blackjack/" + key + ".png";
-            cardTextures[key].loadFromFile(path);
+            (void)cardTextures[key].loadFromFile(path);
         }
     }
 }
@@ -213,27 +214,31 @@ void BlackjackUI::setSessionStats(SessionStats* stats)
 
 void BlackjackUI::setupButtons()
 {
-    hitButton.setSize({ 130.f, 50.f });
+    hitButton.setSize({ 115.f, 50.f });
     hitButton.setPosition({ 30.f, 660.f });
 
-    standButton.setSize({ 130.f, 50.f });
-    standButton.setPosition({ 180.f, 660.f });
+    standButton.setSize({ 115.f, 50.f });
+    standButton.setPosition({ 160.f, 660.f });
 
-    doubleButton.setSize({ 130.f, 50.f });
-    doubleButton.setPosition({ 330.f, 660.f });
+    doubleButton.setSize({ 115.f, 50.f });
+    doubleButton.setPosition({ 290.f, 660.f });
 
-    hintButton.setSize({ 130.f, 50.f });
-    hintButton.setPosition({ 480.f, 660.f });
+    splitButton.setSize({ 115.f, 50.f });
+    splitButton.setPosition({ 420.f, 660.f });
 
-    newRoundButton.setSize({ 160.f, 50.f });
-    newRoundButton.setPosition({ 630.f, 660.f });
+    hintButton.setSize({ 115.f, 50.f });
+    hintButton.setPosition({ 550.f, 660.f });
 
-    backButton.setSize({ 160.f, 50.f });
-    backButton.setPosition({ 810.f, 660.f });
+    newRoundButton.setSize({ 145.f, 50.f });
+    newRoundButton.setPosition({ 680.f, 660.f });
+
+    backButton.setSize({ 145.f, 50.f });
+    backButton.setPosition({ 840.f, 660.f });
 
     hitText.setFillColor(sf::Color::White);
     standText.setFillColor(sf::Color::White);
     doubleText.setFillColor(sf::Color::White);
+    splitText.setFillColor(sf::Color::White);
     hintText.setFillColor(sf::Color::White);
     newRoundText.setFillColor(sf::Color::White);
     backText.setFillColor(sf::Color::White);
@@ -241,6 +246,7 @@ void BlackjackUI::setupButtons()
     centerTextInButton(hitText, hitButton);
     centerTextInButton(standText, standButton);
     centerTextInButton(doubleText, doubleButton);
+    centerTextInButton(splitText, splitButton);
     centerTextInButton(hintText, hintButton);
     centerTextInButton(newRoundText, newRoundButton);
     centerTextInButton(backText, backButton);
@@ -556,6 +562,15 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
         }
     }
 
+    if (splitButton.getGlobalBounds().contains(mousePos))
+    {
+        if (roundStarted && !game.isRoundOver() && game.canSplit())
+        {
+            game.playerSplit();
+            currentHint = "";
+        }
+    }
+
     if (hintButton.getGlobalBounds().contains(mousePos))
     {
         if (roundStarted && !game.isRoundOver() && game.canRequestHint())
@@ -801,6 +816,12 @@ void BlackjackUI::draw(sf::RenderWindow& window)
         : sf::Color(150, 80, 220)
     );
 
+    splitButton.setFillColor(
+        (!roundStarted || game.isRoundOver() || !game.canSplit())
+        ? sf::Color(70, 70, 110)
+        : sf::Color(220, 120, 40)
+    );
+
     hintButton.setFillColor(
         (!roundStarted || game.isRoundOver() || !game.canRequestHint())
         ? sf::Color(70, 70, 110)
@@ -818,6 +839,7 @@ void BlackjackUI::draw(sf::RenderWindow& window)
     window.draw(hitButton);
     window.draw(standButton);
     window.draw(doubleButton);
+    window.draw(splitButton);
     window.draw(hintButton);
     window.draw(newRoundButton);
     window.draw(backButton);
@@ -825,6 +847,7 @@ void BlackjackUI::draw(sf::RenderWindow& window)
     window.draw(hitText);
     window.draw(standText);
     window.draw(doubleText);
+    window.draw(splitText);
     window.draw(hintText);
     window.draw(newRoundText);
     window.draw(backText);

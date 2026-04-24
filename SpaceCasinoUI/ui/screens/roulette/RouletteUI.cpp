@@ -119,7 +119,7 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     centerTextInButton(spinText, spinButton);
     centerTextInButton(backText, backButton);
 
-    wheelTexture.loadFromFile("assets/images/roulette/pngimg.com - roulette_PNG50.png");
+    (void)wheelTexture.loadFromFile("assets/images/roulette/pngimg.com - roulette_PNG50.png");
     wheelSprite.setTexture(wheelTexture, true);
     sf::FloatRect bounds = wheelSprite.getLocalBounds();
     wheelSprite.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });

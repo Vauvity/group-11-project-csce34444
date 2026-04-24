@@ -112,17 +112,17 @@ SlotsUI::SlotsUI(sf::Font& sharedFont)
 
 void SlotsUI::loadTextures()
 {
-    symbolTextures['B'].loadFromFile("assets/images/slots/bar.png");
-    symbolTextures['7'].loadFromFile("assets/images/slots/seven.png");
-    symbolTextures['J'].loadFromFile("assets/images/slots/letter-j.png");
-    symbolTextures['Q'].loadFromFile("assets/images/slots/Q.png");
-    symbolTextures['S'].loadFromFile("assets/images/slots/star.png");
-    symbolTextures['A'].loadFromFile("assets/images/slots/alien.png");
-    symbolTextures['M'].loadFromFile("assets/images/slots/full-moon.png");
-    symbolTextures['R'].loadFromFile("assets/images/slots/rocket.png");
-    symbolTextures['G'].loadFromFile("assets/images/slots/galaxy.png");
-    symbolTextures['2'].loadFromFile("assets/images/slots/2x.png");
-    symbolTextures['5'].loadFromFile("assets/images/slots/5x.png");
+    (void)symbolTextures['B'].loadFromFile("assets/images/slots/bar.png");
+    (void)symbolTextures['7'].loadFromFile("assets/images/slots/seven.png");
+    (void)symbolTextures['J'].loadFromFile("assets/images/slots/letter-j.png");
+    (void)symbolTextures['Q'].loadFromFile("assets/images/slots/Q.png");
+    (void)symbolTextures['S'].loadFromFile("assets/images/slots/star.png");
+    (void)symbolTextures['A'].loadFromFile("assets/images/slots/alien.png");
+    (void)symbolTextures['M'].loadFromFile("assets/images/slots/full-moon.png");
+    (void)symbolTextures['R'].loadFromFile("assets/images/slots/rocket.png");
+    (void)symbolTextures['G'].loadFromFile("assets/images/slots/galaxy.png");
+    (void)symbolTextures['2'].loadFromFile("assets/images/slots/2x.png");
+    (void)symbolTextures['5'].loadFromFile("assets/images/slots/5x.png");
 }
 
 void SlotsUI::refreshBetInputDisplay()

@@ -37,12 +37,14 @@ private:
     sf::RectangleShape hitButton;
     sf::RectangleShape standButton;
     sf::RectangleShape doubleButton;
+    sf::RectangleShape splitButton;
     sf::RectangleShape newRoundButton;
     sf::RectangleShape backButton;
 
     sf::Text hitText;
     sf::Text standText;
     sf::Text doubleText;
+    sf::Text splitText;
     sf::Text newRoundText;
     sf::Text backText;
     sf::Text hintText;
