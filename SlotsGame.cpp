@@ -6,12 +6,10 @@
 //
 //	Team Galactic's Space Casino casino simulator project
 //	Slots Module
-//	SlotsGame.cpp version 6
+//	SlotsGame.cpp version 7
 //		The SlotsGame class Slots
-//	last updated: 4/20/26
-//		UPDATE ADD: added progressive jackpot functions to game, 
-//			display, and stats
-//		UPDATE FIX: increased payout amounts for 3 in a row
+//	last updated: 4/23/26
+//		UPDATE ADD: added 3 in a row diagonal wins
 //
 
 #include "SlotsGame.h"
@@ -143,6 +141,43 @@ double Slots::paytable() {
 			}
 			won = true;
 		}
+	}
+	// Check 3 in a row on both diagonals
+	if (slotw.getDisplay(0, 0) == slotw.getDisplay(1, 1) && slotw.getDisplay(0, 0)
+		== slotw.getDisplay(2, 2))
+	{
+		char row3in = slotw.getDisplay(0, 0);
+		if (row3in == 'J' || row3in == 'Q') {
+			lowwins++;
+		}
+		else if (row3in == '7' || row3in == 'B') {
+			barseven++;
+		}
+		else if (row3in == 'G') {		//Mega jackpot = full prog jackpot
+			jackpotratio = 1.0;
+		}
+		else {
+			highwins++;
+		}
+		won = true;
+	}
+	if (slotw.getDisplay(2, 0) == slotw.getDisplay(1, 1) && slotw.getDisplay(2, 0)
+		== slotw.getDisplay(0, 2))
+	{
+		char row3in = slotw.getDisplay(2, 0);
+		if (row3in == 'J' || row3in == 'Q') {
+			lowwins++;
+		}
+		else if (row3in == '7' || row3in == 'B') {
+			barseven++;
+		}
+		else if (row3in == 'G') {		//Mega jackpot = full prog jackpot
+			jackpotratio = 1.0;
+		}
+		else {
+			highwins++;
+		}
+		won = true;
 	}
 	// Calculates the payout if there was a win
 	if (won) {
