@@ -62,6 +62,11 @@ private:
     SessionStats* sessionStats;
     int lastRecordedSpinNumber;
 
+    sf::Clock frameClock;
+    float spinRemaining;
+    float spinSymbolChangeTimer;
+    char randomSymbols[3][3];
+
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
     std::string symbolToString(char c) const;
 

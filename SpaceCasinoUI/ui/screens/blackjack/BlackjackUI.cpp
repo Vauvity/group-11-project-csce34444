@@ -31,7 +31,8 @@ BlackjackUI::BlackjackUI(sf::Font& sharedFont)
     betCancelText(font, "CANCEL", 20),
     roundStarted(false),
     sessionStats(nullptr),
-    lastRecordedRoundNumber(0)
+    lastRecordedRoundNumber(0),
+    wasRoundOver(false)
 {
     loadCardTextures();
 
@@ -205,6 +206,9 @@ void BlackjackUI::setStartingBankroll(double bankroll)
     enteringBet = false;
     roundStarted = false;
     lastRecordedRoundNumber = 0;
+    pCardAnim.clear();
+    dCardAnim.clear();
+    wasRoundOver = false;
     updateText();
 }
 
@@ -594,6 +598,9 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
             {
                 roundStarted = true;
                 currentHint = "";
+                pCardAnim.clear();
+                dCardAnim.clear();
+                wasRoundOver = false;
             }
         }
     }
@@ -694,6 +701,60 @@ void BlackjackUI::draw(sf::RenderWindow& window)
     window.draw(bankrollText);
     window.draw(betText);
 
+    auto drawCard = [&](const Card& card, float x, float y, float p, bool forceBack) {
+        bool showFront = forceBack ? false : (p >= 0.5f);
+        float scaleX = 1.0f;
+        const sf::Texture* tex = nullptr;
+        std::string key = rankToString(card.getRank()) + "_of_" + suitToString(card.getSuit());
+
+        if (forceBack) {
+            showFront = false;
+            scaleX = p;
+            tex = &cardBackTexture;
+        } else {
+            scaleX = showFront ? (p * 2.0f - 1.0f) : (1.0f - p * 2.0f);
+            tex = showFront ? &cardTextures[key] : &cardBackTexture;
+        }
+
+        sf::Sprite sprite(*tex);
+        sf::FloatRect bounds = sprite.getLocalBounds();
+        float currentWidth = 80.f * scaleX;
+        float offsetX = (80.f - currentWidth) / 2.0f;
+        
+        sprite.setScale({ (80.f / bounds.size.x) * scaleX, 112.f / bounds.size.y });
+        sprite.setPosition({ x + offsetX, y });
+        window.draw(sprite);
+    };
+
+    float dt = frameClock.restart().asSeconds();
+    float flipSpeed = 3.0f;
+
+    while (pCardAnim.size() < game.getPlayerHand().getCardCount()) {
+        pCardAnim.push_back(0.0f);
+    }
+    for (auto& p : pCardAnim) {
+        if (p < 1.0f) p += dt * flipSpeed;
+        if (p > 1.0f) p = 1.0f;
+    }
+
+    while (dCardAnim.size() < game.getDealerHand().getCardCount()) {
+        dCardAnim.push_back(0.0f);
+    }
+
+    if (!wasRoundOver && game.isRoundOver()) {
+        if (dCardAnim.size() > 1) {
+            dCardAnim[1] = 0.0f; 
+        }
+        wasRoundOver = true;
+    } else if (wasRoundOver && !game.isRoundOver()) {
+        wasRoundOver = false;
+    }
+
+    for (size_t i = 0; i < dCardAnim.size(); ++i) {
+        if (dCardAnim[i] < 1.0f) dCardAnim[i] += dt * flipSpeed;
+        if (dCardAnim[i] > 1.0f) dCardAnim[i] = 1.0f;
+    }
+
     if (roundStarted && game.isRoundOver())
     {
         auto drawCenteredYellowLine = [&](const std::string& text, float y, unsigned int size)
@@ -721,32 +782,28 @@ void BlackjackUI::draw(sf::RenderWindow& window)
 
         // Draw Dealer Hand
         float xOffset = 500.f - (game.getDealerHand().getCardCount() * 90.f) / 2.f;
+        size_t dIdx = 0;
         for (const Card& card : game.getDealerHand().getCards())
         {
-            std::string key = rankToString(card.getRank()) + "_of_" + suitToString(card.getSuit());
-            sf::Sprite sprite(cardTextures[key]);
-            sf::FloatRect bounds = sprite.getLocalBounds();
-            sprite.setScale({ 80.f / bounds.size.x, 112.f / bounds.size.y });
-            sprite.setPosition({ xOffset, y });
-            window.draw(sprite);
+            float p = (dIdx < dCardAnim.size()) ? dCardAnim[dIdx] : 1.0f;
+            drawCard(card, xOffset, y, p, false);
             xOffset += 90.f;
+            dIdx++;
         }
         y += 130.f;
 
-        drawCenteredYellowLine("Player: " + std::to_string(game.getPlayerHand().getValue()), y, 26);
+        drawCenteredYellowLine("Player:", y, 26);
         y += 40.f;
 
         // Draw Player Hand
         xOffset = 500.f - (game.getPlayerHand().getCardCount() * 90.f) / 2.f;
+        size_t pIdx = 0;
         for (const Card& card : game.getPlayerHand().getCards())
         {
-            std::string key = rankToString(card.getRank()) + "_of_" + suitToString(card.getSuit());
-            sf::Sprite sprite(cardTextures[key]);
-            sf::FloatRect bounds = sprite.getLocalBounds();
-            sprite.setScale({ 80.f / bounds.size.x, 112.f / bounds.size.y });
-            sprite.setPosition({ xOffset, y });
-            window.draw(sprite);
+            float p = (pIdx < pCardAnim.size()) ? pCardAnim[pIdx] : 1.0f;
+            drawCard(card, xOffset, y, p, false);
             xOffset += 90.f;
+            pIdx++;
         }
         y += 125.f;
 
@@ -767,41 +824,29 @@ void BlackjackUI::draw(sf::RenderWindow& window)
             window.draw(dealerLabel);
 
             float xOffset = 180.f;
+            size_t dIdx = 0;
             const auto& dealerCards = game.getDealerHand().getCards();
-            for (size_t i = 0; i < dealerCards.size(); ++i)
+            for (const Card& card : dealerCards)
             {
-                const sf::Texture* tex = nullptr;
-                if (!game.isRoundOver() && i == 1)
-                {
-                    tex = &cardBackTexture;
-                }
-                else
-                {
-                    std::string key = rankToString(dealerCards[i].getRank()) + "_of_" + suitToString(dealerCards[i].getSuit());
-                    tex = &cardTextures[key];
-                }
-                sf::Sprite sprite(*tex);
-                sf::FloatRect bounds = sprite.getLocalBounds();
-                sprite.setScale({ 80.f / bounds.size.x, 112.f / bounds.size.y });
-                sprite.setPosition({ xOffset, 160.f });
-                window.draw(sprite);
+                float p = (dIdx < dCardAnim.size()) ? dCardAnim[dIdx] : 1.0f;
+                bool forceBack = (!game.isRoundOver() && dIdx == 1);
+                drawCard(card, xOffset, 160.f, p, forceBack);
                 xOffset += 90.f;
+                dIdx++;
             }
 
-            sf::Text playerLabel(font, "Player: (" + std::to_string(game.getPlayerHand().getValue()) + ")", 24);
+            sf::Text playerLabel(font, "Player:", 24);
             playerLabel.setPosition({ 58.f, 445.f });
             window.draw(playerLabel);
 
             xOffset = 180.f;
+            size_t pIdx = 0;
             for (const Card& card : game.getPlayerHand().getCards())
             {
-                std::string key = rankToString(card.getRank()) + "_of_" + suitToString(card.getSuit());
-                sf::Sprite sprite(cardTextures[key]);
-                sf::FloatRect bounds = sprite.getLocalBounds();
-                sprite.setScale({ 80.f / bounds.size.x, 112.f / bounds.size.y });
-                sprite.setPosition({ xOffset, 445.f });
-                window.draw(sprite);
+                float p = (pIdx < pCardAnim.size()) ? pCardAnim[pIdx] : 1.0f;
+                drawCard(card, xOffset, 445.f, p, false);
                 xOffset += 90.f;
+                pIdx++;
             }
         }
     }

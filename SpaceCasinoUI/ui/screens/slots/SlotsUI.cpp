@@ -24,7 +24,9 @@ SlotsUI::SlotsUI(sf::Font& sharedFont)
     betConfirmText(font, "CONFIRM", 20),
     betCancelText(font, "CANCEL", 20),
     sessionStats(nullptr),
-    lastRecordedSpinNumber(0)
+    lastRecordedSpinNumber(0),
+    spinRemaining(0.f),
+    spinSymbolChangeTimer(0.f)
 {
     loadTextures();
 
@@ -170,6 +172,8 @@ void SlotsUI::setStartingBankroll(double bankroll)
     enteringBet = false;
     lastPayout = 0.0;
     lastRecordedSpinNumber = 0;
+    spinRemaining = 0.f;
+    spinSymbolChangeTimer = 0.f;
     updateText();
 }
 
@@ -223,6 +227,11 @@ void SlotsUI::updateText()
     if (!hasSpun)
     {
         resultText.setString("Click SPIN to play slots");
+        payoutText.setString("");
+    }
+    else if (spinRemaining > 0.f)
+    {
+        resultText.setString("Spinning...");
         payoutText.setString("");
     }
     else
@@ -348,18 +357,39 @@ void SlotsUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
         return;
     }
 
-    if (spinButton.getGlobalBounds().contains(mousePos))
+    if (spinButton.getGlobalBounds().contains(mousePos) && spinRemaining <= 0.f)
     {
         if (game.getBankroll() >= currentBet)
         {
             currentWindow = game.reelsSpin(currentBet);
             lastPayout = game.paytable();
             hasSpun = true;
-            if (sessionStats)
-            {
+            spinRemaining = 2.0f;
+            updateText();
+        }
+    }
+}
+
+void SlotsUI::draw(sf::RenderWindow& window)
+{
+    float dt = frameClock.restart().asSeconds();
+    if (spinRemaining > 0.f) {
+        spinRemaining -= dt;
+        spinSymbolChangeTimer -= dt;
+        if (spinSymbolChangeTimer <= 0.f) {
+            spinSymbolChangeTimer = 0.05f;
+            const char possible[] = {'B', '7', 'J', 'Q', 'S', 'A', 'M', 'R', 'G', '2', '5'};
+            for(int r=0; r<3; ++r) {
+                for(int c=0; c<3; ++c) {
+                    randomSymbols[r][c] = possible[rand() % 11];
+                }
+            }
+        }
+        if (spinRemaining <= 0.f) {
+            spinRemaining = 0.f;
+            if (sessionStats) {
                 SlotsSummary summary = game.statSummary();
-                if (summary.spinNumber > lastRecordedSpinNumber)
-                {
+                if (summary.spinNumber > lastRecordedSpinNumber) {
                     SlotsRoundSummary rs;
                     rs.betAmount = summary.betMade;
                     rs.payoutAmount = summary.payoutAmount;
@@ -373,10 +403,7 @@ void SlotsUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
             updateText();
         }
     }
-}
 
-void SlotsUI::draw(sf::RenderWindow& window)
-{
     sf::RectangleShape background({ 1000.f, 760.f });
     background.setFillColor(sf::Color(18, 0, 40));
     window.draw(background);
@@ -437,7 +464,12 @@ void SlotsUI::draw(sf::RenderWindow& window)
 
             if (hasSpun)
             {
-                char symbolChar = currentWindow.getDisplay(col, row);
+                bool isColSpinning = false;
+                if (col == 0 && spinRemaining > 1.0f) isColSpinning = true;
+                if (col == 1 && spinRemaining > 0.5f) isColSpinning = true;
+                if (col == 2 && spinRemaining > 0.0f) isColSpinning = true;
+
+                char symbolChar = isColSpinning ? randomSymbols[row][col] : currentWindow.getDisplay(col, row);
                 if (symbolTextures.find(symbolChar) != symbolTextures.end())
                 {
                     sf::Sprite sprite(symbolTextures[symbolChar]);

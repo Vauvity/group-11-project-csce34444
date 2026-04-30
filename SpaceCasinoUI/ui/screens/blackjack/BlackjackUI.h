@@ -76,6 +76,11 @@ private:
     SessionStats* sessionStats;
     int lastRecordedRoundNumber;
 
+    sf::Clock frameClock;
+    std::vector<float> pCardAnim;
+    std::vector<float> dCardAnim;
+    bool wasRoundOver;
+
     void setupButtons();
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
 
