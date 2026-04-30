@@ -34,6 +34,8 @@ private:
     sf::Text backText;
     sf::Text spinText;
 
+    sf::RectangleShape betBg;
+
     sf::RectangleShape spinButton;
     sf::RectangleShape backButton;
 

@@ -4,8 +4,8 @@
 namespace {
     constexpr float TABLE_X = 95.f;
     constexpr float TABLE_Y = 205.f;
-    constexpr float CELL_W = 48.f;
-    constexpr float CELL_H = 42.f;
+    constexpr float CELL_W = 50.f;
+    constexpr float CELL_H = 65.f;
 }
 
 RouletteUI::RouletteUI(sf::Font& sharedFont)
@@ -28,12 +28,13 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     lowText(font, "1 TO 18", 18),
     highText(font, "19 TO 36", 18),
     straightText(font, "STRAIGHT", 18),
+    clearBetsText(font, "CLEAR BETS", 20),
+    placeStraightText(font, "BET", 18),
     currentBet(5.0),
     chipInput("5"),
     enteringChip(false),
     numberInput("0"),
     enteringNumber(false),
-    selectedBet(SelectedBet::Red),
     chipInputLabelText(font, "Enter Chip Value", 24),
     chipInputText(font, "", 28),
     chipHintText(font, "Enter chip value and confirm", 18),
@@ -52,20 +53,29 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     bankrollText.setFillColor(sf::Color::White);
     bankrollText.setPosition({ 20.f, 20.f });
 
+    betBg.setSize({ 250.f, 40.f });
+    betBg.setPosition({ 10.f, 60.f });
+    betBg.setFillColor(sf::Color(60, 20, 20, 200));
+    betBg.setOutlineThickness(2.f);
+    betBg.setOutlineColor(sf::Color(255, 70, 70));
+
     betText.setFillColor(sf::Color::White);
-    betText.setPosition({ 20.f, 55.f });
+    betText.setPosition({ 20.f, 65.f });
 
     selectedBetText.setFillColor(sf::Color(255, 230, 230));
     selectedBetText.setPosition({ 70.f, 155.f });
 
     numberInputLabelText.setFillColor(sf::Color(255, 230, 230));
-    numberInputLabelText.setPosition({ 760.f, 370.f });
+    numberInputLabelText.setPosition({ 750.f, 380.f });
 
-    numberBox.setSize({ 120.f, 46.f });
-    numberBox.setPosition({ 795.f, 405.f });
+    numberBox.setSize({ 80.f, 46.f });
+    numberBox.setPosition({ 750.f, 410.f });
     numberBox.setFillColor(sf::Color(28, 10, 18));
     numberBox.setOutlineThickness(2.f);
     numberBox.setOutlineColor(sf::Color(255, 70, 70));
+
+    placeStraightButton.setSize({ 80.f, 46.f });
+    placeStraightButton.setPosition({ 840.f, 410.f });
 
     numberInputText.setFillColor(sf::Color::White);
 
@@ -73,25 +83,25 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     payoutText.setFillColor(sf::Color(255, 220, 90));
 
     redButton.setSize({ 125.f, 46.f });
-    redButton.setPosition({ 95.f, 345.f });
+    redButton.setPosition({ 58.f, 605.f });
 
     blackButton.setSize({ 125.f, 46.f });
-    blackButton.setPosition({ 235.f, 345.f });
+    blackButton.setPosition({ 209.f, 605.f });
 
     evenButton.setSize({ 125.f, 46.f });
-    evenButton.setPosition({ 375.f, 345.f });
+    evenButton.setPosition({ 360.f, 605.f });
 
     oddButton.setSize({ 125.f, 46.f });
-    oddButton.setPosition({ 515.f, 345.f });
+    oddButton.setPosition({ 511.f, 605.f });
 
     lowButton.setSize({ 125.f, 46.f });
-    lowButton.setPosition({ 95.f, 405.f });
+    lowButton.setPosition({ 662.f, 605.f });
 
     highButton.setSize({ 125.f, 46.f });
-    highButton.setPosition({ 235.f, 405.f });
+    highButton.setPosition({ 813.f, 605.f });
 
-    straightButton.setSize({ 125.f, 46.f });
-    straightButton.setPosition({ 375.f, 405.f });
+    clearBetsButton.setSize({ 180.f, 50.f });
+    clearBetsButton.setPosition({ 405.f, 660.f });
 
     spinButton.setSize({ 180.f, 50.f });
     spinButton.setPosition({ 595.f, 660.f });
@@ -108,6 +118,8 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     straightText.setFillColor(sf::Color::White);
     spinText.setFillColor(sf::Color::White);
     backText.setFillColor(sf::Color::White);
+    clearBetsText.setFillColor(sf::Color::White);
+    placeStraightText.setFillColor(sf::Color::White);
 
     centerTextInButton(redText, redButton);
     centerTextInButton(blackText, blackButton);
@@ -115,9 +127,10 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     centerTextInButton(oddText, oddButton);
     centerTextInButton(lowText, lowButton);
     centerTextInButton(highText, highButton);
-    centerTextInButton(straightText, straightButton);
     centerTextInButton(spinText, spinButton);
     centerTextInButton(backText, backButton);
+    centerTextInButton(clearBetsText, clearBetsButton);
+    centerTextInButton(placeStraightText, placeStraightButton);
 
     (void)wheelTexture.loadFromFile("assets/images/roulette/pngimg.com - roulette_PNG50.png");
     wheelSprite.setTexture(wheelTexture, true);
@@ -216,7 +229,6 @@ void RouletteUI::setStartingBankroll(double bankroll)
     enteringChip = false;
     numberInput = "0";
     enteringNumber = false;
-    selectedBet = SelectedBet::Red;
     hasSpun = false;
     resultText.setString("");
     payoutText.setString("");
@@ -245,24 +257,11 @@ void RouletteUI::centerTextInButton(sf::Text& text, const sf::RectangleShape& bu
         });
 }
 
-std::string RouletteUI::getSelectedBetLabel() const
-{
-    switch (selectedBet)
-    {
-    case SelectedBet::Red: return "Selected Bet: Red";
-    case SelectedBet::Black: return "Selected Bet: Black";
-    case SelectedBet::Even: return "Selected Bet: Even";
-    case SelectedBet::Odd: return "Selected Bet: Odd";
-    case SelectedBet::Low: return "Selected Bet: 1 to 18";
-    case SelectedBet::High: return "Selected Bet: 19 to 36";
-    case SelectedBet::Straight: return "Selected Bet: Straight Up " + numberInput;
-    default: return "Selected Bet";
-    }
-}
+
 
 sf::FloatRect RouletteUI::getZeroCellBounds() const
 {
-    return sf::FloatRect({ 35.f, TABLE_Y }, { 45.f, CELL_H * 3.f });
+    return sf::FloatRect({ 30.f, TABLE_Y }, { 55.f, CELL_H * 3.f });
 }
 
 sf::FloatRect RouletteUI::getTableCellBounds(int number) const
@@ -308,7 +307,6 @@ void RouletteUI::updateText()
 {
     bankrollText.setString("Bankroll: $" + std::to_string(game.getBalance()));
     betText.setString("Chip Value: $" + std::to_string(static_cast<int>(currentBet)));
-    selectedBetText.setString(getSelectedBetLabel());
 
     numberInputText.setString(numberInput);
 
@@ -358,64 +356,21 @@ void RouletteUI::commitChipInput()
 
 void RouletteUI::spinRound()
 {
-    if (!game.canPlaceBet(static_cast<int>(currentBet)))
+    if (placedChips.empty())
     {
-        resultText.setString("Not enough bankroll for that bet.");
+        resultText.setString("Place a bet first.");
         payoutText.setString("");
         updateText();
         return;
     }
 
-    RouletteBet bet(Color::Red, static_cast<int>(currentBet));
-
-    switch (selectedBet)
-    {
-    case SelectedBet::Red:
-        bet = RouletteBet(Color::Red, static_cast<int>(currentBet));
-        break;
-    case SelectedBet::Black:
-        bet = RouletteBet(Color::Black, static_cast<int>(currentBet));
-        break;
-    case SelectedBet::Even:
-        bet = RouletteBet(BetType::EvenOdd, 0, static_cast<int>(currentBet));
-        break;
-    case SelectedBet::Odd:
-        bet = RouletteBet(BetType::EvenOdd, 1, static_cast<int>(currentBet));
-        break;
-    case SelectedBet::Low:
-        bet = RouletteBet(BetType::HighLow, 0, static_cast<int>(currentBet));
-        break;
-    case SelectedBet::High:
-        bet = RouletteBet(BetType::HighLow, 1, static_cast<int>(currentBet));
-        break;
-    case SelectedBet::Straight:
-    {
-        int chosenNumber = 0;
-        try
-        {
-            chosenNumber = std::stoi(numberInput);
-        }
-        catch (...)
-        {
-            chosenNumber = 0;
-        }
-
-        if (chosenNumber < 0 || chosenNumber > 36)
-        {
-            resultText.setString("Straight number must be from 0 to 36.");
-            payoutText.setString("");
-            updateText();
-            return;
-        }
-
-        bet = RouletteBet(BetType::StraightUp, chosenNumber, static_cast<int>(currentBet));
-        break;
-    }
+    int totalBetAmount = 0;
+    for (const auto& c : placedChips) {
+        totalBetAmount += c.amount;
     }
 
-    int before = game.getBalance();
+    int before = game.getBalance() + totalBetAmount;
 
-    game.placeBet(bet);
     game.spin();
     game.resolve();
 
@@ -441,14 +396,15 @@ void RouletteUI::spinRound()
     if (sessionStats)
     {
         RouletteRoundSummary summary{};
-        summary.betAmount = currentBet;
+        summary.betAmount = static_cast<double>(totalBetAmount);
         summary.netChange = static_cast<double>(net);
-        summary.payoutAmount = net > 0 ? currentBet + net : 0.0;
-        summary.wasStraightUp = (selectedBet == SelectedBet::Straight);
-        summary.straightUpWon = (selectedBet == SelectedBet::Straight && net > 0);
+        summary.payoutAmount = net > 0 ? static_cast<double>(totalBetAmount + net) : 0.0;
+        summary.wasStraightUp = false;
+        summary.straightUpWon = false;
         sessionStats->recordRouletteRound(summary);
     }
 
+    placedChips.clear();
     hasSpun = true;
     isBallSpinning = true;
     ballAngle = 0.f;
@@ -478,7 +434,7 @@ void RouletteUI::handleTextEntered(unsigned int unicode)
         return;
     }
 
-    if (!enteringNumber || selectedBet != SelectedBet::Straight)
+    if (!enteringNumber)
     {
         return;
     }
@@ -507,7 +463,7 @@ void RouletteUI::handleBackspace()
         return;
     }
 
-    if (!enteringNumber || selectedBet != SelectedBet::Straight)
+    if (!enteringNumber)
     {
         return;
     }
@@ -543,7 +499,7 @@ void RouletteUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
         return;
     }
 
-    if (betText.getGlobalBounds().contains(mousePos))
+    if (betBg.getGlobalBounds().contains(mousePos) || betText.getGlobalBounds().contains(mousePos))
     {
         enteringChip = true;
         enteringNumber = false;
@@ -564,49 +520,67 @@ void RouletteUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
 
     enteringNumber = false;
 
+    auto tryPlaceBet = [&](const RouletteBet& bet, sf::Vector2f pos) {
+        if (game.canPlaceBet(static_cast<int>(currentBet))) {
+            game.placeBet(bet);
+            placedChips.push_back({pos, static_cast<int>(currentBet)});
+        } else {
+            resultText.setString("Not enough bankroll.");
+        }
+    };
+
     int pickedNumber = getClickedTableNumber(mousePos);
     if (pickedNumber != -1)
     {
-        selectedBet = SelectedBet::Straight;
-        numberInput = std::to_string(pickedNumber);
-        enteringNumber = true;
+        sf::FloatRect bounds = (pickedNumber == 0) ? getZeroCellBounds() : getTableCellBounds(pickedNumber);
+        tryPlaceBet(RouletteBet(BetType::StraightUp, pickedNumber, static_cast<int>(currentBet)), {bounds.position.x + bounds.size.x / 2.f, bounds.position.y + bounds.size.y / 2.f});
         updateText();
         return;
     }
 
     if (numberBox.getGlobalBounds().contains(mousePos))
     {
-        selectedBet = SelectedBet::Straight;
         enteringNumber = true;
+    }
+    else if (placeStraightButton.getGlobalBounds().contains(mousePos))
+    {
+        int chosenNumber = 0;
+        try { chosenNumber = std::stoi(numberInput); } catch (...) { chosenNumber = -1; }
+        if (chosenNumber >= 0 && chosenNumber <= 36) {
+            sf::FloatRect bounds = (chosenNumber == 0) ? getZeroCellBounds() : getTableCellBounds(chosenNumber);
+            tryPlaceBet(RouletteBet(BetType::StraightUp, chosenNumber, static_cast<int>(currentBet)), {bounds.position.x + bounds.size.x / 2.f, bounds.position.y + bounds.size.y / 2.f});
+        } else {
+            resultText.setString("Straight number must be from 0 to 36.");
+        }
     }
     else if (redButton.getGlobalBounds().contains(mousePos))
     {
-        selectedBet = SelectedBet::Red;
+        tryPlaceBet(RouletteBet(Color::Red, static_cast<int>(currentBet)), {redButton.getPosition().x + redButton.getSize().x / 2.f, redButton.getPosition().y + redButton.getSize().y / 2.f});
     }
     else if (blackButton.getGlobalBounds().contains(mousePos))
     {
-        selectedBet = SelectedBet::Black;
+        tryPlaceBet(RouletteBet(Color::Black, static_cast<int>(currentBet)), {blackButton.getPosition().x + blackButton.getSize().x / 2.f, blackButton.getPosition().y + blackButton.getSize().y / 2.f});
     }
     else if (evenButton.getGlobalBounds().contains(mousePos))
     {
-        selectedBet = SelectedBet::Even;
+        tryPlaceBet(RouletteBet(BetType::EvenOdd, 0, static_cast<int>(currentBet)), {evenButton.getPosition().x + evenButton.getSize().x / 2.f, evenButton.getPosition().y + evenButton.getSize().y / 2.f});
     }
     else if (oddButton.getGlobalBounds().contains(mousePos))
     {
-        selectedBet = SelectedBet::Odd;
+        tryPlaceBet(RouletteBet(BetType::EvenOdd, 1, static_cast<int>(currentBet)), {oddButton.getPosition().x + oddButton.getSize().x / 2.f, oddButton.getPosition().y + oddButton.getSize().y / 2.f});
     }
     else if (lowButton.getGlobalBounds().contains(mousePos))
     {
-        selectedBet = SelectedBet::Low;
+        tryPlaceBet(RouletteBet(BetType::HighLow, 0, static_cast<int>(currentBet)), {lowButton.getPosition().x + lowButton.getSize().x / 2.f, lowButton.getPosition().y + lowButton.getSize().y / 2.f});
     }
     else if (highButton.getGlobalBounds().contains(mousePos))
     {
-        selectedBet = SelectedBet::High;
+        tryPlaceBet(RouletteBet(BetType::HighLow, 1, static_cast<int>(currentBet)), {highButton.getPosition().x + highButton.getSize().x / 2.f, highButton.getPosition().y + highButton.getSize().y / 2.f});
     }
-    else if (straightButton.getGlobalBounds().contains(mousePos))
+    else if (clearBetsButton.getGlobalBounds().contains(mousePos))
     {
-        selectedBet = SelectedBet::Straight;
-        enteringNumber = true;
+        game.clearBets();
+        placedChips.clear();
     }
     else if (spinButton.getGlobalBounds().contains(mousePos))
     {
@@ -647,9 +621,11 @@ void RouletteUI::draw(sf::RenderWindow& window)
     window.draw(topLine);
 
     sf::RectangleShape bottomLine({ 880.f, 3.f });
-    bottomLine.setPosition({ 58.f, 610.f });
+    bottomLine.setPosition({ 58.f, 580.f });
     bottomLine.setFillColor(sf::Color(255, 70, 70));
     window.draw(bottomLine);
+
+    window.draw(betBg);
 
     window.draw(titleText);
     window.draw(bankrollText);
@@ -661,8 +637,8 @@ void RouletteUI::draw(sf::RenderWindow& window)
     tableTitle.setPosition({ 285.f, 170.f });
     window.draw(tableTitle);
 
-    sf::RectangleShape zeroCell({ 45.f, CELL_H * 3.f });
-    zeroCell.setPosition({ 35.f, TABLE_Y });
+    sf::RectangleShape zeroCell({ 55.f, CELL_H * 3.f });
+    zeroCell.setPosition({ 30.f, TABLE_Y });
     zeroCell.setFillColor(sf::Color(20, 120, 50));
     zeroCell.setOutlineThickness(2.f);
     zeroCell.setOutlineColor(sf::Color::White);
@@ -738,6 +714,8 @@ void RouletteUI::draw(sf::RenderWindow& window)
     straightButton.setFillColor(sf::Color(200, 90, 40));
     spinButton.setFillColor(sf::Color(220, 50, 50));
     backButton.setFillColor(sf::Color(180, 40, 60));
+    clearBetsButton.setFillColor(sf::Color(180, 80, 40));
+    placeStraightButton.setFillColor(sf::Color(220, 50, 50));
 
     window.draw(redButton);
     window.draw(blackButton);
@@ -745,7 +723,8 @@ void RouletteUI::draw(sf::RenderWindow& window)
     window.draw(oddButton);
     window.draw(lowButton);
     window.draw(highButton);
-    window.draw(straightButton);
+    window.draw(clearBetsButton);
+    window.draw(placeStraightButton);
     window.draw(spinButton);
     window.draw(backButton);
 
@@ -755,7 +734,8 @@ void RouletteUI::draw(sf::RenderWindow& window)
     window.draw(oddText);
     window.draw(lowText);
     window.draw(highText);
-    window.draw(straightText);
+    window.draw(clearBetsText);
+    window.draw(placeStraightText);
     window.draw(spinText);
     window.draw(backText);
     if (!isBallSpinning)
@@ -765,6 +745,26 @@ void RouletteUI::draw(sf::RenderWindow& window)
     }
     
     window.draw(wheelSprite);
+
+    for (const auto& chip : placedChips)
+    {
+        sf::CircleShape chipShape(15.f);
+        chipShape.setFillColor(sf::Color(255, 215, 0));
+        chipShape.setOutlineThickness(2.f);
+        chipShape.setOutlineColor(sf::Color::Black);
+        chipShape.setOrigin({ 15.f, 15.f });
+        chipShape.setPosition(chip.position);
+        window.draw(chipShape);
+
+        sf::Text amt(font, std::to_string(chip.amount), 12);
+        amt.setFillColor(sf::Color::Black);
+        sf::FloatRect ab = amt.getLocalBounds();
+        amt.setPosition({
+            chip.position.x - ab.size.x / 2.f - ab.position.x,
+            chip.position.y - ab.size.y / 2.f - ab.position.y
+        });
+        window.draw(amt);
+    }
 
     if (isBallSpinning)
     {

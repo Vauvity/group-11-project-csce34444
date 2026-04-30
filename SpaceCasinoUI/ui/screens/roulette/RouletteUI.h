@@ -29,6 +29,8 @@ private:
     sf::Text titleText;
     sf::Text bankrollText;
     sf::Text betText;
+
+    sf::RectangleShape betBg;
     sf::Text selectedBetText;
     sf::Text numberInputLabelText;
     sf::Text numberInputText;
@@ -36,6 +38,8 @@ private:
     sf::Text payoutText;
     sf::Text spinText;
     sf::Text backText;
+    sf::Text clearBetsText;
+    sf::Text placeStraightText;
 
     sf::RectangleShape redButton;
     sf::RectangleShape blackButton;
@@ -46,6 +50,8 @@ private:
     sf::RectangleShape straightButton;
     sf::RectangleShape spinButton;
     sf::RectangleShape backButton;
+    sf::RectangleShape clearBetsButton;
+    sf::RectangleShape placeStraightButton;
     sf::RectangleShape numberBox;
 
     sf::Text redText;
@@ -55,6 +61,12 @@ private:
     sf::Text lowText;
     sf::Text highText;
     sf::Text straightText;
+
+    struct UIChip {
+        sf::Vector2f position;
+        int amount;
+    };
+    std::vector<UIChip> placedChips;
 
     double currentBet;
     std::string chipInput;
@@ -89,8 +101,6 @@ private:
         High,
         Straight
     };
-
-    SelectedBet selectedBet;
     bool hasSpun;
     SessionStats* sessionStats;
 

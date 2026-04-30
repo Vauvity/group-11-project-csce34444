@@ -29,6 +29,8 @@ private:
     sf::Text titleText;
     sf::Text bankrollText;
     sf::Text betText;
+
+    sf::RectangleShape betBg;
     sf::Text dealerText;
     sf::Text playerText;
     sf::Text messageText;

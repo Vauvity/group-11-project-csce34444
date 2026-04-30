@@ -20,6 +20,9 @@ void RouletteGame::placeBet(const RouletteBet& bet) {
 }
 
 void RouletteGame::clearBets() {
+    for (const auto& bet : bets) {
+        balance += bet.amount;
+    }
     bets.clear();
 }
 

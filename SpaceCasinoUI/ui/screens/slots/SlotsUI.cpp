@@ -34,11 +34,17 @@ SlotsUI::SlotsUI(sf::Font& sharedFont)
     bankrollText.setFillColor(sf::Color::White);
     bankrollText.setPosition({ 20.f, 20.f });
 
-    betText.setFillColor(sf::Color::White);
-    betText.setPosition({ 20.f, 55.f });
+    betBg.setSize({ 250.f, 40.f });
+    betBg.setPosition({ 10.f, 60.f });
+    betBg.setFillColor(sf::Color(60, 30, 80, 200));
+    betBg.setOutlineThickness(2.f);
+    betBg.setOutlineColor(sf::Color(200, 100, 255));
 
-    jackpotText.setFillColor(sf::Color::White);
-    jackpotText.setPosition({ 580.f, 55.f });
+    betText.setFillColor(sf::Color::White);
+    betText.setPosition({ 20.f, 65.f });
+
+    jackpotText.setFillColor(sf::Color(255, 220, 100));
+    jackpotText.setPosition({ 690.f, 20.f });
 
     resultText.setFillColor(sf::Color(230, 230, 255));
     resultText.setPosition({ 0.f, 500.f });
@@ -324,7 +330,7 @@ void SlotsUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
         return;
     }
 
-    if (betText.getGlobalBounds().contains(mousePos))
+    if (betBg.getGlobalBounds().contains(mousePos) || betText.getGlobalBounds().contains(mousePos))
     {
         enteringBet = true;
         betInput = std::to_string(static_cast<int>(currentBet));
@@ -392,9 +398,11 @@ void SlotsUI::draw(sf::RenderWindow& window)
     window.draw(topLine);
 
     sf::RectangleShape bottomLine({ 880.f, 3.f });
-    bottomLine.setPosition({ 58.f, 610.f });
+    bottomLine.setPosition({ 58.f, 580.f });
     bottomLine.setFillColor(sf::Color(210, 120, 255));
     window.draw(bottomLine);
+
+    window.draw(betBg);
 
     window.draw(titleText);
     window.draw(bankrollText);

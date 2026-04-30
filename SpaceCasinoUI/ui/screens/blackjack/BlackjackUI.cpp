@@ -41,8 +41,14 @@ BlackjackUI::BlackjackUI(sf::Font& sharedFont)
     bankrollText.setFillColor(sf::Color::White);
     bankrollText.setPosition({ 20.f, 20.f });
 
+    betBg.setSize({ 250.f, 40.f });
+    betBg.setPosition({ 10.f, 60.f });
+    betBg.setFillColor(sf::Color(12, 28, 55, 200));
+    betBg.setOutlineThickness(2.f);
+    betBg.setOutlineColor(sf::Color(90, 210, 255));
+
     betText.setFillColor(sf::Color::White);
-    betText.setPosition({ 20.f, 55.f });
+    betText.setPosition({ 20.f, 65.f });
 
     dealerText.setFillColor(sf::Color(190, 235, 235));
     dealerText.setPosition({ 0.f, 160.f });
@@ -629,7 +635,7 @@ void BlackjackUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
         return;
     }
 
-    if (betText.getGlobalBounds().contains(mousePos))
+    if (betBg.getGlobalBounds().contains(mousePos) || betText.getGlobalBounds().contains(mousePos))
     {
         enteringBet = true;
         betInput = std::to_string(static_cast<int>(currentBet));
@@ -677,10 +683,12 @@ void BlackjackUI::draw(sf::RenderWindow& window)
 
     auto playerBounds = playerText.getGlobalBounds();
 
-    sf::RectangleShape line2({ 880.f, 3.f });
-    line2.setPosition({ 58.f, playerBounds.position.y + playerBounds.size.y + 20.f });
-    line2.setFillColor(sf::Color(90, 210, 255));
-    window.draw(line2);
+    sf::RectangleShape bottomLine({ 880.f, 3.f });
+    bottomLine.setPosition({ 60.f, 580.f });
+    bottomLine.setFillColor(sf::Color(90, 210, 255));
+    window.draw(bottomLine);
+
+    window.draw(betBg);
 
     window.draw(titleText);
     window.draw(bankrollText);
