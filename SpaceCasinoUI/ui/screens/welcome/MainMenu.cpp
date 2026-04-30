@@ -1,4 +1,5 @@
 #include "MainMenu.h"
+#include <cmath>
 
 MainMenu::MainMenu(sf::Font& sharedFont)
     : font(sharedFont),
@@ -11,8 +12,25 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     exitText(font, "EXIT", 22),
     confirmText(font, "CONFIRM", 20),
     cancelText(font, "CANCEL", 20),
+    settingsText(font, "SETTINGS", 18),
     bankrollInput(""),
-    bgSprite(bgTexture)
+    bgSprite(bgTexture),
+    settingsPanel({ 500.f, 380.f }),
+    settingsTitleText(font, "Audio Settings", 32),
+    musicSliderBg({ 200.f, 20.f }),
+    blackjackSfxSliderBg({ 200.f, 20.f }),
+    rouletteSfxSliderBg({ 200.f, 20.f }),
+    slotsSfxSliderBg({ 200.f, 20.f }),
+    musicSliderFill({ 0.f, 20.f }),
+    blackjackSfxSliderFill({ 0.f, 20.f }),
+    rouletteSfxSliderFill({ 0.f, 20.f }),
+    slotsSfxSliderFill({ 0.f, 20.f }),
+    musicLabelText(font, "Music", 20),
+    blackjackSfxLabelText(font, "Blackjack SFX", 20),
+    rouletteSfxLabelText(font, "Roulette SFX", 20),
+    slotsSfxLabelText(font, "Slots SFX", 20),
+    settingsCloseButton({ 180.f, 50.f }),
+    settingsCloseText(font, "CLOSE", 20)
 {
     titleText.setFillColor(sf::Color(90, 210, 255));
     sf::FloatRect bounds = titleText.getLocalBounds();
@@ -38,6 +56,14 @@ MainMenu::MainMenu(sf::Font& sharedFont)
 
     centerTextInButton(startText, startButton);
     centerTextInButton(exitText, exitButton);
+    
+    settingsButton.setSize({ 120.f, 40.f });
+    settingsButton.setPosition({ 20.f, 700.f });
+    settingsButton.setFillColor(sf::Color(50, 50, 60));
+    settingsButton.setOutlineThickness(2.f);
+    settingsButton.setOutlineColor(sf::Color(200, 200, 200));
+    settingsText.setFillColor(sf::Color(200, 200, 200));
+    centerTextInButton(settingsText, settingsButton);
 
     overlay.setSize({ 1000.f, 760.f });
     overlay.setFillColor(sf::Color(0, 0, 0, 160));
@@ -97,6 +123,52 @@ MainMenu::MainMenu(sf::Font& sharedFont)
     }
 
     refreshBankrollText();
+
+    settingsPanel.setPosition({ 250.f, 190.f });
+    settingsPanel.setFillColor(sf::Color(30, 35, 45));
+    settingsPanel.setOutlineThickness(2.f);
+    settingsPanel.setOutlineColor(sf::Color(255, 210, 90));
+
+    settingsTitleText.setFillColor(sf::Color(255, 210, 90));
+    settingsTitleText.setPosition({ 380.f, 210.f });
+
+    musicLabelText.setPosition({ 280.f, 260.f });
+    blackjackSfxLabelText.setPosition({ 280.f, 310.f });
+    rouletteSfxLabelText.setPosition({ 280.f, 360.f });
+    slotsSfxLabelText.setPosition({ 280.f, 410.f });
+
+    musicSliderBg.setPosition({ 480.f, 265.f });
+    blackjackSfxSliderBg.setPosition({ 480.f, 315.f });
+    rouletteSfxSliderBg.setPosition({ 480.f, 365.f });
+    slotsSfxSliderBg.setPosition({ 480.f, 415.f });
+
+    musicSliderFill.setPosition({ 480.f, 265.f });
+    blackjackSfxSliderFill.setPosition({ 480.f, 315.f });
+    rouletteSfxSliderFill.setPosition({ 480.f, 365.f });
+    slotsSfxSliderFill.setPosition({ 480.f, 415.f });
+
+    musicSliderBg.setFillColor(sf::Color(80, 80, 90));
+    blackjackSfxSliderBg.setFillColor(sf::Color(80, 80, 90));
+    rouletteSfxSliderBg.setFillColor(sf::Color(80, 80, 90));
+    slotsSfxSliderBg.setFillColor(sf::Color(80, 80, 90));
+
+    musicSliderFill.setFillColor(sf::Color(50, 115, 230));
+    blackjackSfxSliderFill.setFillColor(sf::Color(50, 115, 230));
+    rouletteSfxSliderFill.setFillColor(sf::Color(50, 115, 230));
+    slotsSfxSliderFill.setFillColor(sf::Color(50, 115, 230));
+
+    musicLabelText.setFillColor(sf::Color::White);
+    blackjackSfxLabelText.setFillColor(sf::Color::White);
+    rouletteSfxLabelText.setFillColor(sf::Color::White);
+    slotsSfxLabelText.setFillColor(sf::Color::White);
+
+    settingsCloseButton.setPosition({ 410.f, 490.f });
+    settingsCloseButton.setFillColor(sf::Color(180, 65, 85));
+    settingsCloseButton.setOutlineThickness(2.f);
+    settingsCloseButton.setOutlineColor(sf::Color(255, 210, 90));
+
+    settingsCloseText.setFillColor(sf::Color::White);
+    centerTextInButton(settingsCloseText, settingsCloseButton);
 }
 
 void MainMenu::centerTextInButton(sf::Text& text, const sf::RectangleShape& button)
@@ -139,6 +211,27 @@ void MainMenu::refreshBankrollText()
     {
         confirmButton.setFillColor(sf::Color(70, 70, 100));
     }
+}
+
+void MainMenu::setAudioSettings(AudioSettings* settings)
+{
+    audioSettings = settings;
+    refreshSettingsDisplay();
+}
+
+void MainMenu::refreshSettingsDisplay()
+{
+    if (!audioSettings) return;
+
+    musicLabelText.setString("Music");
+    blackjackSfxLabelText.setString("Blackjack SFX");
+    rouletteSfxLabelText.setString("Roulette SFX");
+    slotsSfxLabelText.setString("Slots SFX");
+
+    musicSliderFill.setSize({ 200.f * std::sqrt(audioSettings->musicVolume / 100.f), 20.f });
+    blackjackSfxSliderFill.setSize({ 200.f * std::sqrt(audioSettings->blackjackSfxVolume / 100.f), 20.f });
+    rouletteSfxSliderFill.setSize({ 200.f * std::sqrt(audioSettings->rouletteSfxVolume / 100.f), 20.f });
+    slotsSfxSliderFill.setSize({ 200.f * std::sqrt(audioSettings->slotsSfxVolume / 100.f), 20.f });
 }
 
 void MainMenu::handleTextEntered(unsigned int unicode)
@@ -223,8 +316,24 @@ void MainMenu::handleMouseClick(sf::Vector2f mousePos, bool& startGame, bool& ex
     startGame = false;
     exitGame = false;
 
+    if (showingSettingsPopup)
+    {
+        if (settingsCloseButton.getGlobalBounds().contains(mousePos))
+        {
+            showingSettingsPopup = false;
+        }
+        return;
+    }
+
     if (!showingBankrollInput)
     {
+        if (settingsButton.getGlobalBounds().contains(mousePos))
+        {
+            showingSettingsPopup = true;
+            refreshSettingsDisplay();
+            return;
+        }
+
         if (startButton.getGlobalBounds().contains(mousePos))
         {
             if (bankrollSetForSession)
@@ -298,10 +407,58 @@ void MainMenu::draw(sf::RenderWindow& window)
     window.draw(titleText);
     window.draw(startButton);
     window.draw(exitButton);
+    window.draw(settingsButton);
     window.draw(startText);
     window.draw(exitText);
+    window.draw(settingsText);
 
-    if (showingBankrollInput)
+    if (showingSettingsPopup)
+    {
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+        {
+            sf::Vector2i mousePosI = sf::Mouse::getPosition(window);
+            sf::Vector2f mousePos(static_cast<float>(mousePosI.x), static_cast<float>(mousePosI.y));
+
+            auto updateSlider = [&](sf::RectangleShape& bg, float& volume) {
+                sf::FloatRect bounds = bg.getGlobalBounds();
+                bounds.position.y -= 10.f; bounds.size.y += 20.f; 
+                bounds.position.x -= 10.f; bounds.size.x += 20.f;
+                if (bounds.contains(mousePos)) {
+                    float pct = (mousePos.x - bg.getPosition().x) / bg.getSize().x;
+                    if (pct < 0.f) pct = 0.f;
+                    if (pct > 1.f) pct = 1.f;
+                    volume = (pct * pct) * 100.f;
+                    refreshSettingsDisplay();
+                }
+            };
+
+            if (audioSettings) {
+                updateSlider(musicSliderBg, audioSettings->musicVolume);
+                updateSlider(blackjackSfxSliderBg, audioSettings->blackjackSfxVolume);
+                updateSlider(rouletteSfxSliderBg, audioSettings->rouletteSfxVolume);
+                updateSlider(slotsSfxSliderBg, audioSettings->slotsSfxVolume);
+            }
+        }
+
+        window.draw(overlay);
+        window.draw(settingsPanel);
+        window.draw(settingsTitleText);
+        window.draw(musicSliderBg);
+        window.draw(blackjackSfxSliderBg);
+        window.draw(rouletteSfxSliderBg);
+        window.draw(slotsSfxSliderBg);
+        window.draw(musicSliderFill);
+        window.draw(blackjackSfxSliderFill);
+        window.draw(rouletteSfxSliderFill);
+        window.draw(slotsSfxSliderFill);
+        window.draw(musicLabelText);
+        window.draw(blackjackSfxLabelText);
+        window.draw(rouletteSfxLabelText);
+        window.draw(slotsSfxLabelText);
+        window.draw(settingsCloseButton);
+        window.draw(settingsCloseText);
+    }
+    else if (showingBankrollInput)
     {
         window.draw(overlay);
         window.draw(popupPanel);

@@ -1,5 +1,6 @@
 #include "GameSelect.h"
 #include <string>
+#include <cmath>
 
 GameSelect::GameSelect(sf::Font& sharedFont)
     : font(sharedFont),
@@ -19,6 +20,7 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     slotsText(font, "SLOTS", 26),
     statsText(font, "SESSION STATS", 22),
     backText(font, "MAIN MENU", 20),
+    settingsText(font, "SETTINGS", 18),
 
     blackjackInfoBtn({ 40.f, 40.f }),
     rouletteInfoBtn({ 40.f, 40.f }),
@@ -54,9 +56,28 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     infoCloseButton({ 180.f, 50.f }),
     infoCloseText(font, "CLOSE", 20),
 
+    showingSettingsPopup(false),
+    settingsPanel({ 500.f, 380.f }),
+    settingsTitleText(font, "Audio Settings", 32),
+    musicSliderBg({ 200.f, 20.f }),
+    blackjackSfxSliderBg({ 200.f, 20.f }),
+    rouletteSfxSliderBg({ 200.f, 20.f }),
+    slotsSfxSliderBg({ 200.f, 20.f }),
+    musicSliderFill({ 0.f, 20.f }),
+    blackjackSfxSliderFill({ 0.f, 20.f }),
+    rouletteSfxSliderFill({ 0.f, 20.f }),
+    slotsSfxSliderFill({ 0.f, 20.f }),
+    musicLabelText(font, "Music", 20),
+    blackjackSfxLabelText(font, "Blackjack SFX", 20),
+    rouletteSfxLabelText(font, "Roulette SFX", 20),
+    slotsSfxLabelText(font, "Slots SFX", 20),
+    settingsCloseButton({ 180.f, 50.f }),
+    settingsCloseText(font, "CLOSE", 20),
+
     currentBankroll(0.0),
     addMoneyInput(""),
-    showingAddMoneyPopup(false)
+    showingAddMoneyPopup(false),
+    audioSettings(nullptr)
 {
     titleText.setFillColor(sf::Color(255, 210, 90));
     subtitleText.setFillColor(sf::Color::White);
@@ -75,35 +96,43 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     statsButton.setPosition({ centerX - statsButton.getSize().x / 2.f, 540.f });
     backButton.setPosition({ 785.f, 660.f });
 
+    settingsButton.setSize({ 120.f, 40.f });
+    settingsButton.setPosition({ 20.f, 700.f });
+
     blackjackButton.setFillColor(sf::Color(50, 115, 230));
     rouletteButton.setFillColor(sf::Color(180, 65, 85));
     slotsButton.setFillColor(sf::Color(150, 80, 220));
     statsButton.setFillColor(sf::Color(80, 140, 200));
     backButton.setFillColor(sf::Color(80, 80, 90));
+    settingsButton.setFillColor(sf::Color(50, 50, 60));
 
     blackjackButton.setOutlineThickness(2.f);
     rouletteButton.setOutlineThickness(2.f);
     slotsButton.setOutlineThickness(2.f);
     statsButton.setOutlineThickness(2.f);
     backButton.setOutlineThickness(2.f);
+    settingsButton.setOutlineThickness(2.f);
 
     blackjackButton.setOutlineColor(sf::Color(255, 210, 90));
     rouletteButton.setOutlineColor(sf::Color(255, 210, 90));
     slotsButton.setOutlineColor(sf::Color(255, 210, 90));
     statsButton.setOutlineColor(sf::Color(255, 210, 90));
     backButton.setOutlineColor(sf::Color(255, 210, 90));
+    settingsButton.setOutlineColor(sf::Color(200, 200, 200));
 
     blackjackText.setFillColor(sf::Color::White);
     rouletteText.setFillColor(sf::Color::White);
     slotsText.setFillColor(sf::Color::White);
     statsText.setFillColor(sf::Color::White);
     backText.setFillColor(sf::Color::White);
+    settingsText.setFillColor(sf::Color(200, 200, 200));
 
     centerTextInButton(blackjackText, blackjackButton);
     centerTextInButton(rouletteText, rouletteButton);
     centerTextInButton(slotsText, slotsButton);
     centerTextInButton(statsText, statsButton);
     centerTextInButton(backText, backButton);
+    centerTextInButton(settingsText, settingsButton);
 
     blackjackInfoBtn.setPosition({ 620.f, 205.f });
     rouletteInfoBtn.setPosition({ 620.f, 325.f });
@@ -208,6 +237,52 @@ GameSelect::GameSelect(sf::Font& sharedFont)
     infoCloseText.setFillColor(sf::Color::White);
     centerTextInButton(infoCloseText, infoCloseButton);
 
+    settingsPanel.setPosition({ 250.f, 190.f });
+    settingsPanel.setFillColor(sf::Color(30, 35, 45));
+    settingsPanel.setOutlineThickness(2.f);
+    settingsPanel.setOutlineColor(sf::Color(255, 210, 90));
+
+    settingsTitleText.setFillColor(sf::Color(255, 210, 90));
+    settingsTitleText.setPosition({ 380.f, 210.f });
+
+    musicLabelText.setPosition({ 280.f, 260.f });
+    blackjackSfxLabelText.setPosition({ 280.f, 310.f });
+    rouletteSfxLabelText.setPosition({ 280.f, 360.f });
+    slotsSfxLabelText.setPosition({ 280.f, 410.f });
+
+    musicSliderBg.setPosition({ 480.f, 265.f });
+    blackjackSfxSliderBg.setPosition({ 480.f, 315.f });
+    rouletteSfxSliderBg.setPosition({ 480.f, 365.f });
+    slotsSfxSliderBg.setPosition({ 480.f, 415.f });
+
+    musicSliderFill.setPosition({ 480.f, 265.f });
+    blackjackSfxSliderFill.setPosition({ 480.f, 315.f });
+    rouletteSfxSliderFill.setPosition({ 480.f, 365.f });
+    slotsSfxSliderFill.setPosition({ 480.f, 415.f });
+
+    musicSliderBg.setFillColor(sf::Color(80, 80, 90));
+    blackjackSfxSliderBg.setFillColor(sf::Color(80, 80, 90));
+    rouletteSfxSliderBg.setFillColor(sf::Color(80, 80, 90));
+    slotsSfxSliderBg.setFillColor(sf::Color(80, 80, 90));
+
+    musicSliderFill.setFillColor(sf::Color(50, 115, 230));
+    blackjackSfxSliderFill.setFillColor(sf::Color(50, 115, 230));
+    rouletteSfxSliderFill.setFillColor(sf::Color(50, 115, 230));
+    slotsSfxSliderFill.setFillColor(sf::Color(50, 115, 230));
+
+    musicLabelText.setFillColor(sf::Color::White);
+    blackjackSfxLabelText.setFillColor(sf::Color::White);
+    rouletteSfxLabelText.setFillColor(sf::Color::White);
+    slotsSfxLabelText.setFillColor(sf::Color::White);
+
+    settingsCloseButton.setPosition({ 410.f, 490.f });
+    settingsCloseButton.setFillColor(sf::Color(180, 65, 85));
+    settingsCloseButton.setOutlineThickness(2.f);
+    settingsCloseButton.setOutlineColor(sf::Color(255, 210, 90));
+
+    settingsCloseText.setFillColor(sf::Color::White);
+    centerTextInButton(settingsCloseText, settingsCloseButton);
+
     refreshBankrollDisplay();
     refreshAddMoneyDisplay();
 }
@@ -239,6 +314,27 @@ void GameSelect::refreshAddMoneyDisplay()
         addMoneyBox.getPosition().x + (addMoneyBox.getSize().x - bounds.size.x) / 2.f - bounds.position.x,
         addMoneyBox.getPosition().y + (addMoneyBox.getSize().y - bounds.size.y) / 2.f - bounds.position.y
         });
+}
+
+void GameSelect::setAudioSettings(AudioSettings* settings)
+{
+    audioSettings = settings;
+    refreshSettingsDisplay();
+}
+
+void GameSelect::refreshSettingsDisplay()
+{
+    if (!audioSettings) return;
+
+    musicLabelText.setString("Music");
+    blackjackSfxLabelText.setString("Blackjack SFX");
+    rouletteSfxLabelText.setString("Roulette SFX");
+    slotsSfxLabelText.setString("Slots SFX");
+
+    musicSliderFill.setSize({ 200.f * std::sqrt(audioSettings->musicVolume / 100.f), 20.f });
+    blackjackSfxSliderFill.setSize({ 200.f * std::sqrt(audioSettings->blackjackSfxVolume / 100.f), 20.f });
+    rouletteSfxSliderFill.setSize({ 200.f * std::sqrt(audioSettings->rouletteSfxVolume / 100.f), 20.f });
+    slotsSfxSliderFill.setSize({ 200.f * std::sqrt(audioSettings->slotsSfxVolume / 100.f), 20.f });
 }
 
 bool GameSelect::hasValidAddAmount() const
@@ -314,6 +410,15 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
     openSlots = false;
     openStats = false;
     backToMain = false;
+
+    if (showingSettingsPopup)
+    {
+        if (settingsCloseButton.getGlobalBounds().contains(mousePos))
+        {
+            showingSettingsPopup = false;
+        }
+        return;
+    }
 
     if (showingInfoPopup)
     {
@@ -458,6 +563,13 @@ void GameSelect::handleMouseClick(sf::Vector2f mousePos, bool& openBlackjack, bo
         backToMain = true;
         return;
     }
+    
+    if (settingsButton.getGlobalBounds().contains(mousePos))
+    {
+        showingSettingsPopup = true;
+        refreshSettingsDisplay();
+        return;
+    }
 }
 
 void GameSelect::draw(sf::RenderWindow& window)
@@ -486,12 +598,14 @@ void GameSelect::draw(sf::RenderWindow& window)
     window.draw(slotsButton);
     window.draw(statsButton);
     window.draw(backButton);
+    window.draw(settingsButton);
 
     window.draw(blackjackText);
     window.draw(rouletteText);
     window.draw(slotsText);
     window.draw(statsText);
     window.draw(backText);
+    window.draw(settingsText);
 
     window.draw(blackjackInfoBtn);
     window.draw(rouletteInfoBtn);
@@ -508,6 +622,52 @@ void GameSelect::draw(sf::RenderWindow& window)
         window.draw(infoBodyText);
         window.draw(infoCloseButton);
         window.draw(infoCloseText);
+    }
+    else if (showingSettingsPopup)
+    {
+        if (showingSettingsPopup && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+        {
+            sf::Vector2i mousePosI = sf::Mouse::getPosition(window);
+            sf::Vector2f mousePos(static_cast<float>(mousePosI.x), static_cast<float>(mousePosI.y));
+
+            auto updateSlider = [&](sf::RectangleShape& bg, float& volume) {
+                sf::FloatRect bounds = bg.getGlobalBounds();
+                bounds.position.y -= 10.f; bounds.size.y += 20.f; 
+                bounds.position.x -= 10.f; bounds.size.x += 20.f;
+                if (bounds.contains(mousePos)) {
+                    float pct = (mousePos.x - bg.getPosition().x) / bg.getSize().x;
+                    if (pct < 0.f) pct = 0.f;
+                    if (pct > 1.f) pct = 1.f;
+                    volume = (pct * pct) * 100.f;
+                    refreshSettingsDisplay();
+                }
+            };
+
+            if (audioSettings) {
+                updateSlider(musicSliderBg, audioSettings->musicVolume);
+                updateSlider(blackjackSfxSliderBg, audioSettings->blackjackSfxVolume);
+                updateSlider(rouletteSfxSliderBg, audioSettings->rouletteSfxVolume);
+                updateSlider(slotsSfxSliderBg, audioSettings->slotsSfxVolume);
+            }
+        }
+
+        window.draw(overlay);
+        window.draw(settingsPanel);
+        window.draw(settingsTitleText);
+        window.draw(musicSliderBg);
+        window.draw(blackjackSfxSliderBg);
+        window.draw(rouletteSfxSliderBg);
+        window.draw(slotsSfxSliderBg);
+        window.draw(musicSliderFill);
+        window.draw(blackjackSfxSliderFill);
+        window.draw(rouletteSfxSliderFill);
+        window.draw(slotsSfxSliderFill);
+        window.draw(musicLabelText);
+        window.draw(blackjackSfxLabelText);
+        window.draw(rouletteSfxLabelText);
+        window.draw(slotsSfxLabelText);
+        window.draw(settingsCloseButton);
+        window.draw(settingsCloseText);
     }
     else if (showingAddMoneyPopup)
     {

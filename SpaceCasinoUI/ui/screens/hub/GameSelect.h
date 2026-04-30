@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <string>
+#include "../../../core/audio/AudioSettings.h"
 
 class GameSelect
 {
@@ -14,6 +15,8 @@ public:
 
     void setBankroll(double bankroll);
     double getBankroll() const;
+
+    void setAudioSettings(AudioSettings* settings);
 
     void draw(sf::RenderWindow& window);
 
@@ -30,12 +33,14 @@ private:
     sf::RectangleShape slotsButton;
     sf::RectangleShape statsButton;
     sf::RectangleShape backButton;
+    sf::RectangleShape settingsButton;
 
     sf::Text blackjackText;
     sf::Text rouletteText;
     sf::Text slotsText;
     sf::Text statsText;
     sf::Text backText;
+    sf::Text settingsText;
 
     sf::RectangleShape blackjackInfoBtn;
     sf::RectangleShape rouletteInfoBtn;
@@ -72,12 +77,37 @@ private:
     sf::RectangleShape infoCloseButton;
     sf::Text infoCloseText;
 
+    bool showingSettingsPopup;
+    sf::RectangleShape settingsPanel;
+    sf::Text settingsTitleText;
+    
+    sf::RectangleShape musicSliderBg;
+    sf::RectangleShape blackjackSfxSliderBg;
+    sf::RectangleShape rouletteSfxSliderBg;
+    sf::RectangleShape slotsSfxSliderBg;
+
+    sf::RectangleShape musicSliderFill;
+    sf::RectangleShape blackjackSfxSliderFill;
+    sf::RectangleShape rouletteSfxSliderFill;
+    sf::RectangleShape slotsSfxSliderFill;
+    
+    sf::Text musicLabelText;
+    sf::Text blackjackSfxLabelText;
+    sf::Text rouletteSfxLabelText;
+    sf::Text slotsSfxLabelText;
+    
+    sf::RectangleShape settingsCloseButton;
+    sf::Text settingsCloseText;
+
     double currentBankroll;
     std::string addMoneyInput;
     bool showingAddMoneyPopup;
 
+    AudioSettings* audioSettings;
+
     void centerTextInButton(sf::Text& text, const sf::RectangleShape& button);
     void refreshBankrollDisplay();
     void refreshAddMoneyDisplay();
+    void refreshSettingsDisplay();
     bool hasValidAddAmount() const;
 };

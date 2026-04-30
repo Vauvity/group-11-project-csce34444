@@ -15,12 +15,30 @@ CasinoApp::CasinoApp()
         std::cout << "Failed to load ARIAL.TTF\n";
     }
 
+    if (!bgMusic.openFromFile("assets/audio/UFO's-casino_AdobeStock_528505253.wav"))
+    {
+        std::cout << "Failed to load background music\n";
+    }
+    else
+    {
+        bgMusic.setLooping(true);
+        bgMusic.setVolume(audioSettings.musicVolume);
+        if (audioSettings.musicVolume > 0.f)
+            bgMusic.play();
+    }
+
     mainMenu = std::make_unique<MainMenu>(font);
     gameSelect = std::make_unique<GameSelect>(font);
     blackjackUI = std::make_unique<BlackjackUI>(font);
     slotsUI = std::make_unique<SlotsUI>(font);
     rouletteUI = std::make_unique<RouletteUI>(font);
     sessionStatsUI = std::make_unique<SessionStatsUI>(font);
+
+    mainMenu->setAudioSettings(&audioSettings);
+    gameSelect->setAudioSettings(&audioSettings);
+    blackjackUI->setAudioSettings(&audioSettings);
+    slotsUI->setAudioSettings(&audioSettings);
+    rouletteUI->setAudioSettings(&audioSettings);
 
     blackjackUI->setSessionStats(&sessionStats);
     slotsUI->setSessionStats(&sessionStats);
@@ -32,6 +50,7 @@ void CasinoApp::run()
     while (window.isOpen())
     {
         processEvents();
+        updateAudio();
         render();
     }
 }
@@ -266,4 +285,17 @@ void CasinoApp::resetSessionIfNeeded()
     bankrollInitialized = false;
     sharedBankroll = 0.0;
     mainMenu->resetSession();
+}
+
+void CasinoApp::updateAudio()
+{
+    bgMusic.setVolume(audioSettings.musicVolume);
+    if (audioSettings.musicVolume > 0.f && bgMusic.getStatus() != sf::SoundSource::Status::Playing)
+    {
+        bgMusic.play();
+    }
+    else if (audioSettings.musicVolume == 0.f && bgMusic.getStatus() == sf::SoundSource::Status::Playing)
+    {
+        bgMusic.pause();
+    }
 }

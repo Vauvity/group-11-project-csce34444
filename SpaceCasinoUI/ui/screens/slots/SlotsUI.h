@@ -6,6 +6,9 @@
 #include "../../../core/slots/SlotsGame.h"
 #include "../../../core/slots/SlotWindow.h"
 #include "../../../core/session/SessionStats.h"
+#include "../../../core/audio/AudioSettings.h"
+#include <SFML/Audio.hpp>
+#include <optional>
 
 class SlotsUI
 {
@@ -20,6 +23,7 @@ public:
     void handleBackspace();
     void draw(sf::RenderWindow& window);
     void setSessionStats(SessionStats* stats);
+    void setAudioSettings(AudioSettings* settings);
 
 private:
     Slots game;
@@ -74,4 +78,8 @@ private:
     void loadTextures();
     void updateText();
     void commitBetInput();
+
+    AudioSettings* audioSettings;
+    sf::SoundBuffer spinBuffer;
+    std::optional<sf::Sound> spinSound;
 };

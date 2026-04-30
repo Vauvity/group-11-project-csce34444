@@ -6,6 +6,9 @@
 #include "../../../core/roulette/RouletteBet.h"
 #include "../../../core/roulette/RouletteTypes.h"
 #include "../../../core/session/SessionStats.h"
+#include "../../../core/audio/AudioSettings.h"
+#include <SFML/Audio.hpp>
+#include <optional>
 
 class RouletteUI
 {
@@ -21,6 +24,7 @@ public:
 
     void draw(sf::RenderWindow& window);
     void setSessionStats(SessionStats* stats);
+    void setAudioSettings(AudioSettings* settings);
 
 private:
     RouletteGame game;
@@ -118,4 +122,8 @@ private:
     sf::FloatRect getTableCellBounds(int number) const;
     sf::FloatRect getZeroCellBounds() const;
     bool isRedNumber(int number) const;
+
+    AudioSettings* audioSettings;
+    sf::SoundBuffer spinBuffer;
+    std::optional<sf::Sound> spinSound;
 };

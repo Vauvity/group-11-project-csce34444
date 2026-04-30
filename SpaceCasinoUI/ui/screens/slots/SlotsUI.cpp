@@ -26,8 +26,14 @@ SlotsUI::SlotsUI(sf::Font& sharedFont)
     sessionStats(nullptr),
     lastRecordedSpinNumber(0),
     spinRemaining(0.f),
-    spinSymbolChangeTimer(0.f)
+    spinSymbolChangeTimer(0.f),
+    audioSettings(nullptr)
 {
+    if (spinBuffer.loadFromFile("assets/audio/slotmachine.wav"))
+    {
+        spinSound.emplace(spinBuffer);
+    }
+
     loadTextures();
 
     titleText.setFillColor(sf::Color(210, 120, 255));
@@ -185,6 +191,11 @@ double SlotsUI::getCurrentBankroll() const
 void SlotsUI::setSessionStats(SessionStats* stats)
 {
     sessionStats = stats;
+}
+
+void SlotsUI::setAudioSettings(AudioSettings* settings)
+{
+    audioSettings = settings;
 }
 
 void SlotsUI::centerTextInButton(sf::Text& text, const sf::RectangleShape& button)
@@ -365,6 +376,13 @@ void SlotsUI::handleScreenClick(sf::Vector2f mousePos, bool& backToMenu)
             lastPayout = game.paytable();
             hasSpun = true;
             spinRemaining = 2.0f;
+            
+            if (audioSettings && audioSettings->slotsSfxVolume > 0.f && spinSound)
+            {
+                spinSound->setVolume(audioSettings->slotsSfxVolume);
+                spinSound->play();
+            }
+            
             updateText();
         }
     }

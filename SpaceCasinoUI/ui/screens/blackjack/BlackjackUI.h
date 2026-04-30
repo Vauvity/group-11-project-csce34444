@@ -7,6 +7,9 @@
 #include "../../../core/blackjack/BlackjackGame.h"
 #include "../../../core/blackjack/Card.h"
 #include "../../../core/session/SessionStats.h"
+#include "../../../core/audio/AudioSettings.h"
+#include <SFML/Audio.hpp>
+#include <optional>
 
 class BlackjackUI
 {
@@ -21,6 +24,7 @@ public:
     void handleBackspace();
     void draw(sf::RenderWindow& window);
     void setSessionStats(SessionStats* stats);
+    void setAudioSettings(AudioSettings* settings);
 
 private:
     BlackjackGame game;
@@ -102,4 +106,9 @@ private:
     void updateText();
     void handleGameClick(sf::Vector2f mousePos);
     void recordRoundIfNeeded();
+
+    AudioSettings* audioSettings;
+    sf::SoundBuffer cardDealBuffer;
+    std::optional<sf::Sound> cardDealSound;
+    void playDealSound();
 };

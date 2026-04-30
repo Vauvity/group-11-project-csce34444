@@ -32,8 +32,14 @@ BlackjackUI::BlackjackUI(sf::Font& sharedFont)
     roundStarted(false),
     sessionStats(nullptr),
     lastRecordedRoundNumber(0),
-    wasRoundOver(false)
+    wasRoundOver(false),
+    audioSettings(nullptr)
 {
+    if (cardDealBuffer.loadFromFile("assets/audio/card_deal.wav"))
+    {
+        cardDealSound.emplace(cardDealBuffer);
+    }
+
     loadCardTextures();
 
     titleText.setFillColor(sf::Color(90, 210, 255));
@@ -551,6 +557,7 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
         {
             game.playerHit();
             currentHint = "";
+            playDealSound();
         }
     }
 
@@ -560,6 +567,7 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
         {
             game.playerStand();
             currentHint = "";
+            playDealSound();
         }
     }
 
@@ -569,6 +577,7 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
         {
             game.playerDoubleDown();
             currentHint = "";
+            playDealSound();
         }
     }
 
@@ -578,6 +587,7 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
         {
             game.playerSplit();
             currentHint = "";
+            playDealSound();
         }
     }
 
@@ -601,6 +611,7 @@ void BlackjackUI::handleGameClick(sf::Vector2f mousePos)
                 pCardAnim.clear();
                 dCardAnim.clear();
                 wasRoundOver = false;
+                playDealSound();
             }
         }
     }
@@ -621,6 +632,20 @@ void BlackjackUI::recordRoundIfNeeded()
     {
         sessionStats->recordBlackjackRound(summary);
         lastRecordedRoundNumber = summary.roundNumber;
+    }
+}
+
+void BlackjackUI::setAudioSettings(AudioSettings* settings)
+{
+    audioSettings = settings;
+}
+
+void BlackjackUI::playDealSound()
+{
+    if (audioSettings && audioSettings->blackjackSfxVolume > 0.f && cardDealSound)
+    {
+        cardDealSound->setVolume(audioSettings->blackjackSfxVolume);
+        cardDealSound->play();
     }
 }
 
@@ -792,7 +817,11 @@ void BlackjackUI::draw(sf::RenderWindow& window)
         }
         y += 130.f;
 
-        drawCenteredYellowLine("Player:", y, 26);
+        drawCenteredYellowLine(
+            "Player: " + std::to_string(game.getPlayerHand().getValue()), 
+            y, 
+            26
+        );
         y += 40.f;
 
         // Draw Player Hand

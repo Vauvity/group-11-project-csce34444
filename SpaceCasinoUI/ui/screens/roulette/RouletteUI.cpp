@@ -45,8 +45,13 @@ RouletteUI::RouletteUI(sf::Font& sharedFont)
     sessionStats(nullptr),
     wheelSprite(wheelTexture),
     isBallSpinning(false),
-    ballAngle(0.f)
+    ballAngle(0.f),
+    audioSettings(nullptr)
 {
+    if (spinBuffer.loadFromFile("assets/audio/roulette_spin.wav"))
+    {
+        spinSound.emplace(spinBuffer);
+    }
     titleText.setFillColor(sf::Color(255, 85, 85));
     titleText.setPosition({ 355.f, 35.f });
 
@@ -245,6 +250,11 @@ void RouletteUI::setSessionStats(SessionStats* stats)
     sessionStats = stats;
 }
 
+void RouletteUI::setAudioSettings(AudioSettings* settings)
+{
+    audioSettings = settings;
+}
+
 void RouletteUI::centerTextInButton(sf::Text& text, const sf::RectangleShape& button)
 {
     sf::FloatRect bounds = text.getLocalBounds();
@@ -409,6 +419,12 @@ void RouletteUI::spinRound()
     isBallSpinning = true;
     ballAngle = 0.f;
     ballAnimationClock.restart();
+    
+    if (audioSettings && audioSettings->rouletteSfxVolume > 0.f && spinSound)
+    {
+        spinSound->setVolume(audioSettings->rouletteSfxVolume);
+        spinSound->play();
+    }
     
     updateText();
 }

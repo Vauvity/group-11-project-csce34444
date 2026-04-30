@@ -2,6 +2,7 @@
 #define CASINOAPP_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <memory>
 #include "AppState.h"
 #include "../screens/welcome/MainMenu.h"
@@ -11,6 +12,7 @@
 #include "../screens/roulette/RouletteUI.h"
 #include "../screens/session/SessionStatsUI.h"
 #include "../../core/session/SessionStats.h"
+#include "../../core/audio/AudioSettings.h"
 
 class CasinoApp
 {
@@ -41,6 +43,10 @@ private:
     double sharedBankroll;
     bool bankrollInitialized;
     SessionStats sessionStats;
+    AudioSettings audioSettings;
+    sf::Music bgMusic;
+
+    void updateAudio();
 };
 
 #endif
